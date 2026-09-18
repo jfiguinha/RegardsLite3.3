@@ -165,3 +165,6 @@ RegardsViewer_macsilicon/change_dylib.sh
 RegardsViewer_macsilicon/MacOsLibExplorer
 RegardsViewer_macsilicon/package/RegardsLite.dmg
 /RegardsViewer_macsilicon/package/RegardsLite
+/RegardsViewer/package/Prerequisites/RegardsLite3
+/RegardsViewer/package/Prerequisites/RegardsLite3.zip
+/RegardsViewer/package/RegardsLite3Setup.exe
