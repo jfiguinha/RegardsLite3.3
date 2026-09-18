@@ -131,3 +131,6 @@ RegardsViewer_macsilicon/RegardsLite_macsilicon.txt
 libAppleFunction/libAppleFunction.txt
 /.ctagsd
 .ctagsd/ctagsd.json
+/.ctagsd
+.DS_Store
+/RegardsViewer_macsilicon/Release

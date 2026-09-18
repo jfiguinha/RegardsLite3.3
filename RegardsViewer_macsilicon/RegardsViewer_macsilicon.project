@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<CodeLite_Project Name="RegardsLite_macsilicon" InternalType="GUI" Version="11000">
+<CodeLite_Project Name="RegardsLiteViewer_macsilicon" InternalType="GUI" Version="11000">
   <Plugins>
     <Plugin Name="qmake">
       <![CDATA[00020001N0005Debug0000000000000001N0007Release000000000000]]>
@@ -86,8 +86,6 @@
     <Project Name="libControl"/>
     <Project Name="libWindow"/>
     <Project Name="libViewer"/>
-    <Project Name="libVideoThumbnail"/>
-    <Project Name="libVideoFFMpeg"/>
     <Project Name="libUtility"/>
     <Project Name="libSqlEngine"/>
     <Project Name="libSqlite"/>
@@ -102,29 +100,14 @@
     <Project Name="libEmail"/>
     <Project Name="libDialog"/>
     <Project Name="libFiltreInterface"/>
-    <Project Name="wxCheckTree"/>
     <Project Name="libOpenGL"/>
     <Project Name="libJbig"/>
-    <Project Name="libPsd"/>
-    <Project Name="libavcodec"/>
-    <Project Name="libbpg"/>
-    <Project Name="FaceRecognition"/>
-    <Project Name="libavutil"/>
     <Project Name="wxPDFDoc"/>
     <Project Name="libAppleFunction"/>
-    <Project Name="libScanner"/>
-    <Project Name="FaceRecognition_mac"/>
     <Project Name="libDeepLearning"/>
-    <Project Name="libavif"/>
-    <Project Name="libFreeImage"/>
     <Project Name="libResource"/>
-    <Project Name="wxIA"/>
-    <Project Name="libRegardsBpg_mac"/>
-    <Project Name="libffmpeg"/>
     <Project Name="libVideoConverter"/>
-    <Project Name="libheif"/>
     <Project Name="libVideoEffect"/>
-    <Project Name="OpenCV"/>
   </Dependencies>
   <Settings Type="Executable">
     <GlobalSettings>
@@ -177,8 +160,6 @@
         <IncludePath Value="../Otherlib/wxIA/WIA"/>
         <Preprocessor Value="VIEWER"/>
         <Preprocessor Value="OPENGL"/>
-        <Preprocessor Value="SDL2"/>
-        <Preprocessor Value="LIBBPG"/>
       </Compiler>
       <Linker Options="$(shell ../libextern/wxconfig_lib.sh);-headerpad_max_install_names;-framework IOKit;-framework Carbon;-framework Cocoa;-framework AudioToolbox;-framework System;-framework OpenCL;-framework CoreAudio;-framework CoreVideo;-framework AudioUnit;-framework AVKit;-framework ForceFeedback;-framework WebKit;-framework security;-framework VideoToolbox;-framework AVFoundation;-framework VideoDecodeAcceleration;-framework CoreMedia;-framework CoreImage;-framework OpenGL;-framework GLUT;-framework ImageCaptureCore;-framework CoreML;-framework Vision;-framework SystemConfiguration;-framework Metal;-framework GameController;-framework CoreHaptics">
         <LibraryPath Value="../libextern/heif-master/srcs/lib"/>
@@ -198,7 +179,6 @@
         <Library Value="Window"/>
         <Library Value="RegardsGL"/>
         <Library Value="Dialog"/>
-        <Library Value="OpenCV"/>
         <Library Value="Utility"/>
         <Library Value="mediainfo"/>
         <Library Value="Theme"/>
@@ -226,7 +206,10 @@
         <Library Value="swscale"/>
         <Library Value="jpeg"/>
         <Library Value="lzma"/>
-        <Library Value="SDL2"/>
+        <Library Value="OpenAL"/>
+        <Library Value="plutovg"/>
+        <Library Value="lunasvg"/>
+        <Library Value="fmt"/>
         <Library Value="z"/>
         <Library Value="bz2"/>
         <Library Value="heif_static"/>
@@ -276,7 +259,6 @@
         <Library Value="webpdecoder"/>
         <Library Value="webpdemux"/>
         <Library Value="webpmux"/>
-        <Library Value="ffmpeg"/>
         <Library Value="dav1d"/>
         <Library Value="wx_osx_cocoau_webview-3.3"/>
         <Library Value="archive"/>
@@ -423,9 +405,6 @@
         <LibraryPath Value="../Otherlib/libJbig/Release"/>
         <LibraryPath Value="../libAppleFunction/Release"/>
         <LibraryPath Value="../Otherlib/wxPDFDoc/Release"/>
-        <LibraryPath Value="../Otherlib/libheif/Release"/>
-        <LibraryPath Value="../Otherlib/libffmpeg/Release"/>
-        <LibraryPath Value="../Otherlib/OpenCV/Release"/>
       </Linker>
       <ResourceCompiler Options="$(shell wx-config --rcflags)" Required="no"/>
       <General OutputFile="$(IntermediateDirectory)/RegardsLite" IntermediateDirectory="./Release" Command="./$(ProjectName)" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(IntermediateDirectory)" PauseExecWhenProcTerminates="yes" IsGUIProgram="yes" IsEnabled="yes"/>
@@ -455,7 +434,6 @@
         <Command Enabled="yes">ln -f ./Release/RegardsLite ./Release/RegardsLite.app/Contents/MacOS/RegardsLite</Command>
         <Command Enabled="yes">cp -f ../Regards/mac/regardsliteicon.icns ./Release/RegardsLite.app/Contents/Resources/wxmac.icns</Command>
         <Command Enabled="yes">cp -R ../Regards/Resources ./Release/RegardsLite.app/Contents/</Command>
-        <Command Enabled="yes">cp ../libextern/vcpkg/installed/arm64-osx/tools/ffmpeg/ffmpeg ./Release/RegardsLite.app/Contents/MacOS</Command>
       </PostBuild>
       <CustomBuild Enabled="no">
         <RebuildCommand/>
