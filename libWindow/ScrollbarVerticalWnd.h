@@ -1,0 +1,139 @@
+#pragma once
+#include <theme.h>
+#include <WindowMain.h>
+
+namespace Regards::Window
+{
+	class CScrollbarVerticalWnd : public CWindowMain
+	{
+	public:
+		CScrollbarVerticalWnd(const wxString& windowName, wxWindow* parent, wxWindowID id,
+		                      const CThemeScrollBar& theme);
+		~CScrollbarVerticalWnd() override;
+
+		int GetWidthSize();
+		void ShowEmptyRectangle(const bool& show, const int& heightSize);
+
+		bool DefineSize(const int& screenHeight, const int& pictureHeight);
+		//bool SetPosition(const int &top);
+
+		void SetPageSize(const int& pageSize);
+		int GetPageSize();
+		void SetLineSize(const int& lineSize);
+		int GetLineSize();
+
+
+		int GetPosition();
+
+		int GetScreenHeight();
+		int GetPictureHeight();
+
+		bool UpdateScrollBar(const int& posHauteur, const int& screenHeight, const int& pictureHeight);
+
+		bool IsMoving();
+
+		void UpdateScreenRatio() override;
+
+		void SetShowWindow(const bool& showValue);
+
+		void ClickTopTriangle();
+		void ClickBottomTriangle();
+		void ClickTopPage();
+		void ClickBottomPage();
+
+		bool SetPosition(const int& top);
+
+	protected:
+		void PaintNow();
+		void on_paint(wxPaintEvent& event);
+		void OnMouseMove(wxMouseEvent& event);
+		void OnLButtonDown(wxMouseEvent& event);
+		void OnLButtonUp(wxMouseEvent& event);
+		void OnMouseLeave(wxMouseEvent& event);
+		void OnMouseHover(wxMouseEvent& event);
+		void OnTimerTriangleTop(wxTimerEvent& event);
+		void OnTimerTriangleBottom(wxTimerEvent& event);
+		void OnTimerPageTop(wxTimerEvent& event);
+		void OnTimerPageBottom(wxTimerEvent& event);
+		void OnTimerStopMoving(wxTimerEvent& event);
+		void OnMouseCaptureLost(wxMouseEvent& event);
+
+		void OnEraseBackground(wxEraseEvent& event) override
+		{
+		};
+		void SendTopPosition(const int& value);
+		void DrawElement(wxDC* dc);
+
+		void Resize() override;
+		void CalculBarSize();
+
+
+		bool FindTopTriangle(const int& yPosition, const int& xPosition);
+		bool FindBottomTriangle(const int& yPosition, const int& xPosition);
+		bool FindRectangleBar(const int& yPosition, const int& xPosition);
+
+		void DrawTopTriangleElement(wxDC* dc, const wxRect& rc, const wxColour& colorTriangle);
+		void DrawBottomTriangleElement(wxDC* dc, const wxRect& rc, const wxColour& colorTriangle);
+		void DrawRectangleElement(wxDC* dc, const wxColour& colorBar);
+
+		// [CORRECTIF] MoveBar ne prend plus de wxColour : le paramètre n'était jamais
+		// utilisé dans le corps de la fonction (code mort/trompeur). La couleur du
+		// bandeau est déterminée exclusivement dans DrawElement() via captureBar.
+		void MoveBar(const int currentPos);
+
+		// [CORRECTIF] Nouvelle fonction : centralise le clamp de rcPosBar dans
+		// [barStartY, barEndY], auparavant dupliqué dans MoveBar() ET DrawRectangleElement().
+		// DrawRectangleElement() ne mute plus l'état pendant le rendu.
+		void ClampBarRect();
+
+		void SetIsMoving();
+		bool TestMaxY();
+		bool TestMinY();
+		void FillRect(wxDC* dc, const wxRect& rc, const wxColour& color);
+
+		double dragStartMouseY = 0.0;
+		int dragStartScrollY = 0;
+		int lastSentScrollY = -1;
+
+		int barSize;
+		int barPosY;
+		bool captureBar;
+		int stepSize;
+		bool showEmptyRectangle;
+		int heightSize;
+
+		int barStartY;
+		int barEndY;
+		int yPositionStart;
+		int yPositionStartMove;
+		bool moveScrollbar;
+
+		wxRect rcPosTriangleTop;
+		wxRect rcPosTriangleBottom;
+		wxRect rcPosBar;
+
+		int pictureHeight;
+		int screenHeight;
+		int pageSize;
+		int lineSize;
+		int pageSizeDefault;
+		int lineSizeDefault;
+		int currentYPos;
+
+		bool m_bTracking;
+
+		bool scrollMoving;
+
+		std::unique_ptr<wxTimer> triangleTop;
+		std::unique_ptr<wxTimer> triangleBottom;
+		std::unique_ptr<wxTimer> pageTop;
+		std::unique_ptr<wxTimer> pageBottom;
+		std::unique_ptr<wxTimer> stopMoving;
+
+		CThemeScrollBar themeScroll;
+
+		bool showTriangle = false;
+
+		bool showWindow = true;
+	};
+}

@@ -1,0 +1,17 @@
+//
+//To Optimize : https://zz85.github.io/glsl-optimizer/
+//
+#version 330 core // Passage en core
+
+uniform sampler2D textureScreen;
+uniform float intensity;
+
+in vec2 TexCoord; // Reu du vertex shader
+out vec4 FragColor;
+
+void main(void)
+{	
+    vec4 src_color = texture(textureScreen, TexCoord);
+    float alpha = intensity / 100.0;
+    FragColor = vec4(src_color.rgb, alpha);
+}

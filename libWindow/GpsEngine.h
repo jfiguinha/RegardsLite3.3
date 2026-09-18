@@ -1,0 +1,30 @@
+#pragma once
+#include <WindowMain.h>
+using namespace Regards::Window;
+
+namespace Regards::Window
+{
+	class CListOfWindow
+	{
+	public:
+		CListOfWindow();
+
+		void AddWindow(CWindowMain* windowMain);
+		void SendMessageToWindow(const wxString& filename, const int& typeData);
+		void RemoveWindow(CWindowMain* windowMain);
+	private:
+		WindowMainVector listOfWinListener;
+	};
+
+	class CGpsEngine
+	{
+	public:
+		CGpsEngine() {};
+		virtual ~CGpsEngine() {};
+		static CListOfWindow* getInstance();
+		static void Initialize();
+
+	private:
+		static std::unique_ptr<CListOfWindow> listofWindow;
+	};
+}

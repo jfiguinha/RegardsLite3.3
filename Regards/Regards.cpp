@@ -1,0 +1,557 @@
+/////////////////////////////////////////////////////////////////////////////
+// Name:        minimal.cpp
+// Purpose:     Minimal wxWidgets sample
+// Author:      Julian Smart
+// Modified by:
+// Created:     04/01/98
+// RCS-ID:      $Id$
+// Copyright:   (c) Julian Smart
+// Licence:     wxWindows licence
+/////////////////////////////////////////////////////////////////////////////
+
+#include "header.h"
+#include <Regards.h>
+#include <wx/window.h>
+#include "SqlInit.h"
+#include <libPicture.h>
+#include <wx/webview.h>
+#include <LibResource.h>
+#include <FileUtility.h>
+#include <ParamInit.h>
+#include <FilterWindowParam.h>
+#include <FilterData.h>
+#include <OpenCLContext.h>
+#include <appcontext.h>
+#include <Gps.h>
+#ifdef __WXGTK__
+#include <fontconfig/fontconfig.h>
+#endif
+#include <ncnn/gpu.h>
+#include <exiv2/image.hpp>
+AppContext application_context;
+
+#ifdef __APPLE__
+#include <appglcontext.h>
+AppGLContext application_glcontext;
+#endif
+ncnn::VulkanDevice* vkdev = nullptr;
+
+using namespace cv;
+using namespace Regards::Picture;
+using namespace Regards::OpenCL;
+
+extern int Start(int argc, char **argv);
+
+
+
+MyApp::MyApp()
+{
+
+	regardsParam = nullptr;
+	frameStart = nullptr;
+	//frameViewer = nullptr;
+#ifdef USECURL
+	curl_global_init(CURL_GLOBAL_ALL);
+#endif
+
+#ifdef __WXGTK__
+	int result = XInitThreads();
+#endif
+
+}
+
+void MyApp::OnInitCmdLine(wxCmdLineParser& parser)
+{
+	LogInfo("Application Parameter :");
+	parser.SetDesc(g_cmdLineDesc);
+	// must refuse '/' as parameter starter or cannot use "/path" style paths
+	parser.SetSwitchChars(wxT("-"));
+    parser.EnableLongOptions();
+    if (parser.Parse() != 0)
+        return;
+}
+
+void MyApp::OnEventLoopEnter(wxEventLoopBase* WXUNUSED(loop))
+{
+	if (frameViewer != nullptr)
+	{
+		frameViewer->CreateWatcherIfNecessary();
+	}
+}
+
+bool MyApp::OnCmdLineParsed(wxCmdLineParser& parser)
+{
+	// to get at your unnamed parameters use
+	wxArrayString files;
+	for (auto i = 0; i < parser.GetParamCount(); i++)
+	{
+		//printf("Files to show : %s \n", CConvertUtility::ConvertToStdString(parser.GetParam(i)));
+		files.Add(parser.GetParam(i));
+		break;
+	}
+
+	// and other command line parameters
+	if (files.Count() > 0)
+	{
+		fileToOpen = files[0];
+	}
+	
+	if (parser.Found("program", &appName))
+		LogInfo("App : " + appName);
+	// then do what you need with them.
+	
+	LogInfo("Application Parameter :");
+	LogInfo("File : " + fileToOpen);
+	
+	return true;
+}
+
+// ----------------------------------------------------------------------------
+// the application class
+// ----------------------------------------------------------------------------
+#ifdef __APPLE__
+void MyApp::MacOpenFile(const wxString &fileName)
+{
+    wxString message = "Mac Open Files : " + fileName;
+    fileToOpen = fileName;
+	//wxMessageBox(message);
+	//wxMessageBox(fileName);
+	//frameViewer->OpenFile(fileName);
+}
+#endif
+
+
+
+int MyApp::Close()
+{
+   
+	CSqlInit::KillSqlEngine();
+	CPrintEngine::Kill();
+
+	CLibResource::KillSqlEngine();
+
+	// Reset unique_ptrs; their deleters will call Destroy() on wx windows
+	// (frameStart may be a top-level window)
+
+	sqlite3_shutdown();
+#ifdef USECURL
+	curl_global_cleanup();
+#endif
+	//this->Exit();
+
+	CWindowMain::listMainWindow.clear();
+
+	CLibPicture::UninitFreeImage();
+
+
+#ifdef __WXMSW__
+	CoUninitialize();
+
+#endif
+
+#ifdef FFMPEG
+	avformat_network_deinit();
+	//av_lockmgr_register(nullptr);
+#endif
+
+#if defined(__WXMSW__) && defined(_DEBUG)
+	//_CrtDumpMemoryLeaks();
+#endif
+
+
+	if(vkdev != nullptr)
+		ncnn::destroy_gpu_instance();
+
+	// Signal the main loop to exit instead of abruptly terminating the process
+	ExitMainLoop();
+
+	return 0;
+}
+
+bool LocaleMakeDir(const wxString& folder)
+{
+    wxFileName path(CFileUtility::GetDocumentFolderPath(), wxEmptyString);
+    path.AppendDir(folder);
+
+    if (path.DirExists())
+        return true;
+
+    return path.Mkdir(wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);
+}
+
+wxBitmap GetIcon(const wxArtID& id, const wxSize& sz)
+{
+    wxBitmap bmp = wxArtProvider::GetBitmap(id, wxART_CMN_DIALOG, sz);
+    return bmp;
+}
+
+void SaveIcon(const wxArtID& id, wxString filename)
+{
+    wxSize m_size = wxSize(16, 16);
+    wxBitmap bmp = GetIcon(id, m_size);
+    wxImage image = bmp.ConvertToImage();
+    image.SaveFile(filename, wxBITMAP_TYPE_PNG);
+}
+
+void MyApp::CheckGeolocalisationServiceAvailability()
+//Verify if Geolocalisation is available
+{
+	wxString urlServer = "";
+	wxString apiKey = "";
+	int ShowInfosGeolocUnavailable = 1;
+	//Géolocalisation
+	CRegardsConfigParam* param = CParamInit::getInstance();
+	if (param != nullptr)
+	{
+		urlServer = param->GetGeoLocUrlServer();
+		apiKey = param->GetApiKey();
+		ShowInfosGeolocUnavailable = param->ShowInfosGeolocUnavailable();
+	}
+	bool result = Regards::Internet::CGps::IsLocalisationAvailable(urlServer, apiKey);
+	if (!result)
+		application_context.isGPsAvailable = false;
+	else
+		application_context.isGPsAvailable = true;
+
+	if (!result && ShowInfosGeolocUnavailable)
+	{
+		wxMessageBox(_("Geolocalisation service is not available. Please check your geoplugin.net API key locate in the configuration window."));
+		param->SetShowInfosGeolocUnavailable(0);
+	}
+}
+
+void MyApp::CheckOpenCLAvailability(bool configFileExist)
+{
+
+	bool testOpenCL = true;
+	regardsParam->SetIsCudaSupport(0);
+
+	if (testOpenCL)
+	{
+		if (!ocl::haveOpenCL())
+		{
+			LogInfo("OpenCL is not available...");
+		}
+		else
+		{
+			LogInfo("OpenCL is available...");
+		}
+
+		if (!configFileExist)
+		{
+			if (!ocl::haveOpenCL())
+			{
+				regardsParam->SetIsOpenCLSupport(false);
+				regardsParam->SetIsOpenCLOpenGLInteropSupport(false);
+			}
+			else
+			{
+				regardsParam->SetIsOpenCLSupport(true);
+			}
+		}}
+
+}
+
+
+bool MyApp::InitializeLocale()
+{
+	// 
+	// call the base class initialization method, currently it only parses a
+	// few common command-line options but it could be do more in the future
+	if (!wxApp::OnInit())
+		return false;
+
+	if (wxWebView::IsBackendAvailable(wxWebViewBackendEdge))
+	{
+		LogInfo("WebView Edge backend available");
+	}
+
+#ifdef __APPLE__
+	wxSystemOptions::SetOption(wxOSX_FILEDIALOG_ALWAYS_SHOW_TYPES, 1);
+	//wxSystemOptions::SetOption( wxMAC_WINDOW_PLAIN_TRANSITION, 0 );
+#endif
+
+#ifdef __WXGTK__
+	FcBool result = FcInit();
+	if (result)
+		LogInfo("Font Config Initialized");
+#endif
+
+
+#ifdef WIN32
+	LCID lcid = GetThreadLocale();
+	wchar_t name[LOCALE_NAME_MAX_LENGTH];
+	if (LCIDToLocaleName(lcid, name, LOCALE_NAME_MAX_LENGTH, 0) == 0)
+		printf("%s", GetLastError());
+	std::wcout << L"Locale name = " << name << std::endl;
+
+	char buffer[64];
+	int ret;
+	ret = wcstombs(buffer, name, sizeof(buffer));
+	setlocale(LC_ALL, buffer);
+
+#elif __APPLE__
+	std::locale::global(std::locale(""));
+
+#else
+
+	//std::locale loc;
+	//string locName = loc.name();
+	//setlocale(LC_ALL, locName.c_str());
+
+#endif
+
+#ifdef __APPLE__
+	setlocale(LC_NUMERIC, "en_US.UTF-8");
+#elif defined(WIN32)
+	std::setlocale(LC_NUMERIC, "en_US.UTF-8");
+#endif
+
+	return true;
+}
+
+bool MyApp::InitializeDirectories()
+{
+	wxString programPath = CFileUtility::GetProgramFolderPath();
+
+	cout << "Program Path : " << programPath << endl;
+
+	wxString regardsdb_path = CFileUtility::GetResourcesFolderPathWithExt("regards.db");
+	wxString regardsdocumentdb_path = CFileUtility::GetDocumentFolderPathWithFilename("regards.db");
+
+	if (!LocaleMakeDir("Thumbnail"))
+	{
+		printf("Unable to make folder Thumbnail");
+		exit(0);
+	}
+	if (!LocaleMakeDir("ThumbnailVideo"))
+	{
+		printf("Unable to make folder ThumbnailVideo");
+		exit(0);
+	}
+	if (!LocaleMakeDir("temp"))
+	{
+		printf("Unable to make folder temp");
+		exit(0);
+	}
+	if (!LocaleMakeDir("Face"))
+	{
+		printf("Unable to make folder Face");
+		exit(0);
+	}
+	if (!LocaleMakeDir("model"))
+	{
+		printf("Unable to make folder Face");
+		exit(0);
+	}
+
+	if (!wxFileExists(regardsdocumentdb_path))
+		wxCopyFile(regardsdb_path, regardsdocumentdb_path);
+
+	return true;
+}
+
+bool MyApp::InitializeDatabase()
+{
+	sqlite3_initialize();
+	return true;
+}
+
+
+bool MyApp::InitializeResources()
+{
+
+	wxString resourcePath = CFileUtility::GetResourcesFolderPath();
+	wxString documentPath = CFileUtility::GetDocumentFolderPath();
+	//task_scheduler_init init;
+	//int n = tbb::task_scheduler_init::default_num_threads();
+	Exiv2::XmpParser::initialize();
+	std::atexit(Exiv2::XmpParser::terminate);
+
+	wxInitAllImageHandlers();
+
+	CLibPicture::InitFreeImage();
+
+	wxSocketBase::Initialize();
+
+	CPrintEngine::Initialize();
+
+
+#ifndef NDEBUG
+	::wxMessageBox("toto");
+#endif
+
+	//Chargement des paramËtres de l'application
+	regardsParam = CParamInit::getInstance();
+
+	bool dataInMemory = regardsParam->GetDatabaseInMemory();
+
+	if (!CLibResource::InitializeSQLServerDatabase(resourcePath))
+	{
+		wxMessageBox("Unable to initialize Resource.db SQL database");
+		exit(0);
+	}
+
+	if (!CSqlInit::InitializeSQLServerDatabase(documentPath, dataInMemory))
+	{
+		wxMessageBox("Unable to initialize Regards.db SQL database");
+		exit(0);
+	}
+
+	//Chargement des ressources
+	wxXmlResource::Get()->InitAllHandlers();
+
+	CFiltreData::CreateFilterList();
+
+	bool configFileExist = CParamInit::IsConfigFileExist();
+
+	bool firstInitialisation = true;
+	std::set_terminate(onTerminate);
+
+	CheckOpenCLAvailability(configFileExist);
+
+	CheckGeolocalisationServiceAvailability();
+
+
+	wxString numIdLang;
+	numIdLang = wxFILE_SEP_PATH;
+	numIdLang.append(to_string(regardsParam->GetNumLanguage()));
+	numIdLang += wxFILE_SEP_PATH;
+
+#ifdef WIN32
+	numIdLang += "msw";
+#else
+#ifdef __APPLE__
+	numIdLang += "osx";
+#else
+	numIdLang += "linux";
+#endif
+#endif
+
+	wxXmlResource::Get()->LoadAllFiles(resourcePath + numIdLang);
+
+	int svgWidth = 256;
+	int svgHeight = 256;
+
+	application_context.LoadWxDefaultPicture(CLibResource::GetPhotoCancel());
+	application_context.SetWxDefaultPictureThumbnail(CLibResource::CreatePictureFromSVG("IDB_PHOTOTEMP", svgWidth, svgHeight).ConvertToDisabled());
+	application_context.SetWxDefaultPictureThumbnailVideo(CLibResource::CreatePictureFromSVG("IDB_MOVIE", svgWidth, svgHeight).ConvertToDisabled());
+
+
+	return true;
+}
+
+void MyApp::LaunchApplication()
+{
+
+	if (appName == "RegardsConverter")
+	{
+		wxDisplay display;
+		wxRect screen = display.GetClientArea();
+		frameVideoConverter = std::make_unique<CVideoConverterFrame>(this);
+		frameVideoConverter->ExportVideo(fileToOpen);
+	}
+	else
+	{
+		ShowViewer();
+
+		CViewerFrame::SetViewerMode(true);
+	}
+}
+
+// 'Main program' equivalent: the program execution "starts" here
+bool MyApp::OnInit()
+{
+
+
+	if (!wxApp::OnInit())
+		return false;
+
+
+	// Create a unique name for your app instance, usually using the app name and your username
+	const wxString name = wxString::Format(wxT("RegardsViewer3%s"), wxGetUserId());
+
+	// Initialize the checker
+	m_checker = new wxSingleInstanceChecker(name);
+
+	// Check if another instance is already running
+	if (m_checker->IsAnotherRunning()) {
+		wxMessageBox(
+			wxT("Another instance of this application is already running."),
+			wxT("Application Error"),
+			wxOK | wxICON_INFORMATION
+		);
+
+		// Clean up and exit
+		delete m_checker;
+		m_checker = nullptr;
+		return false;
+	}
+
+	// Ensure unique_ptr frame members are explicitly null-initialized
+	// (unique_ptrs default to nullptr, but be explicit for clarity)
+	frameStart.reset();
+	frameViewer.reset();
+	frameVideoConverter.reset();
+
+	if (!InitializeLocale()) return false;
+	if (!InitializeDirectories()) return false;
+	if (!InitializeDatabase()) return false;
+	if (!InitializeResources()) return false;
+
+	LaunchApplication();
+
+	return true;
+}
+
+
+// Get the file extension filter for all registered image handlers.
+//
+wxString MyApp::GetImageFilter()
+{
+	return _("All image files") + wxString(wxT("|"))
+		+ m_strImageFilter + wxT("|")
+		+ m_strImageFilterList
+		+ _("All files") + wxT("|*.*");
+}
+
+
+// Image handler and extension filter handling.
+//
+// Adds image handlers to the image handler list.
+//
+void MyApp::AddImageHandler(wxImageHandler* poHandler)
+{
+	if (poHandler)
+	{
+		wxString strExtension = poHandler->GetExtension();
+
+		// TODO: Is there a posibility to get files by extension fully
+		//       case insensitive?
+		//
+#ifdef __WXMSW__
+		m_strImageFilter += wxT("*.") + strExtension + wxT(";");
+		m_strImageFilterList += poHandler->GetMimeType() + wxT(" (*.")
+			+ strExtension
+			+ wxT(")|*.") + strExtension + wxT("|");
+#else
+        m_strImageFilter += wxT( "*." ) + strExtension.Lower() + wxT( ";" )
+                         +  wxT( "*." ) + strExtension.Upper() + wxT( ";" );
+        m_strImageFilterList += poHandler->GetMimeType() + wxT( " (*." )
+                                + strExtension
+                                + wxT( ")|*." )
+                                + strExtension.Lower()
+                                + wxT( ";*." )
+                                + strExtension.Upper()
+                                + wxT( "|" );
+#endif
+		if (wxImage::FindHandler(poHandler->GetName()))
+		{
+			delete poHandler;
+		}
+		else
+		{
+			wxImage::AddHandler(poHandler);
+		}
+	}
+}

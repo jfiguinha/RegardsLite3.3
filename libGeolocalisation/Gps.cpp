@@ -1,0 +1,236 @@
+#include "header.h"
+#include "Gps.h"
+#include "httprequest.h"
+#include <ConvertUtility.h>
+#include <appcontext.h>
+extern AppContext application_context;
+
+using namespace Regards::Internet;
+
+
+
+//Test parameter /extras/location.gp?lat=48.896168&long=2.387500&format=xml wxString server = L"www.geoplugin.net";
+
+CGps::CGps(const wxString& server, const wxString& apiKey)
+{
+	serverHttp = server;
+	this->apiKey = apiKey;
+
+}
+
+bool CGps::IsLocalisationAvailable(const wxString& server, const wxString& apiKey)
+{
+	//wxString result = GeolocalisationGPS("48.839996", "2.379706");
+	wxString latitude = "48.839996";
+	wxString longitude = "2.379706";
+
+	wxString httpAdress = server;
+	httpAdress.append(L"/v1/geocode/reverse?lat=");
+	httpAdress.append(latitude);
+	httpAdress.append(L"&lon=");
+	httpAdress.append(longitude);
+	httpAdress.append("&format=xml");
+	httpAdress.append(L"&type=postcode");
+	httpAdress.append(L"&apiKey=");
+	httpAdress.append(apiKey);
+	///wxString xml = Regards::Internet::CHttpRequest::ExecuteRequest(httpAdress);
+
+	HttpResponse response = Regards::Internet::CHttpRequest::Get(httpAdress);
+	wxString xml = "";
+	if (response.IsSuccess())
+		xml = response.body;
+	else
+		return false;
+
+	return true;
+}
+
+
+CGps::~CGps()
+{
+
+}
+
+float CGps::GetGpsfValue(const wxString& gpsValue)
+{
+	wxString returnValue = "";
+	vector<wxString> latValue;
+	int i = 0;
+
+	//Conversion des valeurs des latitudes et des longitudes
+	latValue = CConvertUtility::split(gpsValue, ' ');
+
+	float outputValue = 0.0;
+
+	for (auto it = latValue.begin(); it != latValue.end(); ++it)
+	{
+		vector<wxString> intValue = CConvertUtility::split(*it, '/');
+		if (intValue.size() < 2)
+			continue;
+		int valeur = atoi(intValue.at(0));
+		int diviseur = atoi(intValue.at(1));
+		if (diviseur == 0)
+			continue;
+
+		float value = static_cast<float>(valeur) / static_cast<float>(diviseur);
+		if (i == 1)
+		{
+			value = value / 60;
+		}
+		else if (i == 2)
+		{
+			value = value / 3600;
+		}
+
+		outputValue += value;
+		i++;
+	}
+
+	return outputValue;
+}
+
+wxString CGps::GetGpsValue(const float& gpsValue)
+{
+	return to_string(gpsValue);
+}
+
+
+float CGps::GetFLatitude()
+{
+	double val = 0.0;
+	if (!latitude.ToDouble(&val))
+		return 0.0f;
+	return val;
+}
+
+float CGps::GetFLongitude()
+{
+	double val = 0.0;
+	if (!longitude.ToDouble(&val))
+		return 0.0f;
+	return val;
+}
+
+
+
+bool CGps::GeolocalisationGPS(const wxString& latitude, const wxString& longitude)
+{
+	bool returnValue = true;
+
+	if (!application_context.isGPsAvailable)
+	{
+		return false;
+	}
+
+	
+	try
+	{
+		//printf("CGps GeolocalisationGPS \n");
+
+
+		this->latitude = latitude;
+		this->longitude = longitude;
+
+		//https://api.geoapify.com/v1/geocode/reverse?"; //lat=52.478117501285965&lon=13.47717282413089&type=postcode&apiKey=
+		//wxString xml = L"";
+		wxString httpAdress = serverHttp;
+		httpAdress.append(L"/v1/geocode/reverse?lat=");
+		httpAdress.append(latitude);
+		httpAdress.append(L"&lon=");
+		httpAdress.append(longitude);
+		httpAdress.append("&format=xml");
+		httpAdress.append(L"&type=postcode");
+		httpAdress.append(L"&apiKey=");
+		httpAdress.append(apiKey);
+		//wxString mystring2(chars, wxConvUTF8);
+
+		HttpResponse response = Regards::Internet::CHttpRequest::Get(httpAdress);
+		wxString xml = "";
+		if (response.IsSuccess())
+		{
+			xml = response.body;
+			geoPluginVector.clear();
+			ImportationGeocodePlugin(xml);
+		}
+		else
+			returnValue = false;
+	}
+	catch (...)
+	{
+		returnValue = false;
+	}
+
+
+	return returnValue;
+}
+
+GeoPluginVector* CGps::GetGpsList()
+{
+	return &geoPluginVector;
+}
+
+wxString CGps::FindElement(const wxString& xml, const wxString& baliseBegin, const wxString& baliseEnd)
+{
+	size_t i = xml.find(baliseBegin);
+	if (i == -1)
+		return L"";
+
+	i += baliseBegin.size();
+	size_t j = xml.find(baliseEnd, i);
+	if (j == wxString::npos)
+		return L"";
+
+	return xml.substr(i, j - i);
+}
+
+
+bool CGps::ImportationGeocodePlugin(const wxString& xml)
+{
+	//int j = 0;
+	wxString data = L"";
+	wxString value = L"";
+	wxString xmlData = xml;
+	wxString baliseBegin = L"<results>";
+	wxString baliseEnd = L"</results>";
+
+	std::size_t found = xml.find("Bad Request");
+	if (found != std::string::npos)
+	{
+		CGeoPluginValue geoValue;
+		geoValue.SetAddress("not found");
+		geoValue.SetPlace("not found");
+		geoValue.SetCountryCode(value);
+		geoValue.SetCity(value);
+		geoValue.SetRegion(value);
+		geoPluginVector.push_back(geoValue);
+	}
+	else
+	{
+		do
+		{
+			data = FindElement(xmlData, baliseBegin, baliseEnd);
+			if (data != L"")
+			{
+				CGeoPluginValue geoValue;
+				value = FindElement(data, L"<formatted>", L"</formatted>");
+				geoValue.SetAddress(value);
+				value = FindElement(data, L"<address_line1>", L"</address_line1>");
+				geoValue.SetPlace(value);
+				value = FindElement(data, L"<country_code>", L"</country_code>");
+				geoValue.SetCountryCode(value);
+				value = FindElement(data, L"<city>", L"</city>");
+				geoValue.SetCity(value);
+				value = FindElement(data, L"<state>", L"</state>");
+				geoValue.SetRegion(value);
+				geoPluginVector.push_back(geoValue);
+
+				const size_t end = xmlData.find(baliseEnd);
+				if (end == wxString::npos)
+					break;
+				xmlData = xmlData.substr(end + baliseEnd.length());
+			}
+		} while (data != L"");
+	}
+
+	return true;
+}

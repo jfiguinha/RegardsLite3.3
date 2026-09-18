@@ -1,0 +1,482 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CodeLite_Project Name="RegardsLiteViewer_macsilicon" InternalType="GUI" Version="11000">
+  <Plugins>
+    <Plugin Name="qmake">
+      <![CDATA[00020001N0005Debug0000000000000001N0007Release000000000000]]>
+    </Plugin>
+    <Plugin Name="CMakePlugin">
+      <![CDATA[[{
+  "name": "Debug",
+  "enabled": false,
+  "buildDirectory": "build",
+  "sourceDirectory": "$(ProjectPath)",
+  "generator": "",
+  "buildType": "",
+  "arguments": [],
+  "parentProject": ""
+ }, {
+  "name": "Release",
+  "enabled": false,
+  "buildDirectory": "build",
+  "sourceDirectory": "$(ProjectPath)",
+  "generator": "",
+  "buildType": "",
+  "arguments": [],
+  "parentProject": ""
+ }]]]>
+    </Plugin>
+  </Plugins>
+  <Description/>
+  <Dependencies/>
+  <VirtualDirectory Name="src">
+    <File Name="../Regards/Regards.cpp"/>
+  </VirtualDirectory>
+  <VirtualDirectory Name="include">
+    <File Name="../Regards/Regards.h"/>
+    <File Name="../Regards/SqlInit.h"/>
+  </VirtualDirectory>
+  <Dependencies Name="Debug">
+    <Project Name="include"/>
+    <Project Name="libWindow"/>
+    <Project Name="libViewer"/>
+    <Project Name="libVideoThumbnail"/>
+    <Project Name="libVideoFFMpeg"/>
+    <Project Name="libUtility"/>
+    <Project Name="libTheme"/>
+    <Project Name="libSqlite"/>
+    <Project Name="libSqlEngine"/>
+    <Project Name="libSqlData"/>
+    <Project Name="libPicture"/>
+    <Project Name="libParameter"/>
+    <Project Name="libOpenCL"/>
+    <Project Name="libGeolocalisation"/>
+    <Project Name="libFiltre"/>
+    <Project Name="libExif"/>
+    <Project Name="libEmail"/>
+    <Project Name="libDialog"/>
+    <Project Name="CxImage"/>
+    <Project Name="libControl"/>
+    <Project Name="libFiltreInterface"/>
+    <Project Name="wxCheckTree"/>
+    <Project Name="libPsd"/>
+    <Project Name="libOpenGL"/>
+    <Project Name="libJbig"/>
+    <Project Name="libAppleFunction"/>
+    <Project Name="libavutil"/>
+    <Project Name="libavcodec"/>
+    <Project Name="libbpg"/>
+    <Project Name="FaceRecognition"/>
+    <Project Name="libRegardsBpg_mac"/>
+    <Project Name="FaceRecognition_mac"/>
+    <Project Name="wxPDFDoc"/>
+    <Project Name="wxIA"/>
+    <Project Name="libScanner"/>
+    <Project Name="libavif"/>
+    <Project Name="libFreeImage"/>
+    <Project Name="libDeepLearning"/>
+    <Project Name="libResource"/>
+    <Project Name="libffmpeg"/>
+    <Project Name="libVideoConverter"/>
+    <Project Name="libheif"/>
+    <Project Name="libVideoEffect"/>
+  </Dependencies>
+  <Dependencies Name="Release">
+    <Project Name="include"/>
+    <Project Name="CxImage"/>
+    <Project Name="libControl"/>
+    <Project Name="libWindow"/>
+    <Project Name="libViewer"/>
+    <Project Name="libVideoThumbnail"/>
+    <Project Name="libVideoFFMpeg"/>
+    <Project Name="libUtility"/>
+    <Project Name="libSqlEngine"/>
+    <Project Name="libSqlite"/>
+    <Project Name="libTheme"/>
+    <Project Name="libSqlData"/>
+    <Project Name="libPicture"/>
+    <Project Name="libOpenCL"/>
+    <Project Name="libParameter"/>
+    <Project Name="libGeolocalisation"/>
+    <Project Name="libFiltre"/>
+    <Project Name="libExif"/>
+    <Project Name="libEmail"/>
+    <Project Name="libDialog"/>
+    <Project Name="libFiltreInterface"/>
+    <Project Name="wxCheckTree"/>
+    <Project Name="libOpenGL"/>
+    <Project Name="libJbig"/>
+    <Project Name="libPsd"/>
+    <Project Name="libavcodec"/>
+    <Project Name="libbpg"/>
+    <Project Name="FaceRecognition"/>
+    <Project Name="libavutil"/>
+    <Project Name="wxPDFDoc"/>
+    <Project Name="libAppleFunction"/>
+    <Project Name="libScanner"/>
+    <Project Name="FaceRecognition_mac"/>
+    <Project Name="libDeepLearning"/>
+    <Project Name="libavif"/>
+    <Project Name="libFreeImage"/>
+    <Project Name="libResource"/>
+    <Project Name="wxIA"/>
+    <Project Name="libRegardsBpg_mac"/>
+    <Project Name="libffmpeg"/>
+    <Project Name="libVideoConverter"/>
+    <Project Name="libheif"/>
+    <Project Name="libVideoEffect"/>
+    <Project Name="OpenCV"/>
+  </Dependencies>
+  <Settings Type="Executable">
+    <GlobalSettings>
+      <Compiler Options=";-std=gnu++17;$(shell ../libextern/wxconfig_cpp.sh);-Wall;-pthread" C_Options=";-Wall;" Assembler="">
+        <IncludePath Value="."/>
+        <IncludePath Value="../libSqlite"/>
+        <IncludePath Value="../libVideoEffect"/>
+        <IncludePath Value="../libOpenCLEngine"/>
+        <IncludePath Value="../libTheme"/>
+        <IncludePath Value="../libextern/libRapidXML"/>
+        <IncludePath Value="../libextern/ffmpeg-master"/>
+        <IncludePath Value="../libGeolocalisation"/>
+        <IncludePath Value="../libVideoConverter"/>
+        <IncludePath Value="../libParameter"/>
+        <IncludePath Value="../OtherLib/libffmpeg"/>
+        <IncludePath Value="../libUtility"/>
+        <IncludePath Value="../libFiltreInterface"/>
+        <IncludePath Value="../include"/>
+        <IncludePath Value="../libDataStructure"/>
+        <IncludePath Value="../libResource"/>
+        <IncludePath Value="../libSqlData"/>
+        <IncludePath Value="../libOpenGL"/>
+        <IncludePath Value="../libRenderBitmap"/>
+        <IncludePath Value="../libSqlEngine"/>
+        <IncludePath Value="../libSqlite"/>
+        <IncludePath Value="../libFiltre"/>
+        <IncludePath Value="../include"/>
+        <IncludePath Value="../libDataStructure"/>
+        <IncludePath Value="../Otherlib/wxSVG/include"/>
+        <IncludePath Value="../Otherlib/libffplay"/>
+        <IncludePath Value="../libWindow"/>
+        <IncludePath Value="../libPrint"/>
+        <IncludePath Value="../libPicture"/>
+        <IncludePath Value="../libTheme"/>
+        <IncludePath Value="../libGeolocalisation"/>
+        <IncludePath Value="../libControl"/>
+        <IncludePath Value="../libIntro"/>
+        <IncludePath Value="../libDialog"/>
+        <IncludePath Value="../libViewer"/>
+        <IncludePath Value="../libExplorer"/>
+        <IncludePath Value="../libOpenCL"/>
+        <IncludePath Value="../libWindowMain"/>
+        <IncludePath Value="../libVideoFFMpeg"/>
+        <IncludePath Value="../libextern/libOpenCL/include"/>
+        <IncludePath Value="../Regards"/>
+        <IncludePath Value="../Otherlib/wxPDFDoc/include"/>
+        <IncludePath Value="../libDeepLearning"/>
+        <IncludePath Value="../libScanner"/>
+        <IncludePath Value="../Otherlib/wxIA/include"/>
+        <IncludePath Value="../Otherlib/wxIA/WIA"/>
+        <Preprocessor Value="VIEWER"/>
+        <Preprocessor Value="OPENGL"/>
+        <Preprocessor Value="SDL2"/>
+        <Preprocessor Value="LIBBPG"/>
+      </Compiler>
+      <Linker Options="$(shell ../libextern/wxconfig_lib.sh);-headerpad_max_install_names;-framework IOKit;-framework Carbon;-framework Cocoa;-framework AudioToolbox;-framework System;-framework OpenCL;-framework CoreAudio;-framework CoreVideo;-framework AudioUnit;-framework AVKit;-framework ForceFeedback;-framework WebKit;-framework security;-framework VideoToolbox;-framework AVFoundation;-framework VideoDecodeAcceleration;-framework CoreMedia;-framework CoreImage;-framework OpenGL;-framework GLUT;-framework ImageCaptureCore;-framework CoreML;-framework Vision;-framework SystemConfiguration;-framework Metal;-framework GameController;-framework CoreHaptics">
+        <LibraryPath Value="../libextern/heif-master/srcs/lib"/>
+        <Library Value="Viewer"/>
+        <Library Value="Control"/>
+        <Library Value="Email"/>
+        <Library Value="Resource"/>
+        <Library Value="Geolocalisation"/>
+        <Library Value="Filtre"/>
+        <Library Value="VideoConverter"/>
+        <Library Value="RegardsCL"/>
+        <Library Value="VideoEffect"/>
+        <Library Value="SqlData"/>
+        <Library Value="SqlEngine"/>
+        <Library Value="sqlite3"/>
+        <Library Value="Picture"/>
+        <Library Value="Window"/>
+        <Library Value="RegardsGL"/>
+        <Library Value="Dialog"/>
+        <Library Value="OpenCV"/>
+        <Library Value="Utility"/>
+        <Library Value="mediainfo"/>
+        <Library Value="Theme"/>
+        <Library Value="Parameter"/>
+        <Library Value="CxImage"/>
+        <Library Value="wx_osx_cocoau_gl-3.3"/>
+        <Library Value="epoxy"/>
+        <Library Value="exiv2"/>
+        <Library Value="intl"/>
+        <Library Value="exif"/>
+        <Library Value="INIReader"/>
+        <Library Value="inih"/>
+        <Library Value="avif"/>
+        <Library Value="heif"/>
+        <Library Value="iconv"/>
+        <Library Value="expat"/>
+        <Library Value="jasper"/>
+        <Library Value="Jbig"/>
+        <Library Value="avformat"/>
+        <Library Value="avcodec"/>
+        <Library Value="avdevice"/>
+        <Library Value="avfilter"/>
+        <Library Value="avutil"/>
+        <Library Value="swresample"/>
+        <Library Value="swscale"/>
+        <Library Value="jpeg"/>
+        <Library Value="lzma"/>
+        <Library Value="SDL2"/>
+        <Library Value="z"/>
+        <Library Value="bz2"/>
+        <Library Value="heif_static"/>
+        <Library Value="de265"/>
+        <Library Value="dl"/>
+        <Library Value="curl"/>
+        <Library Value="AppleFunction"/>
+        <Library Value="wxPDFDoc"/>
+        <Library Value="poppler"/>
+        <Library Value="poppler-cpp"/>
+        <Library Value="fontconfig"/>
+        <Library Value="freeimage"/>
+        <Library Value="qpdf"/>
+        <Library Value="tesseract"/>
+        <Library Value="leptonica"/>
+        <Library Value="tbb"/>
+        <Library Value="aom"/>
+        <Library Value="opencv_calib3d4"/>
+        <Library Value="opencv_core4"/>
+        <Library Value="opencv_features2d4"/>
+        <Library Value="opencv_imgproc4"/>
+        <Library Value="opencv_imgcodecs4"/>
+        <Library Value="opencv_face4"/>
+        <Library Value="opencv_objdetect4"/>
+        <Library Value="opencv_tracking4"/>
+        <Library Value="opencv_video4"/>
+        <Library Value="opencv_videoio4"/>
+        <Library Value="opencv_xphoto4"/>
+        <Library Value="opencv_photo4"/>
+        <Library Value="opencv_flann4"/>
+        <Library Value="x264"/>
+        <Library Value="x265"/>
+        <Library Value="tiff"/>
+        <Library Value="png16"/>
+        <Library Value="raw_r"/>
+        <Library Value="openjp2"/>
+        <Library Value="Iex-3_4"/>
+        <Library Value="IMath-3_2"/>
+        <Library Value="IlmThread-3_4"/>
+        <Library Value="OpenEXRCore-3_4"/>
+        <Library Value="OpenEXR-3_4"/>
+        <Library Value="OpenEXRUtil-3_4"/>
+        <Library Value="openjph"/>
+        <Library Value="deflate"/>
+        <Library Value="turbojpeg"/>
+        <Library Value="webp"/>
+        <Library Value="webpdecoder"/>
+        <Library Value="webpdemux"/>
+        <Library Value="webpmux"/>
+        <Library Value="ffmpeg"/>
+        <Library Value="dav1d"/>
+        <Library Value="wx_osx_cocoau_webview-3.3"/>
+        <Library Value="archive"/>
+        <Library Value="xml2"/>
+        <Library Value="jxl"/>
+        <Library Value="jxl_threads"/>
+        <Library Value="jxl_cms"/>
+        <Library Value="hwy"/>
+        <Library Value="brotlidec"/>
+        <Library Value="brotlienc"/>
+        <Library Value="brotlicommon"/>
+        <Library Value="jpegxr"/>
+        <Library Value="jxrglue"/>
+        <Library Value="freetype"/>
+        <Library Value="lcms2"/>
+        <Library Value="lz4"/>
+        <Library Value="gif"/>
+        <Library Value="opus"/>
+        <Library Value="vpx"/>
+        <Library Value="vorbis"/>
+        <Library Value="ogg"/>
+        <Library Value="yuv"/>
+        <Library Value="mp3lame"/>
+        <Library Value="SvtAv1Enc"/>
+        <Library Value="vorbisenc"/>
+        <Library Value="openh264"/>
+        <Library Value="sharpyuv"/>
+        <Library Value="fdk-aac"/>
+        <Library Value="zstd"/>
+        <Library Value="zen"/>
+        <Library Value="tinyxml2"/>
+        <Library Value="ssl"/>
+        <Library Value="crypto"/>
+      </Linker>
+      <ResourceCompiler Options=""/>
+    </GlobalSettings>
+    <Configuration Name="Debug" CompilerType="Intel" DebuggerType="" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+      <Compiler Options="-ggdb;-O0" C_Options="-ggdb;-O0" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="1"/>
+      <Linker Options="" Required="yes">
+        <LibraryPath Value="../CxImage/Debug"/>
+        <LibraryPath Value="../libOpenGL/Debug"/>
+        <LibraryPath Value="../wxCheckTree/Debug"/>
+        <LibraryPath Value="../libViewer/Debug"/>
+        <LibraryPath Value="../libVideoEffect/Debug"/>
+        <LibraryPath Value="../libSqlEngine/Debug"/>
+        <LibraryPath Value="../libResource/Debug"/>
+        <LibraryPath Value="../libDialog/Debug"/>
+        <LibraryPath Value="../libPicture/Debug"/>
+        <LibraryPath Value="../libUtility/Debug"/>
+        <LibraryPath Value="../libGeolocalisation/Debug"/>
+        <LibraryPath Value="../libSqlData/Debug"/>
+        <LibraryPath Value="../libFiltre/Debug"/>
+        <LibraryPath Value="../libWindow/Debug"/>
+        <LibraryPath Value="../libControl/Debug"/>
+        <LibraryPath Value="../libTheme/Debug"/>
+        <LibraryPath Value="../libScanner/Debug"/>
+        <LibraryPath Value="../libParameter/Debug"/>
+        <LibraryPath Value="../libOpenCL/Debug"/>
+        <LibraryPath Value="../libEmail/Debug"/>
+        <LibraryPath Value="../libVideoConverter/Debug"/>
+        <LibraryPath Value="../Otherlib/libJbig/Debug"/>
+        <LibraryPath Value="../libDeepLearning/Debug"/>
+        <LibraryPath Value="../libAppleFunction/Debug"/>
+        <LibraryPath Value="../Otherlib/wxPDFDoc/Debug"/>
+        <LibraryPath Value="../Otherlib/libavif/Debug"/>
+        <LibraryPath Value="../Otherlib/libheif/Debug"/>
+        <LibraryPath Value="../Otherlib/libffmpeg/Debug"/>
+        <LibraryPath Value="../Otherlib/OpenCV/Debug"/>
+      </Linker>
+      <ResourceCompiler Options="$(shell wx-config --rcflags)" Required="no"/>
+      <General OutputFile="$(IntermediateDirectory)/RegardsLiteViewer" IntermediateDirectory="./Debug" Command="./$(ProjectName)" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(IntermediateDirectory)" PauseExecWhenProcTerminates="yes" IsGUIProgram="yes" IsEnabled="yes"/>
+      <BuildSystem Name="Default"/>
+      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
+        <![CDATA[]]>
+      </Environment>
+      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="/usr/bin/lldb" IsExtended="no">
+        <DebuggerSearchPaths/>
+        <PostConnectCommands/>
+        <StartupCommands/>
+      </Debugger>
+      <PreBuild>
+        <Command Enabled="yes">if [ -f Debug/header.h ]; then echo « Exists »; else if [ -d Debug ]; then echo « Exists »; else mkdir Debug;fi;cp ../include/header.h Debug/header.h;fi</Command>
+      </PreBuild>
+      <PostBuild>
+        <Command Enabled="yes">SetFile -t APPL ./Debug/RegardsLiteViewer</Command>
+        <Command Enabled="yes">mkdir -p ./Debug/RegardsLiteViewer.app/Contents</Command>
+        <Command Enabled="yes">mkdir -p ./Debug/RegardsLiteViewer.app/Contents/Frameworks</Command>
+        <Command Enabled="yes">mkdir -p ./Debug/RegardsLiteViewer.app/Contents/MacOS</Command>
+        <Command Enabled="yes">mkdir -p ./Debug/RegardsLiteViewer.app/Contents/Resources</Command>
+        <Command Enabled="yes">sed -e "s/IDENTIFIER/`echo . | sed -e 's,\.\./,,g' | sed -e 's,/,.,g'`/" \
+	-e "s/EXECUTABLE/RegardsLiteViewer/" \
+	-e "s/VERSION/2.0.3.3/" \
+	../Regards/mac/Info.plist.in &gt;./Debug/RegardsLiteViewer.app/Contents/Info.plist</Command>
+        <Command Enabled="yes">/bin/echo "APPL????" &gt;./Debug/RegardsLiteViewer.app/Contents/PkgInfo</Command>
+        <Command Enabled="yes">ln -f ./Debug/RegardsLiteViewer ./Debug/RegardsLiteViewer.app/Contents/MacOS/RegardsLiteViewer</Command>
+        <Command Enabled="yes">cp -f ../Regards/mac/regardsliteicon.icns ./Debug/RegardsLiteViewer.app/Contents/Resources/wxmac.icns</Command>
+        <Command Enabled="yes">cp -R ../Regards/Resources ./Debug/RegardsLiteViewer.app/Contents/</Command>
+      </PostBuild>
+      <CustomBuild Enabled="no">
+        <RebuildCommand/>
+        <CleanCommand/>
+        <BuildCommand/>
+        <PreprocessFileCommand/>
+        <SingleFileCommand/>
+        <MakefileGenerationCommand/>
+        <ThirdPartyToolName>None</ThirdPartyToolName>
+        <WorkingDirectory/>
+      </CustomBuild>
+      <AdditionalRules>
+        <CustomPostBuild/>
+        <CustomPreBuild/>
+      </AdditionalRules>
+      <Completion EnableCpp11="no" EnableCpp14="no">
+        <ClangCmpFlagsC/>
+        <ClangCmpFlags/>
+        <ClangPP/>
+        <SearchPaths/>
+      </Completion>
+    </Configuration>
+    <Configuration Name="Release" CompilerType="Intel" DebuggerType="" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+      <Compiler Options="-O2" C_Options="-O2" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="1">
+        <Preprocessor Value="NDEBUG"/>
+      </Compiler>
+      <Linker Options="" Required="yes">
+        <LibraryPath Value="../CxImage/Release"/>
+        <LibraryPath Value="../libOpenGL/Release"/>
+        <LibraryPath Value="../libVideoEffect/Release"/>
+        <LibraryPath Value="../libViewer/Release"/>
+        <LibraryPath Value="../libSqlEngine/Release"/>
+        <LibraryPath Value="../libResource/Release"/>
+        <LibraryPath Value="../libDialog/Release"/>
+        <LibraryPath Value="../libPicture/Release"/>
+        <LibraryPath Value="../libUtility/Release"/>
+        <LibraryPath Value="../libVideoConverter/Release"/>
+        <LibraryPath Value="../libGeolocalisation/Release"/>
+        <LibraryPath Value="../libSqlData/Release"/>
+        <LibraryPath Value="../libFiltre/Release"/>
+        <LibraryPath Value="../libWindow/Release"/>
+        <LibraryPath Value="../libControl/Release"/>
+        <LibraryPath Value="../libTheme/Release"/>
+        <LibraryPath Value="../libParameter/Release"/>
+        <LibraryPath Value="../libOpenCL/Release"/>
+        <LibraryPath Value="../libEmail/Release"/>
+        <LibraryPath Value="../Otherlib/libJbig/Release"/>
+        <LibraryPath Value="../libAppleFunction/Release"/>
+        <LibraryPath Value="../Otherlib/wxPDFDoc/Release"/>
+        <LibraryPath Value="../Otherlib/libheif/Release"/>
+        <LibraryPath Value="../Otherlib/libffmpeg/Release"/>
+        <LibraryPath Value="../Otherlib/OpenCV/Release"/>
+      </Linker>
+      <ResourceCompiler Options="$(shell wx-config --rcflags)" Required="no"/>
+      <General OutputFile="$(IntermediateDirectory)/RegardsLiteViewer" IntermediateDirectory="./Release" Command="./$(ProjectName)" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(IntermediateDirectory)" PauseExecWhenProcTerminates="yes" IsGUIProgram="yes" IsEnabled="yes"/>
+      <BuildSystem Name="Default"/>
+      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
+        <![CDATA[]]>
+      </Environment>
+      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="" IsExtended="no">
+        <DebuggerSearchPaths/>
+        <PostConnectCommands/>
+        <StartupCommands/>
+      </Debugger>
+      <PreBuild>
+        <Command Enabled="yes">if [ -f Release/header.h ]; then echo « Exists »; else if [ -d Release ]; then echo « Exists »; else mkdir Release;fi;cp ../include/header.h Release/header.h;fi</Command>
+      </PreBuild>
+      <PostBuild>
+        <Command Enabled="yes">SetFile -t APPL ./Release/RegardsLiteViewer</Command>
+        <Command Enabled="yes">mkdir -p ./Release/RegardsLiteViewer.app/Contents</Command>
+        <Command Enabled="yes">mkdir -p ./Release/RegardsLiteViewer.app/Contents/Frameworks</Command>
+        <Command Enabled="yes">mkdir -p ./Release/RegardsLiteViewer.app/Contents/MacOS</Command>
+        <Command Enabled="yes">mkdir -p ./Release/RegardsLiteViewer.app/Contents/Resources</Command>
+        <Command Enabled="yes">sed -e "s/IDENTIFIER/`echo . | sed -e 's,\.\./,,g' | sed -e 's,/,.,g'`/" \
+	-e "s/EXECUTABLE/RegardsLiteViewer/" \
+	-e "s/VERSION/2.0.3.3/" \
+	../Regards/mac/Info.plist.in &gt;./Release/RegardsLiteViewer.app/Contents/Info.plist</Command>
+        <Command Enabled="yes">/bin/echo "APPL????" &gt;./Release/RegardsLiteViewer.app/Contents/PkgInfo</Command>
+        <Command Enabled="yes">ln -f ./Release/RegardsLiteViewer ./Release/RegardsLiteViewer.app/Contents/MacOS/RegardsLiteViewer</Command>
+        <Command Enabled="yes">cp -f ../Regards/mac/regardsliteicon.icns ./Release/RegardsLiteViewer.app/Contents/Resources/wxmac.icns</Command>
+        <Command Enabled="yes">cp -R ../Regards/Resources ./Release/RegardsLiteViewer.app/Contents/</Command>
+        <Command Enabled="yes">cp ../libextern/vcpkg/installed/arm64-osx/tools/ffmpeg/ffmpeg ./Release/RegardsLiteViewer.app/Contents/MacOS</Command>
+      </PostBuild>
+      <CustomBuild Enabled="no">
+        <RebuildCommand/>
+        <CleanCommand/>
+        <BuildCommand/>
+        <PreprocessFileCommand/>
+        <SingleFileCommand/>
+        <MakefileGenerationCommand/>
+        <ThirdPartyToolName>None</ThirdPartyToolName>
+        <WorkingDirectory/>
+      </CustomBuild>
+      <AdditionalRules>
+        <CustomPostBuild/>
+        <CustomPreBuild/>
+      </AdditionalRules>
+      <Completion EnableCpp11="no" EnableCpp14="no">
+        <ClangCmpFlagsC/>
+        <ClangCmpFlags/>
+        <ClangPP/>
+        <SearchPaths/>
+      </Completion>
+    </Configuration>
+  </Settings>
+</CodeLite_Project>

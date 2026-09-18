@@ -1,0 +1,946 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<resource xmlns="http://www.wxwidgets.org/wxxrc">
+	<object class="wxDialog" name="CompressionAudioVideoOption">
+		<title>Video Exportation Option</title>
+		<centered>1</centered>
+		<style>wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER</style>
+		<object class="wxFlexGridSizer">
+			<cols>2</cols>
+			<rows>0</rows>
+			<hgap>5</hgap>
+			<vgap>5</vgap>
+			<!-- Left Column: Notebook and Buttons -->
+			<object class="sizeritem">
+				<flag>wxEXPAND</flag>
+				<border>5</border>
+				<option>1</option>
+				<object class="wxBoxSizer">
+					<orient>wxVERTICAL</orient>
+					<!-- Notebook -->
+					<object class="sizeritem">
+						<flag>wxEXPAND|wxALL</flag>
+						<border>5</border>
+						<option>1</option>
+						<object class="wxNotebook">
+							<style>wxBK_TOP</style>
+							<!-- Page 1: Compression Video Option -->
+							<object class="notebookpage">
+								<label>Compression Video Option</label>
+								<object class="wxPanel" name="page_1">
+									<object class="wxBoxSizer">
+										<orient>wxVERTICAL</orient>
+										<!-- Video Conversion RadioBox -->
+										<object class="sizeritem">
+											<flag>wxEXPAND|wxALL</flag>
+											<border>5</border>
+											<object class="wxRadioBox" name="ID_RBVIDEOCOMPRESSION">
+        										<label>Video Conversion</label>
+        										<style>wxRA_SPECIFY_COLS</style>
+        										<content>
+            										<item>Conversion</item>
+            										<item>Direct Copy</item>
+        										</content>
+        										<dimension>2</dimension>
+		 									   <size>-1,60</size>
+											</object>
+										</object>
+										<!-- Video Option Group -->
+										<object class="sizeritem">
+											<flag>wxEXPAND|wxALL</flag>
+											<border>5</border>
+											<option>1</option>
+											<object class="wxStaticBoxSizer">
+												<label>Video Option</label>
+												<orient>wxVERTICAL</orient>
+												<!-- Hardware Encoder -->
+												<object class="sizeritem">
+													<flag>wxEXPAND|wxALL</flag>
+													<border>5</border>
+													<object class="wxBoxSizer">
+														<orient>wxHORIZONTAL</orient>
+														<object class="sizeritem">
+															<flag>wxALIGN_CENTER_VERTICAL|wxALL</flag>
+															<border>5</border>
+															<object class="wxCheckBox" name="ID_CKVIDEOHARDWARE">
+																<label>Hardware Encoder</label>
+															</object>
+														</object>
+														<object class="sizeritem">
+															<flag>wxEXPAND|wxALL</flag>
+															<border>5</border>
+															<option>1</option>
+															<object class="wxComboBox" name="ID_CBVIDEOHARDWARE">
+																<value>QSV</value>
+																<size>100,30</size>
+																<content>
+																	<item>QSV</item>
+																	<item>AMF</item>
+																	<item>NVDEC</item>
+																</content>
+															</object>
+														</object>
+													</object>
+												</object>
+												<!-- Video Codec -->
+												<object class="sizeritem">
+													<flag>wxEXPAND|wxALL</flag>
+													<border>5</border>
+													<object class="wxBoxSizer">
+														<orient>wxHORIZONTAL</orient>
+														<object class="sizeritem">
+															<flag>wxALIGN_CENTER_VERTICAL|wxALL</flag>
+															<border>5</border>
+															<size>100,-1</size>
+															<object class="wxStaticText" name="ID_STVIDEOCODEC">
+																<label>Video :</label>
+															</object>
+														</object>
+														<object class="sizeritem">
+															<flag>wxEXPAND|wxALL</flag>
+															<border>5</border>
+															<option>1</option>
+															<object class="wxComboBox" name="ID_CBVIDEOCODEC">
+																<value>H264</value>
+																<size>100,30</size>
+																<content>
+																	<item>H264</item>
+																	<item>H265</item>
+																	<item>AV1</item>
+																	<item>VP8</item>
+																	<item>VP9</item>
+																	<item>MPEG4</item>
+																	<item>MPEG2</item>
+																</content>
+															</object>
+														</object>
+													</object>
+												</object>
+												<!-- Video Profile -->
+												<object class="sizeritem">
+													<flag>wxEXPAND|wxALL</flag>
+													<border>5</border>
+													<object class="wxBoxSizer">
+														<orient>wxHORIZONTAL</orient>
+														<object class="sizeritem">
+															<flag>wxALIGN_CENTER_VERTICAL|wxALL</flag>
+															<border>5</border>
+															<size>100,-1</size>
+															<object class="wxStaticText" name="ID_STVIDEOPRESET">
+																<label>Profile :</label>
+															</object>
+														</object>
+														<object class="sizeritem">
+															<flag>wxEXPAND|wxALL</flag>
+															<border>5</border>
+															<option>1</option>
+															<object class="wxComboBox" name="ID_CBVIDEOPROFILE">
+																<value>main</value>
+																<size>100,30</size>
+																<content>
+																	<item>baseline</item>
+																	<item>main</item>
+																	<item>high</item>
+																</content>
+															</object>
+														</object>
+													</object>
+												</object>
+												<!-- Bit Rate and Preset -->
+												<object class="sizeritem">
+													<flag>wxEXPAND|wxALL</flag>
+													<border>5</border>
+													<object class="wxBoxSizer">
+														<orient>wxHORIZONTAL</orient>
+														<!-- Bit Rate RadioBox -->
+														<object class="sizeritem">
+															<flag>wxEXPAND|wxALL</flag>
+															<border>5</border>
+															<option>1</option>
+															<object class="wxRadioBox" name="ID_RBQUALITY">
+																<label>Bit Rate</label>
+																<style>wxRA_SPECIFY_COLS</style>
+																<content>
+																	<item>Constant</item>
+																	<item>Variable</item>
+																</content>
+																<default>-1</default>
+															</object>
+														</object>
+														<!-- Preset -->
+														<object class="sizeritem">
+															<flag>wxEXPAND|wxALL</flag>
+															<border>5</border>
+															<option>1</option>
+															<object class="wxBoxSizer">
+																<orient>wxVERTICAL</orient>
+																<object class="sizeritem">
+																	<flag>wxALL</flag>
+																	<border>5</border>
+																	<object class="wxStaticText">
+																		<label>Preset :</label>
+																	</object>
+																</object>
+																<object class="sizeritem">
+																	<flag>wxEXPAND|wxALL</flag>
+																	<border>5</border>
+																	<object class="wxComboBox" name="ID_CBVIDEOPRESET">
+																		<value>Medium</value>
+																		<size>100,30</size>
+																		<content>
+																			<item>VeryFast</item>
+																			<item>Faster</item>
+																			<item>Fast</item>
+																			<item>Medium</item>
+																			<item>Slow</item>
+																			<item>Slower</item>
+																			<item>VerySlow</item>
+																		</content>
+																	</object>
+																</object>
+															</object>
+														</object>
+													</object>
+												</object>
+												<!-- Quality Slider -->
+												<object class="sizeritem">
+													<flag>wxEXPAND|wxALL</flag>
+													<border>5</border>
+													<object class="wxBoxSizer">
+														<orient>wxVERTICAL</orient>
+														<object class="sizeritem">
+															<flag>wxEXPAND|wxALL</flag>
+															<border>5</border>
+															<object class="wxBoxSizer">
+																<orient>wxHORIZONTAL</orient>
+																<object class="sizeritem">
+																	<flag>wxALIGN_CENTER_VERTICAL|wxALL</flag>
+																	<border>5</border>
+																	<object class="wxCheckBox" name="ID_CKVIDEOQUALITY">
+																		<checked>1</checked>
+																	</object>
+																</object>
+																<object class="sizeritem">
+																	<flag>wxALIGN_CENTER_VERTICAL|wxALL</flag>
+																	<border>5</border>
+																	<object class="wxStaticText">
+																		<label>Quality :</label>
+																	</object>
+																</object>
+															</object>
+														</object>
+														<object class="sizeritem">
+															<flag>wxEXPAND|wxALL</flag>
+															<border>5</border>
+															<object class="wxBoxSizer">
+																<orient>wxHORIZONTAL</orient>
+																<object class="sizeritem">
+																	<flag>wxALIGN_CENTER_VERTICAL|wxALL</flag>
+																	<border>5</border>
+																	<object class="wxStaticText">
+																		<label>High</label>
+																	</object>
+																</object>
+																<object class="sizeritem">
+																	<flag>wxEXPAND|wxALL</flag>
+																	<border>5</border>
+																	<option>1</option>
+																	<object class="wxSlider" name="ID_SLCOMPRESSIONQUALITY">
+																		<max>51</max>
+																		<size>200,-1</size>
+																	</object>
+																</object>
+																<object class="sizeritem">
+																	<flag>wxALIGN_CENTER_VERTICAL|wxALL</flag>
+																	<border>5</border>
+																	<object class="wxStaticText">
+																		<label>Low</label>
+																	</object>
+																</object>
+															</object>
+														</object>
+													</object>
+												</object>
+												<!-- BitRate -->
+												<object class="sizeritem">
+													<flag>wxEXPAND|wxALL</flag>
+													<border>5</border>
+													<object class="wxBoxSizer">
+														<orient>wxHORIZONTAL</orient>
+														<object class="sizeritem">
+															<flag>wxALIGN_CENTER_VERTICAL|wxALL</flag>
+															<border>5</border>
+															<object class="wxCheckBox" name="ID_CKVIDEOBITRATE">
+																<label>BitRate (kbps) :</label>
+															</object>
+														</object>
+														<object class="sizeritem">
+															<flag>wxEXPAND|wxALL</flag>
+															<border>5</border>
+															<option>1</option>
+															<object class="wxTextCtrl" name="ID_TXTBITRATE">
+																<value>1500</value>
+																<size>100,20</size>
+															</object>
+														</object>
+													</object>
+												</object>
+											</object>
+										</object>
+										<object class="sizeritem">
+											<flag>wxEXPAND</flag>
+											<object class="wxBoxSizer">
+												<orient>wxVERTICAL</orient>
+											</object>
+										</object>
+									</object>
+								</object>
+							</object>
+							<!-- Page 2: Compression Audio Option -->
+							<object class="notebookpage">
+								<label>Compression Audio Option</label>
+								<object class="wxPanel" name="page_2">
+									<object class="wxBoxSizer">
+										<orient>wxVERTICAL</orient>
+										<!-- Audio Conversion RadioBox -->
+										<object class="sizeritem">
+											<flag>wxEXPAND|wxALL</flag>
+											<border>5</border>
+											<object class="wxRadioBox" name="ID_RBAUDIOCOMPRESSION">
+												<label>Audio Conversion</label>
+        										<style>wxRA_SPECIFY_COLS</style>
+        										<content>
+            										<item>Conversion</item>
+            										<item>Direct Copy</item>
+        										</content>
+        										<dimension>2</dimension>
+		 									   <size>-1,60</size>
+											</object>
+										</object>
+										<!-- Audio Option Group -->
+										<object class="sizeritem">
+											<flag>wxEXPAND|wxALL</flag>
+											<border>5</border>
+											<object class="wxStaticBoxSizer">
+												<label>Audio Option</label>
+												<orient>wxVERTICAL</orient>
+												<!-- Audio Codec -->
+												<object class="sizeritem">
+													<flag>wxEXPAND|wxALL</flag>
+													<border>5</border>
+													<object class="wxBoxSizer">
+														<orient>wxHORIZONTAL</orient>
+														<object class="sizeritem">
+															<flag>wxALIGN_CENTER_VERTICAL|wxALL</flag>
+															<border>5</border>
+															<size>100,-1</size>
+															<object class="wxStaticText" name="ID_STAUDIOCODEC">
+																<label>Audio Codec :</label>
+															</object>
+														</object>
+														<object class="sizeritem">
+															<flag>wxEXPAND|wxALL</flag>
+															<border>5</border>
+															<option>1</option>
+															<object class="wxComboBox" name="ID_CBAUDIOCODEC">
+																<value>AAC</value>
+																<size>100,30</size>
+																<content>
+																	<item>AAC</item>
+																	<item>MP3</item>
+																	<item>VORBIS</item>
+																</content>
+															</object>
+														</object>
+													</object>
+												</object>
+												<!-- Audio Quality -->
+												<object class="sizeritem">
+													<flag>wxEXPAND|wxALL</flag>
+													<border>5</border>
+													<object class="wxBoxSizer">
+														<orient>wxHORIZONTAL</orient>
+														<object class="sizeritem">
+															<flag>wxALIGN_CENTER_VERTICAL|wxALL</flag>
+															<border>5</border>
+															<object class="wxCheckBox" name="ID_CKAUDIOQUALITY">
+																<label>Audio Quality :</label>
+															</object>
+														</object>
+														<object class="sizeritem">
+															<flag>wxEXPAND|wxALL</flag>
+															<border>5</border>
+															<option>1</option>
+															<object class="wxComboBox" name="ID_CBAUDIOQUALITY">
+																<value>5</value>
+																<size>100,30</size>
+																<content>
+																	<item>0</item>
+																	<item>1</item>
+																	<item>2</item>
+																	<item>3</item>
+																	<item>4</item>
+																	<item>5</item>
+																	<item>6</item>
+																	<item>7</item>
+																	<item>8</item>
+																	<item>9</item>
+																	<item>10</item>
+																</content>
+															</object>
+														</object>
+													</object>
+												</object>
+												<!-- Audio Bitrate -->
+												<object class="sizeritem">
+													<flag>wxEXPAND|wxALL</flag>
+													<border>5</border>
+													<object class="wxBoxSizer">
+														<orient>wxHORIZONTAL</orient>
+														<object class="sizeritem">
+															<flag>wxALIGN_CENTER_VERTICAL|wxALL</flag>
+															<border>5</border>
+															<object class="wxCheckBox" name="ID_CKAUDIOBITRATE">
+																<label>Audio Bitrate :</label>
+															</object>
+														</object>
+														<object class="sizeritem">
+															<flag>wxEXPAND|wxALL</flag>
+															<border>5</border>
+															<option>1</option>
+															<object class="wxComboBox" name="ID_CBAUDIOBITRATE">
+																<value>128</value>
+																<size>100,30</size>
+																<content>
+																	<item>32</item>
+																	<item>40</item>
+																	<item>48</item>
+																	<item>56</item>
+																	<item>64</item>
+																	<item>80</item>
+																	<item>96</item>
+																	<item>112</item>
+																	<item>128</item>
+																	<item>160</item>
+																	<item>192</item>
+																	<item>224</item>
+																	<item>256</item>
+																	<item>320</item>
+																</content>
+															</object>
+														</object>
+													</object>
+												</object>
+											</object>
+										</object>
+										<object class="sizeritem">
+											<flag>wxEXPAND</flag>
+											<object class="wxBoxSizer">
+												<orient>wxVERTICAL</orient>
+											</object>
+										</object>
+									</object>
+								</object>
+							</object>
+							<!-- Page 3: Position -->
+							<!-- Page 3: Position -->
+							<object class="notebookpage">
+								<label>Position</label>
+								<object class="wxPanel" name="page_3">
+									<object class="wxBoxSizer">
+										<orient>wxVERTICAL</orient>
+										<!-- Video Bitmap -->
+										<object class="sizeritem">
+											<flag>wxEXPAND|wxALL</flag>
+											<border>5</border>
+											<option>1</option>
+											<object class="wxStaticBitmap" name="ID_BITMAPVIDEO">
+												<size>320,240</size>
+											</object>
+										</object>
+										<!-- Video Slider -->
+										<object class="sizeritem">
+											<flag>wxEXPAND|wxALL</flag>
+											<border>5</border>
+											<object class="wxSlider" name="ID_SLVIDEO">
+												<max>51</max>
+												<size>300,-1</size>
+											</object>
+										</object>
+										<!-- Start Time -->
+										<object class="sizeritem">
+											<flag>wxEXPAND|wxALL</flag>
+											<border>5</border>
+											<object class="wxBoxSizer">
+												<orient>wxHORIZONTAL</orient>
+												<object class="sizeritem">
+													<flag>wxALIGN_CENTER_VERTICAL|wxALL</flag>
+													<border>5</border>
+													<object class="wxStaticText" name="ID_STLABELSTARTMOVIE">
+														<label>From :</label>
+													</object>
+												</object>
+												<object class="sizeritem">
+													<flag>wxALIGN_CENTER_VERTICAL|wxALL</flag>
+													<border>5</border>
+													<object class="wxTextCtrl" name="ID_TXTSTARTMOVIE">
+														<value>00:00:00</value>
+														<size>80,-1</size>
+														<style>wxTE_CENTRE</style>
+													</object>
+												</object>
+												<object class="sizeritem">
+													<flag>wxALIGN_CENTER_VERTICAL</flag>
+													<object class="wxSpinButton" name="ID_SPINSTARTMOVIE">
+														<style>wxSP_VERTICAL|wxSP_ARROW_KEYS</style>
+														<range>0,86400</range>
+													</object>
+												</object>
+											</object>
+										</object>
+										<!-- End Time -->
+										<object class="sizeritem">
+											<flag>wxEXPAND|wxALL</flag>
+											<border>5</border>
+											<object class="wxBoxSizer">
+												<orient>wxHORIZONTAL</orient>
+												<object class="sizeritem">
+													<flag>wxALIGN_CENTER_VERTICAL|wxALL</flag>
+													<border>5</border>
+													<object class="wxStaticText" name="ID_STLABELENDMOVIE">
+														<label>To :</label>
+													</object>
+												</object>
+												<object class="sizeritem">
+													<flag>wxALIGN_CENTER_VERTICAL|wxALL</flag>
+													<border>5</border>
+													<object class="wxTextCtrl" name="ID_TXTENDMOVIE">
+														<value>00:00:00</value>
+														<size>80,-1</size>
+														<style>wxTE_CENTRE</style>
+													</object>
+												</object>
+												<object class="sizeritem">
+													<flag>wxALIGN_CENTER_VERTICAL</flag>
+													<object class="wxSpinButton" name="ID_SPINENDMOVIE">
+														<style>wxSP_VERTICAL|wxSP_ARROW_KEYS</style>
+														<range>0,86400</range>
+													</object>
+												</object>
+											</object>
+										</object>
+										<object class="sizeritem">
+											<flag>wxEXPAND</flag>
+											<object class="wxBoxSizer">
+												<orient>wxVERTICAL</orient>
+											</object>
+										</object>
+									</object>
+								</object>
+							</object>
+							<!-- Page 4: Filter Effect -->
+							<object class="notebookpage">
+								<label>Filter Effect</label>
+								<object class="wxPanel" name="page_4">
+									<object class="wxBoxSizer">
+										<orient>wxVERTICAL</orient>
+										<!-- Enable Filter -->
+										<object class="sizeritem">
+											<flag>wxEXPAND|wxALL</flag>
+											<border>5</border>
+											<object class="wxBoxSizer">
+												<orient>wxHORIZONTAL</orient>
+												<object class="sizeritem">
+													<flag>wxALIGN_CENTER_VERTICAL|wxALL</flag>
+													<border>5</border>
+													<object class="wxCheckBox" name="ID_CKENABLEFILTER">
+													</object>
+												</object>
+												<object class="sizeritem">
+													<flag>wxALIGN_CENTER_VERTICAL|wxALL</flag>
+													<border>5</border>
+													<object class="wxStaticText" name="ID_STENABLEFILTER">
+														<label>Enable Filter</label>
+													</object>
+												</object>
+											</object>
+										</object>
+										<!-- Color Filter Group -->
+										<object class="sizeritem">
+											<flag>wxEXPAND|wxALL</flag>
+											<border>5</border>
+											<object class="wxStaticBoxSizer">
+												<label>Color Filter</label>
+												<orient>wxVERTICAL</orient>
+												<!-- Row 1: Checkboxes -->
+												<object class="sizeritem">
+													<flag>wxEXPAND|wxALL</flag>
+													<border>5</border>
+													<object class="wxBoxSizer">
+														<orient>wxHORIZONTAL</orient>
+														<object class="sizeritem">
+															<flag>wxALL</flag>
+															<border>5</border>
+															<object class="wxCheckBox" name="ID_CKGRAYFILTER">
+																<label>Gray Filter</label>
+															</object>
+														</object>
+														<object class="sizeritem">
+															<flag>wxALL</flag>
+															<border>5</border>
+															<object class="wxCheckBox" name="ID_CKSEPIAFILTER">
+																<label>Sepia Filter</label>
+															</object>
+														</object>
+														<object class="sizeritem">
+															<flag>wxALL</flag>
+															<border>5</border>
+															<object class="wxCheckBox" name="ID_CKCOLORISATIONFILTER">
+																<label>Colorization Filter</label>
+															</object>
+														</object>
+													</object>
+												</object>
+												<!-- Row 2: More Checkboxes -->
+												<object class="sizeritem">
+													<flag>wxEXPAND|wxALL</flag>
+													<border>5</border>
+													<object class="wxBoxSizer">
+														<orient>wxHORIZONTAL</orient>
+														<object class="sizeritem">
+															<flag>wxALL</flag>
+															<border>5</border>
+															<object class="wxCheckBox" name="ID_CKDCOLORBOOSTFILTER">
+																<label>Color Boost</label>
+															</object>
+														</object>
+														<object class="sizeritem">
+															<flag>wxALL</flag>
+															<border>5</border>
+															<object class="wxCheckBox" name="ID_CKNOISEFILTER">
+																<label>Noise Filter</label>
+															</object>
+														</object>
+														<object class="sizeritem">
+															<flag>wxALL</flag>
+															<border>5</border>
+															<object class="wxCheckBox" name="ID_CKRESTOREFILTER">
+																<label>Restore Filter</label>
+															</object>
+														</object>
+													</object>
+												</object>
+												<!-- Red Boost -->
+												<object class="sizeritem">
+													<flag>wxEXPAND|wxALL</flag>
+													<border>5</border>
+													<object class="wxBoxSizer">
+														<orient>wxHORIZONTAL</orient>
+														<object class="sizeritem">
+															<flag>wxALIGN_CENTER_VERTICAL|wxALL</flag>
+															<border>5</border>
+															<size>70,-1</size>
+															<object class="wxStaticText" name="ID_STREDBOOSTFILTER">
+																<label>Red :</label>
+															</object>
+														</object>
+														<object class="sizeritem">
+															<flag>wxEXPAND|wxALL</flag>
+															<border>5</border>
+															<option>1</option>
+															<object class="wxSlider" name="ID_SLREDBOOSTFILTER">
+																<max>255</max>
+																<min>-255</min>
+																<style>wxSL_MIN_MAX_LABELS</style>
+																<size>230,-1</size>
+															</object>
+														</object>
+													</object>
+												</object>
+												<!-- Green Boost -->
+												<object class="sizeritem">
+													<flag>wxEXPAND|wxALL</flag>
+													<border>5</border>
+													<object class="wxBoxSizer">
+														<orient>wxHORIZONTAL</orient>
+														<object class="sizeritem">
+															<flag>wxALIGN_CENTER_VERTICAL|wxALL</flag>
+															<border>5</border>
+															<size>70,-1</size>
+															<object class="wxStaticText" name="ID_STGREENBOOSTFILTER">
+																<label>Green :</label>
+															</object>
+														</object>
+														<object class="sizeritem">
+															<flag>wxEXPAND|wxALL</flag>
+															<border>5</border>
+															<option>1</option>
+															<object class="wxSlider" name="ID_SLGREENBOOSTFILTER">
+																<max>255</max>
+																<min>-255</min>
+																<style>wxSL_MIN_MAX_LABELS</style>
+																<size>230,-1</size>
+															</object>
+														</object>
+													</object>
+												</object>
+												<!-- Blue Boost -->
+												<object class="sizeritem">
+													<flag>wxEXPAND|wxALL</flag>
+													<border>5</border>
+													<object class="wxBoxSizer">
+														<orient>wxHORIZONTAL</orient>
+														<object class="sizeritem">
+															<flag>wxALIGN_CENTER_VERTICAL|wxALL</flag>
+															<border>5</border>
+															<size>70,-1</size>
+															<object class="wxStaticText" name="ID_STBLUEBOOSTFILTER">
+																<label>Blue :</label>
+															</object>
+														</object>
+														<object class="sizeritem">
+															<flag>wxEXPAND|wxALL</flag>
+															<border>5</border>
+															<option>1</option>
+															<object class="wxSlider" name="ID_SLBLUEBOOSTFILTER">
+																<max>255</max>
+																<min>-255</min>
+																<style>wxSL_MIN_MAX_LABELS</style>
+																<size>230,-1</size>
+															</object>
+														</object>
+													</object>
+												</object>
+											</object>
+										</object>
+										<!-- Contrast and Lightness Group -->
+										<object class="sizeritem">
+											<flag>wxEXPAND|wxALL</flag>
+											<border>5</border>
+											<object class="wxStaticBoxSizer">
+												<label>Contrast and Lightness</label>
+												<orient>wxVERTICAL</orient>
+												<!-- Enable -->
+												<object class="sizeritem">
+													<flag>wxEXPAND|wxALL</flag>
+													<border>5</border>
+													<object class="wxCheckBox" name="ID_CKCONTRASTANDLIGHTFILTER">
+														<label>Enable</label>
+													</object>
+												</object>
+												<!-- Contrast -->
+												<object class="sizeritem">
+													<flag>wxEXPAND|wxALL</flag>
+													<border>5</border>
+													<object class="wxBoxSizer">
+														<orient>wxHORIZONTAL</orient>
+														<object class="sizeritem">
+															<flag>wxALIGN_CENTER_VERTICAL|wxALL</flag>
+															<border>5</border>
+															<size>70,-1</size>
+															<object class="wxStaticText" name="ID_STCONTRASTFILTER">
+																<label>Contrast :</label>
+															</object>
+														</object>
+														<object class="sizeritem">
+															<flag>wxEXPAND|wxALL</flag>
+															<border>5</border>
+															<option>1</option>
+															<object class="wxSlider" name="ID_SLCONTRASTFILTER">
+																<max>100</max>
+																<min>-100</min>
+																<style>wxSL_MIN_MAX_LABELS</style>
+																<size>230,-1</size>
+															</object>
+														</object>
+													</object>
+												</object>
+												<!-- Lightness -->
+												<object class="sizeritem">
+													<flag>wxEXPAND|wxALL</flag>
+													<border>5</border>
+													<object class="wxBoxSizer">
+														<orient>wxHORIZONTAL</orient>
+														<object class="sizeritem">
+															<flag>wxALIGN_CENTER_VERTICAL|wxALL</flag>
+															<border>5</border>
+															<size>70,-1</size>
+															<object class="wxStaticText" name="ID_STLIGHTFILTER">
+																<label>Lightness :</label>
+															</object>
+														</object>
+														<object class="sizeritem">
+															<flag>wxEXPAND|wxALL</flag>
+															<border>5</border>
+															<option>1</option>
+															<object class="wxSlider" name="ID_SLLIGHTFILTER">
+																<max>100</max>
+																<min>-100</min>
+																<style>wxSL_MIN_MAX_LABELS</style>
+																<size>230,-1</size>
+															</object>
+														</object>
+													</object>
+												</object>
+											</object>
+										</object>
+										<!-- Convolution Filter Group -->
+										<object class="sizeritem">
+											<flag>wxEXPAND|wxALL</flag>
+											<border>5</border>
+											<object class="wxStaticBoxSizer">
+												<label>Convolution Filter</label>
+												<orient>wxVERTICAL</orient>
+												<!-- Sharpen -->
+												<object class="sizeritem">
+													<flag>wxEXPAND|wxALL</flag>
+													<border>5</border>
+													<object class="wxBoxSizer">
+														<orient>wxHORIZONTAL</orient>
+														<object class="sizeritem">
+															<flag>wxALIGN_CENTER_VERTICAL|wxALL</flag>
+															<border>5</border>
+															<object class="wxCheckBox" name="ID_CKSHARPENFILTER">
+																<label>Sharpen :</label>
+															</object>
+														</object>
+														<object class="sizeritem">
+															<flag>wxEXPAND|wxALL</flag>
+															<border>5</border>
+															<option>1</option>
+															<object class="wxSlider" name="ID_SLSHARPENFILTER">
+																<max>100</max>
+																<style>wxSL_MIN_MAX_LABELS</style>
+																<size>230,-1</size>
+															</object>
+														</object>
+													</object>
+												</object>
+												<!-- Denoise -->
+												<object class="sizeritem">
+													<flag>wxEXPAND|wxALL</flag>
+													<border>5</border>
+													<object class="wxBoxSizer">
+														<orient>wxHORIZONTAL</orient>
+														<object class="sizeritem">
+															<flag>wxALIGN_CENTER_VERTICAL|wxALL</flag>
+															<border>5</border>
+															<object class="wxCheckBox" name="ID_CKDENOISEFILTER">
+																<label>Denoise :</label>
+															</object>
+														</object>
+														<object class="sizeritem">
+															<flag>wxEXPAND|wxALL</flag>
+															<border>5</border>
+															<option>1</option>
+															<object class="wxSlider" name="ID_SLDENOISEFILTER">
+																<max>255</max>
+																<style>wxSL_MIN_MAX_LABELS</style>
+																<size>230,-1</size>
+															</object>
+														</object>
+													</object>
+												</object>
+											</object>
+										</object>
+										<!-- Video Filter Group -->
+										<object class="sizeritem">
+											<flag>wxEXPAND|wxALL</flag>
+											<border>5</border>
+											<object class="wxStaticBoxSizer">
+												<label>Video Filter</label>
+												<orient>wxVERTICAL</orient>
+												<!-- Video Stabilization -->
+												<object class="sizeritem">
+													<flag>wxEXPAND|wxALL</flag>
+													<border>5</border>
+													<object class="wxBoxSizer">
+														<orient>wxHORIZONTAL</orient>
+														<object class="sizeritem">
+															<flag>wxALIGN_CENTER_VERTICAL|wxALL</flag>
+															<border>5</border>
+															<object class="wxCheckBox" name="ID_CKVIDEOSTABILIZATION">
+																<label>Video Stabilization</label>
+															</object>
+														</object>
+														<object class="sizeritem">
+															<flag>wxALIGN_CENTER_VERTICAL|wxALL</flag>
+															<border>5</border>
+															<object class="wxStaticText">
+																<label>Buffer :</label>
+															</object>
+														</object>
+														<object class="sizeritem">
+															<flag>wxEXPAND|wxALL</flag>
+															<border>5</border>
+															<option>1</option>
+															<object class="wxSpinCtrl" name="ID_CKVIDEOSTABILIZATIONBUFFER">
+																<value>2</value>
+																<min>2</min>
+																<max>100</max>
+																<size>80,-1</size>
+															</object>
+														</object>
+													</object>
+												</object>
+												<!-- Auto Contrast -->
+												<object class="sizeritem">
+													<flag>wxEXPAND|wxALL</flag>
+													<border>5</border>
+													<object class="wxCheckBox" name="ID_CKVIDEOAUTOCONTRAST">
+														<label>Auto Contrast</label>
+													</object>
+												</object>
+											</object>
+										</object>
+									</object>
+								</object>
+							</object>
+						</object>
+					</object>
+					<!-- OK and Cancel Buttons -->
+					<object class="sizeritem">
+						<flag>wxALIGN_CENTER|wxALL</flag>
+						<border>5</border>
+						<object class="wxBoxSizer">
+							<orient>wxHORIZONTAL</orient>
+							<object class="sizeritem">
+								<flag>wxALIGN_CENTER|wxALL</flag>
+								<border>5</border>
+								<object class="wxButton" name="ID_BTOK">
+									<label>OK</label>
+								</object>
+							</object>
+							<object class="sizeritem">
+								<flag>wxALIGN_CENTER|wxALL</flag>
+								<border>5</border>
+								<object class="wxButton" name="ID_BTCANCEL">
+									<label>Cancel</label>
+								</object>
+							</object>
+						</object>
+					</object>
+				</object>
+			</object>
+			<object class="sizeritem">
+				<size>640,500</size>
+				<border>1</border>
+				<option>1</option>
+				<object class="wxPanel" name="IDPANEL">
+					<object class="wxStaticBox" name="ID_STPREVIEWPICTURE">
+							<label>Preview Picture</label>
+							<pos>5,5</pos>
+							<size>640,500</size>
+						</object>
+					<object class="wxStaticBitmap" name="ID_BITMAPVIDEOPREVIEW">
+						<pos>20,20</pos>
+						<size>620,470</size>
+					</object>
+					<object class="wxButton" name="ID_BTPREVIEW">
+						<label>Refresh</label>
+						<pos>300,510</pos>
+					</object>
+				</object>
+			</object>
+		</object>
+	</object>
+</resource>

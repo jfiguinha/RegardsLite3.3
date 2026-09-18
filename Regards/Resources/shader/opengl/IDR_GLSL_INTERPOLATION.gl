@@ -1,0 +1,246 @@
+//
+// To Optimize : https://zz85.github.io/glsl-optimizer/
+//
+#version 330 core
+
+uniform sampler2D ImageTexture;
+uniform float widthTex;
+uniform float heightTex;
+uniform int widthIn;
+uniform int heightIn;
+uniform int widthOut;
+uniform int heightOut;
+uniform int flipH;
+uniform int flipV;
+uniform int angle;
+uniform int left;
+uniform int top;
+uniform int interpolation;
+
+in vec2 TexCoord;
+out vec4 FragColor;
+
+// Constantes globales pr-calcules
+const float FILTER_PI  = 3.1415926535;
+const float FILTER_2PI = 6.2831853070;
+const float FILTER_4PI = 12.5663706140;
+const float INV_SQRT_OF_2PI = 0.3989422804;
+
+// Variable de travail partage
+vec2 texelSize;
+
+// chantillonnage scuris et optimis
+vec4 TextureValue(float posX, float posY, float xDiff, float yDiff)
+{
+    float pixelX = posX * widthTex + xDiff;
+    float pixelY = posY * heightTex + yDiff;
+
+    if (pixelX >= 0.0 && pixelX < widthTex && pixelY >= 0.0 && pixelY < heightTex)
+    {
+        return texture(ImageTexture, vec2(posX, posY) + texelSize * vec2(xDiff, yDiff));
+    }
+    return vec4(0.0);
+}
+
+// Slection de Kernel simplifie (base sur la valeur absolue)
+float KernelFilter_selection(float x, int type)
+{
+    float ax = abs(x); 
+
+    if (type == 1) { // BboxFilter
+        return (ax <= 0.5) ? 1.0 : 0.0;
+    }
+    if (type == 2) { // HermiteFilter
+        if (ax >= 1.0) return 0.0;
+        return (2.0 * ax - 3.0) * ax * ax + 1.0;
+    }
+    if (type == 3) { // HanningFilter
+        return (ax > 1.0) ? 0.0 : (0.54 + 0.46 * cos(FILTER_PI * ax));
+    }
+    if (type == 4) { // CatromFilter
+        if (ax >= 2.0) return 0.0;
+        if (ax < 1.0)  return 0.5 * (2.0 + ax * ax * (-5.0 + 3.0 * ax));
+        return 0.5 * (4.0 + ax * (-8.0 + ax * (5.0 - ax)));
+    }
+    if (type == 5) { // MitchellFilter
+        if (ax >= 2.0) return 0.0;
+        float P0 = 16.0 / 18.0;
+        float P2 = -30.0 / 18.0;
+        float P3 = 12.0 / 18.0;
+        float Q0 = 32.0 / 18.0;
+        float Q1 = -60.0 / 18.0;
+        float Q2 = 36.0 / 18.0;
+        float Q3 = -4.0 / 18.0;
+
+        if (ax < 1.0) return P0 + ax * ax * (P2 + ax * P3);
+        return Q0 + ax * (Q1 + ax * (Q2 + ax * Q3));
+    }
+    if (type == 6 || type == 11) { // Triangle / Bilinear Kernel
+        return (ax < 1.0) ? (1.0 - ax) : 0.0;
+    }
+    if (type == 7) { // QuadraticFilter
+        if (ax >= 1.5) return 0.0;
+        if (ax < 0.5)  return 0.75 - ax * ax;
+        float v = ax - 1.5;
+        return 0.5 * v * v;
+    }
+    if (type == 8) { // BlackmanFilter
+        return (ax > 1.0) ? 0.0 : (0.42 + 0.5 * cos(FILTER_2PI * ax / 2.0) + 0.08 * cos(FILTER_4PI * ax / 2.0));
+    }
+    if (type == 9) { // HammingFilter
+        if (ax > 1.0) return 0.0;
+        float dWindow = 0.54 + 0.46 * cos(FILTER_2PI * ax);
+        float dSinc = (ax < 0.00001) ? 1.0 : (sin(FILTER_PI * ax) / (FILTER_PI * ax));
+        return dWindow * dSinc;
+    }
+    if (type == 10) { // GaussianFilter
+        return (ax > 1.25) ? 0.0 : (exp(-ax * ax * 0.5) * INV_SQRT_OF_2PI);
+    }
+    
+    // Default: CubicFilter
+    if (ax >= 2.0) return 0.0;
+    if (ax < 1.0)  return (4.0 + ax * ax * (-6.0 + 3.0 * ax)) / 6.0;
+    float v = 2.0 - ax;
+    return (v * v * v) / 6.0;
+}
+
+vec4 FilterHorizontal(float x, float y, float diff, int type)
+{
+    float pixelX = x * widthTex;
+    float realA = fract(pixelX);
+
+    float fx1 = KernelFilter_selection(-1.0 - realA, type);
+    float fx2 = KernelFilter_selection(-realA, type);
+    float fx3 = KernelFilter_selection(1.0 - realA, type);
+
+    float fxSum = fx1 + fx2 + fx3;
+    float fxInv = 1.0 / max(fxSum, 0.000001);
+
+    return (TextureValue(x, y, -1.0, diff) * fx1 +
+            TextureValue(x, y, 0.0, diff) * fx2 +
+            TextureValue(x, y, 1.0, diff) * fx3) * fxInv;
+}
+
+vec4 FilterVertical(vec4 row1, vec4 row2, vec4 row3, float y, int type)
+{
+    float pixelY = y * heightTex;
+    float realB = fract(pixelY);
+
+    float fy1 = KernelFilter_selection(1.0 + realB, type);
+    float fy2 = KernelFilter_selection(realB, type);
+    float fy3 = KernelFilter_selection(-(1.0 - realB), type);
+
+    float fySum = fy1 + fy2 + fy3;
+    float fyInv = 1.0 / max(fySum, 0.000001);
+
+    return (row1 * fy1 + row2 * fy2 + row3 * fy3) * fyInv;
+}
+
+vec4 KernelExecution(float x, float y, int type)
+{
+    vec4 row1 = FilterHorizontal(x, y, -1.0, type);
+    vec4 row2 = FilterHorizontal(x, y, 0.0, type);
+    vec4 row3 = FilterHorizontal(x, y, 1.0, type);
+    return FilterVertical(row1, row2, row3, y, type);
+}
+
+vec4 cubic(float v)
+{
+    vec4 n = vec4(1.0, 2.0, 3.0, 4.0) - v;
+    vec4 s = n * n * n;
+    float x = s.x;
+    float y = s.y - 4.0 * s.x;
+    float z = s.z - 4.0 * s.y + 6.0 * s.x;
+    float w = 6.0 - x - y - z;
+    return vec4(x, y, z, w) * (1.0 / 6.0);
+}
+
+vec4 textureBicubic(vec2 texCoord_i)
+{
+    vec2 fxy = fract(texCoord_i);
+    vec4 xcubic = cubic(fxy.x);
+    vec4 ycubic = cubic(fxy.y);
+
+    vec4 s = vec4(xcubic.x + xcubic.z, xcubic.y + xcubic.w, ycubic.x + ycubic.z, ycubic.y + ycubic.w);
+    float sx = s.x / max(s.x + s.y, 0.000001);
+    float sy = s.z / max(s.z + s.w, 0.000001);
+
+    return mix(
+        mix(TextureValue(texCoord_i.x, texCoord_i.y, 0.0, 1.0), TextureValue(texCoord_i.x, texCoord_i.y, 0.0, 0.0), sx),
+        mix(TextureValue(texCoord_i.x, texCoord_i.y, 1.0, 1.0), TextureValue(texCoord_i.x, texCoord_i.y, 1.0, 0.0), sx),
+        sy
+    );
+}
+
+vec4 tex2DBiLinear(vec2 texCoord_i)
+{
+    float a = fract(texCoord_i.x * widthTex);
+    float b = fract(texCoord_i.y * heightTex);
+
+    vec4 pInterp_q0 = mix(TextureValue(texCoord_i.x, texCoord_i.y, 0.0, 0.0), TextureValue(texCoord_i.x, texCoord_i.y, 1.0, 0.0), a);
+    vec4 pInterp_q1 = mix(TextureValue(texCoord_i.x, texCoord_i.y, 0.0, 1.0), TextureValue(texCoord_i.x, texCoord_i.y, 1.0, 1.0), a);
+
+    return mix(pInterp_q0, pInterp_q1, b);
+}
+
+void main()
+{
+    // Initialisation de la taille du texel
+    texelSize = vec2(1.0 / widthTex, 1.0 / heightTex);
+
+    float left_local = max(float(widthIn - widthOut) * 0.5, 0.0);
+    float top_local  = max(float(heightIn - heightOut) * 0.5, 0.0);
+
+    float xPixel = TexCoord.x * float(widthIn);
+    float yPixel = TexCoord.y * float(heightIn);
+
+    float fwidthOut  = float(widthOut);
+    float fheightOut = float(heightOut);
+
+    if (xPixel >= left_local && yPixel >= top_local &&
+        xPixel < float(widthIn) - left_local && yPixel < float(heightIn) - top_local)
+    {
+        float posX = (xPixel - left_local) + float(left);
+        float posY = (yPixel - top_local) + float(top);
+
+        // Transformation de l'angle
+        if (angle == 270) {
+            float tmp = posX; posX = posY; posY = fwidthOut - tmp - 1.0;
+        } else if (angle == 180) {
+            posX = fwidthOut - posX - 1.0;
+            posY = fheightOut - posY - 1.0;
+        } else if (angle == 90) {
+            float tmp = posX; posX = fheightOut - posY - 1.0; posY = tmp;
+        }
+
+        // Gestion du miroir (Flip)
+        if (angle == 90 || angle == 270) {
+            if (flipV == 1) posX = fheightOut - posX - 1.0;
+            if (flipH == 1) posY = fwidthOut - posY - 1.0;
+        } else {
+            if (flipH == 1) posX = fwidthOut - posX - 1.0;
+            if (flipV == 1) posY = fheightOut - posY - 1.0;
+        }
+
+        // Coordonnes de texture finales
+        vec2 uv_local = vec2(posX / fwidthOut, posY / fheightOut);
+        if (angle == 90 || angle == 270) {
+            uv_local = vec2(posX / fheightOut, posY / fwidthOut);
+        }
+
+        // Branchement de sortie propre
+        if (interpolation == 1) {
+            FragColor = tex2DBiLinear(uv_local);
+        } else if (interpolation >= 8) {
+            FragColor = KernelExecution(uv_local.x, uv_local.y, interpolation - 7);
+        } else if (interpolation >= 2) {
+            FragColor = textureBicubic(uv_local);
+        } else {
+            FragColor = TextureValue(uv_local.x, uv_local.y, 0.0, 0.0);
+        }
+    }
+    else
+    {
+        FragColor = vec4(0.0);
+    }
+}

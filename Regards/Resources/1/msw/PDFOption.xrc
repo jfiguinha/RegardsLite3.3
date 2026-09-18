@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<resource xmlns="http://www.wxwidgets.org/wxxrc">
+	<object class="wxDialog" name="PDFOption">
+		<title>Dialog</title>
+		<centered>1</centered>
+		<size>272,275</size>
+		<object class="wxBoxSizer">
+			<orient>wxVERTICAL</orient>
+			<object class="sizeritem">
+				<object class="wxRadioBox" name="ID_RBCOMPRESSION">
+					<label>PDF Compression Option</label>
+					<style>wxRA_SPECIFY_COLS</style>
+					<content>
+						<item>JPEG</item>
+						<item>TIFF</item>
+					</content>
+					<default>-1</default>
+				</object>
+				<flag>wxALL|wxEXPAND</flag>
+				<border>5</border>
+				<proportion>1</proportion>
+			</object>
+			<object class="sizeritem">
+				<object class="wxBoxSizer">
+					<orient>wxHORIZONTAL</orient>
+					<object class="sizeritem">
+						<object class="wxButton" name="ID_OK">
+							<label>OK</label>
+						</object>
+						<flag>wxALL</flag>
+						<border>5</border>
+						<proportion>0</proportion>
+					</object>
+					<object class="sizeritem">
+						<object class="wxButton" name="ID_CANCEL">
+							<label>Cancel</label>
+						</object>
+						<flag>wxALL</flag>
+						<border>5</border>
+						<proportion>0</proportion>
+					</object>
+				</object>
+				<flag>wxALL|wxEXPAND</flag>
+				<border>5</border>
+				<proportion>0</proportion>
+			</object>
+		</object>
+	</object>
+</resource>

@@ -1,0 +1,653 @@
+﻿#include "header.h"
+#include "OpenCLContext.h"
+
+#ifdef __APPLE__
+
+#include <OpenCL/opencl.h>
+#include <OpenCL/cl_ext.h>
+#include <OpenCL/cl_gl.h>
+#include <OpenCL/cl_gl_ext.h> // <- TRÈS IMPORTANT: contient la macro CGL_SHAREGROUP
+#include <OpenGL/OpenGL.h>
+
+// Sécurité si le SDK est incomplet
+#ifndef CL_CONTEXT_PROPERTY_USE_CGL_SHAREGROUP_APPLE
+#define CL_CONTEXT_PROPERTY_USE_CGL_SHAREGROUP_APPLE 0x10000000
+#endif
+
+
+#else
+#include <CL/cl.h>
+#include <CL/cl_gl.h>
+
+#endif
+
+
+#ifdef WIN32
+#include <epoxy/wgl.h>
+#endif
+
+#ifdef __WXGTK__
+#include <epoxy/glx.h>
+#if wxUSE_GLCANVAS_EGL == 1
+#include <EGL/egl.h>
+#include <EGL/eglext.h>
+#endif
+#endif
+#include <ncnn/gpu.h>
+#include <utility.h>
+#include <ParamInit.h>
+#include <RegardsConfigParam.h>
+#include "utility_opencl.h"
+#include <LibResource.h>
+#include <appcontext.h>
+extern AppContext application_context;
+extern ncnn::VulkanDevice* vkdev;
+
+#if defined (__APPLE__) || defined(MACOSX)
+static const char* CL_GL_SHARING_EXT = "cl_APPLE_gl_sharing";
+#else
+static const char* CL_GL_SHARING_EXT = "cl_khr_gl_sharing";
+#endif
+
+
+using namespace Regards::OpenCL;
+
+
+COpenCLContext::~COpenCLContext()
+{
+	if (commandQueue != nullptr)
+	{
+		clReleaseCommandQueue(commandQueue);
+		commandQueue = nullptr;
+	}
+}
+
+void COpenCLContext::Bind()
+{
+	if (!clExecCtx.empty())
+		clExecCtx.bind();
+}
+
+void COpenCLContext::AssociateToVulkan()
+{
+    if (!cv::ocl::haveOpenCL())
+        return;
+
+    constexpr const char* preferredGpu[] =
+    {
+        "nvidia",
+        "amd",
+        "intel",
+        "apple"
+    };
+
+    int selectedIndex = -1;
+    int selectedPriority = INT_MAX;
+
+    const int gpuCount = ncnn::get_gpu_count();
+
+    for (int i = 0; i < gpuCount; ++i)
+    {
+        const ncnn::GpuInfo& info =
+            ncnn::get_gpu_info(i);
+
+        std::string deviceName =
+            info.device_name();
+
+        std::transform(deviceName.begin(),
+                       deviceName.end(),
+                       deviceName.begin(),
+                       [](unsigned char c)
+                       {
+                           return std::tolower(c);
+                       });
+
+        for (int priority = 0;
+             priority < 4;
+             ++priority)
+        {
+            if (deviceName.find(preferredGpu[priority])
+                != std::string::npos)
+            {
+                if (priority < selectedPriority)
+                {
+                    selectedPriority = priority;
+                    selectedIndex = i;
+                }
+                break;
+            }
+        }
+    }
+
+    if (selectedIndex >= 0)
+    {
+		vkdev = ncnn::get_gpu_device(selectedIndex);
+    }
+}
+
+wxString COpenCLContext::GetDeviceInfo(
+    cl_device_id device,
+    cl_device_info param_name)
+{
+    size_t size = 0;
+
+    cl_int err =
+        clGetDeviceInfo(device,
+                        param_name,
+                        0,
+                        nullptr,
+                        &size);
+
+    if (err != CL_SUCCESS || size == 0)
+        return {};
+
+    std::vector<char> buffer(size);
+
+    err = clGetDeviceInfo(device,
+                          param_name,
+                          size,
+                          buffer.data(),
+                          nullptr);
+
+    if (err != CL_SUCCESS)
+        return {};
+
+    return wxString(buffer.data());
+}
+
+cv::ocl::Program COpenCLContext::GetProgram(const wxString& programName)
+{
+    std::lock_guard<std::mutex> lock(programMutex);
+
+    auto it = COpenCLContext::openclBinaryMapping.find(programName);
+
+    if (it != COpenCLContext::openclBinaryMapping.end())
+    {
+        return it->second;
+    }
+
+	wxString kernelSource = CLibResource::GetOpenCLUcharProgram(programName);
+
+	cv::ocl::ProgramSource programSource(kernelSource.c_str());
+
+    cv::ocl::Context context = clExecCtx.getContext();
+
+    cv::String errmsg;
+
+    auto [insertedIt, inserted] =
+        COpenCLContext::openclBinaryMapping.emplace(
+            programName,
+            context.getProg(programSource, application_context.buildOption, errmsg));
+
+    return insertedIt->second;
+}
+
+
+cl_device_id COpenCLContext::GetListOfDevice(cl_platform_id platform, cl_device_type device_type, int& found)
+{
+	found = -1;
+
+	cl_uint num_of_devices;
+
+	cl_int err = clGetDeviceIDs(
+		platform,
+		device_type,
+		0,
+		nullptr,
+		&num_of_devices
+	);
+
+	Error::CheckError(err);
+
+	vector<cl_device_id> devices(num_of_devices);
+
+	err = clGetDeviceIDs(
+		platform,
+		device_type,
+		num_of_devices,
+		&devices[0],
+		nullptr
+	);
+	Error::CheckError(err);
+
+	for (cl_uint i = 0; i < num_of_devices; ++i)
+	{
+		int supported = 0;
+		cl_device_type type;
+		clGetDeviceInfo(devices[i], CL_DEVICE_TYPE, sizeof(type), &type, nullptr);
+		wxString deviceName = GetDeviceInfo(devices[i], CL_DEVICE_NAME);
+		if (deviceName == "")
+			continue;
+
+		if (type == CL_DEVICE_TYPE_GPU)
+		{
+			wxString supportExt = GetDeviceInfo(devices[i], CL_DEVICE_EXTENSIONS);
+            supported = (supportExt.find(CL_GL_SHARING_EXT) != wxString::npos) ? 1 : 0;
+		}
+
+		if (!supported)
+			continue;
+
+		found = i;
+		//printf("Device found : %s \n", CConvertUtility::ConvertToStdString(deviceName));
+		break;
+	}
+
+	if (found == -1)
+		return nullptr;
+	return devices[found];
+}
+
+void COpenCLContext::initializeContextFromGL()
+{
+#if defined(__APPLE__) || defined(__MACOSX)
+
+    //printf("initializeContextFromGL 1\n");
+	cl_uint numPlatforms;
+	cl_int status = clGetPlatformIDs(0, NULL, &numPlatforms);
+	if (status != CL_SUCCESS)
+		CV_Error(cv::Error::OpenCLInitError, "OpenCL: Can't get number of platforms");
+	if (numPlatforms == 0)
+		CV_Error(cv::Error::OpenCLInitError, "OpenCL: No available platforms");
+
+	std::vector<cl_platform_id> platforms(numPlatforms);
+	status = clGetPlatformIDs(numPlatforms, &platforms[0], NULL);
+	if (status != CL_SUCCESS)
+		CV_Error(cv::Error::OpenCLInitError, "OpenCL: Can't get number of platforms");
+
+	// TODO Filter platforms by name from OPENCV_OPENCL_DEVICE
+   //  printf("initializeContextFromGL 2\n");
+	int found = -1;
+	cl_device_id device = NULL;
+	device = GetListOfDevice(platforms[0], CL_DEVICE_TYPE_GPU, found);
+
+	if (found < 0)
+		CV_Error(cv::Error::OpenCLInitError, "OpenCL: Can't create context for OpenGL interop");
+
+	cl_context context = NULL;
+
+	// get OpenGL share group
+	CGLContextObj cgl_current_context = CGLGetCurrentContext();
+	CGLShareGroupObj cgl_share_group = CGLGetShareGroup(cgl_current_context);
+    
+   //  printf("initializeContextFromGL 3\n");
+
+	cl_context_properties properties[] = {
+		CL_CONTEXT_PROPERTY_USE_CGL_SHAREGROUP_APPLE,
+		(cl_context_properties)cgl_share_group,
+		0
+	};
+	// create context
+	context = clCreateContext(properties, 1, &device, NULL, NULL, &status);
+	if (status != CL_SUCCESS)
+	{
+		clReleaseDevice(device);
+		CV_Error(cv::Error::OpenCLInitError, "OpenCL: Can't create context for OpenGL interop");
+	}
+
+    // printf("initializeContextFromGL 4\n");
+
+	cl_platform_id platform = platforms[0];
+	std::string platformName = cv::ocl::PlatformInfo(&platform).name();
+
+	clExecCtx = cv::ocl::OpenCLExecutionContext::create(platformName, platform, context, device);
+
+	cv::ocl::Device(cv::ocl::Device::fromHandle(device));
+
+	clReleaseDevice(device);
+	clReleaseContext(context);
+	clExecCtx.bind();
+
+    // printf("initializeContextFromGL 5\n");
+#else
+
+     //printf("initializeContextFromGL 1\n");
+    
+	cl_uint numPlatforms;
+	cl_int status = clGetPlatformIDs(0, NULL, &numPlatforms);
+	if (status != CL_SUCCESS)
+		CV_Error(cv::Error::OpenCLInitError, "OpenCL: Can't get number of platforms");
+	if (numPlatforms == 0)
+		CV_Error(cv::Error::OpenCLInitError, "OpenCL: No available platforms");
+
+	std::vector<cl_platform_id> platforms(numPlatforms);
+	status = clGetPlatformIDs(numPlatforms, &platforms[0], NULL);
+	if (status != CL_SUCCESS)
+		CV_Error(cv::Error::OpenCLInitError, "OpenCL: Can't get number of platforms");
+
+	// TODO Filter platforms by name from OPENCV_OPENCL_DEVICE
+
+	int found = -1;
+	cl_device_id device = NULL;
+	cl_context context = NULL;
+
+	vector<int> platformCompatible;
+
+	for (int i = 0; i < (int)numPlatforms; i++)
+	{
+		// query platform extension: presence of "cl_khr_gl_sharing" extension is required
+		{
+			cv::AutoBuffer<char> extensionStr;
+
+			size_t extensionSize;
+			status = clGetPlatformInfo(platforms[i], CL_PLATFORM_EXTENSIONS, 0, NULL, &extensionSize);
+			if (status == CL_SUCCESS)
+			{
+				extensionStr.allocate(extensionSize + 1);
+				status = clGetPlatformInfo(platforms[i], CL_PLATFORM_EXTENSIONS, extensionSize,
+					(char*)extensionStr.data(), NULL);
+			}
+			if (status != CL_SUCCESS)
+				CV_Error(cv::Error::OpenCLInitError, "OpenCL: Can't get platform extension string");
+
+			if (!strstr((const char*)extensionStr.data(), CL_GL_SHARING_EXT))
+				continue;
+		}
+
+		clGetGLContextInfoKHR_fn clGetGLContextInfoKHR = (clGetGLContextInfoKHR_fn)
+			clGetExtensionFunctionAddressForPlatform(platforms[i], "clGetGLContextInfoKHR");
+		if (!clGetGLContextInfoKHR)
+			continue;
+
+		platformCompatible.push_back(i);
+	}
+    
+    //printf("initializeContextFromGL 2\n");
+
+	for (int j = 0; j < platformCompatible.size(); j++)
+	{
+		int i = platformCompatible[j];
+		std::string platformName = cv::ocl::PlatformInfo(&platforms[i]).name();
+        
+        //printf("platformName : %i - %s \n", i, platformName.c_str());
+
+		clGetGLContextInfoKHR_fn clGetGLContextInfoKHR = (clGetGLContextInfoKHR_fn)
+			clGetExtensionFunctionAddressForPlatform(platforms[i], "clGetGLContextInfoKHR");
+
+#ifdef WIN32
+		// Create CL context properties, add WGL context & handle to DC
+		cl_context_properties properties[] = {
+			CL_CONTEXT_PLATFORM, (cl_context_properties)platforms[i], // OpenCL platform
+			CL_GL_CONTEXT_KHR, (cl_context_properties)wglGetCurrentContext(), // WGL Context
+			CL_WGL_HDC_KHR, (cl_context_properties)wglGetCurrentDC(), // WGL HDC
+			0
+		};
+
+
+#elif defined(__WXGTK__)
+		// ─── DÉTECTION DYNAMIQUE DES CONTEXTES SENS LES MACROS RIGIDES ───
+		cl_context_properties properties[7] = { 0 };
+		bool propertiesSet = false;
+
+		// Tentative 1 : Est-ce qu'un contexte EGL est actif (Recommandé pour le confinement Snap) ?
+#if defined(epoxy_has_egl) || defined(EGL_VERSION)
+		EGLContext eglContext = eglGetCurrentContext();
+		EGLDisplay eglDisplay = eglGetCurrentDisplay();
+
+		if (eglContext != EGL_NO_CONTEXT && eglDisplay != EGL_NO_DISPLAY)
+		{
+			printf("OpenCL Interop: Contexte EGL détecté en cours d'exécution.\n");
+			properties[0] = CL_CONTEXT_PLATFORM;
+			properties[1] = (cl_context_properties)platforms[i];
+			properties[2] = CL_GL_CONTEXT_KHR;
+			properties[3] = (cl_context_properties)eglContext;
+			properties[4] = CL_EGL_DISPLAY_KHR;
+			properties[5] = (cl_context_properties)eglDisplay;
+			properties[6] = 0;
+			propertiesSet = true;
+		}
+#endif
+
+		// Tentative 2 : Fallback vers GLX (Si EGL est absent ou non initialisé, ex: Mint X11 local)
+		if (!propertiesSet)
+		{
+			GLXContext glxcontext = glXGetCurrentContext();
+			Display* display = glXGetCurrentDisplay();
+
+			if (glxcontext && display)
+			{
+				printf("OpenCL Interop: Contexte GLX (X11) détecté en cours d'exécution.\n");
+				properties[0] = CL_GL_CONTEXT_KHR;
+				properties[1] = (cl_context_properties)glxcontext;
+				properties[2] = CL_GLX_DISPLAY_KHR;
+				properties[3] = (cl_context_properties)display;
+				properties[4] = CL_CONTEXT_PLATFORM;
+				properties[5] = (cl_context_properties)platforms[i];
+				properties[6] = 0;
+				propertiesSet = true;
+			}
+		}
+
+		if (!propertiesSet)
+		{
+			std::cerr << "OpenCL Interop Erreur: Aucun contexte GL valide (EGL ou GLX) n'est actif sur ce thread.\n";
+			continue;
+		}
+
+#endif
+
+       // printf("initializeContextFromGL 4\n");
+
+		// query device
+		device = NULL;
+		status = clGetGLContextInfoKHR(properties, CL_CURRENT_DEVICE_FOR_GL_CONTEXT_KHR, sizeof(cl_device_id),
+			&device, 0);
+		if (status != CL_SUCCESS)
+			continue;
+
+		// create context
+		context = clCreateContext(properties, 1, &device, NULL, NULL, &status);
+		if (status != CL_SUCCESS)
+		{
+			clReleaseDevice(device);
+			found = -1;
+		}
+		else
+		{
+			found = i;
+			break;
+		}
+	}
+
+	if (found < 0)
+		CV_Error(cv::Error::OpenCLInitError, "OpenCL: Can't create context for OpenGL interop");
+        
+    // printf("initializeContextFromGL 6\n");
+
+	cl_platform_id platform = platforms[found];
+	application_context.platformName = cv::ocl::PlatformInfo(&platform).name();
+
+	clExecCtx = cv::ocl::OpenCLExecutionContext::create(
+		application_context.platformName, platform, context, device);
+
+	cv::ocl::Device(cv::ocl::Device::fromHandle(device));
+    
+	clReleaseDevice(device);
+	clReleaseContext(context);
+	clExecCtx.bind();
+
+#endif
+}
+
+void ShowInfos()
+{
+	cl_int errNum;
+	cl_uint numPlatforms;
+	cl_platform_id firstPlatformId;
+	cl_context context = NULL;
+	cl_device_id device;
+	//get Platform and choose first one
+	errNum = clGetPlatformIDs(1, &firstPlatformId, &numPlatforms);
+	if (errNum != CL_SUCCESS || numPlatforms <= 0) {
+		cerr << "No OpenCL platforum found!" << endl;
+		return;
+	}
+
+	char buffer[10240];
+	printf("=====  Platform 0 =====\n");
+	clGetPlatformInfo(firstPlatformId, CL_PLATFORM_PROFILE, 10240, buffer, NULL);
+	printf("  PROFILE = %s\n", buffer);
+	clGetPlatformInfo(firstPlatformId, CL_PLATFORM_VERSION, 10240, buffer, NULL);
+	printf("  VERSION = %s\n", buffer);
+	clGetPlatformInfo(firstPlatformId, CL_PLATFORM_NAME, 10240, buffer, NULL);
+	printf("  NAME = %s\n", buffer);
+	clGetPlatformInfo(firstPlatformId, CL_PLATFORM_VENDOR, 10240, buffer, NULL);
+	printf("  VENDOR = %s\n", buffer);
+	clGetPlatformInfo(firstPlatformId, CL_PLATFORM_EXTENSIONS, 10240, buffer, NULL);
+	printf("  VENDOR = %s\n", buffer);
+	//  clGetPlatformInfo(platforms[i],CL_PLATFORM_EXTENSIONS,10240,buffer,NULL);
+	//  printf("  EXTENSIONS = %s\n", buffer);
+
+	cl_uint devices_n;
+
+	// get the GPU-devices of platform i, print details of the device
+	errNum = clGetDeviceIDs(firstPlatformId, CL_DEVICE_TYPE_CPU, 1, &device,
+		&devices_n);
+	if (errNum != CL_SUCCESS)
+		printf("error getting device IDS\n");
+	printf("  === %d OpenCL device(s) found on platform: 0\n\n", devices_n);
+	for (unsigned int d = 0; d < devices_n; d++)
+	{
+		char buffer[10240];
+		cl_uint buf_uint;
+		cl_ulong buf_ulong;
+		cl_bool buf_bool;
+		printf("  === --- Device -- %d \n", d);
+		(clGetDeviceInfo(device, CL_DEVICE_NAME, sizeof(buffer),
+			buffer, NULL));
+		printf("    DEVICE_NAME = %s\n", buffer);
+		(clGetDeviceInfo(device, CL_DEVICE_VENDOR, sizeof(buffer),
+			buffer, NULL));
+		printf("    DEVICE_VENDOR = %s\n", buffer);
+		(clGetDeviceInfo(device, CL_DEVICE_VERSION, sizeof(buffer),
+			buffer, NULL));
+		printf("    DEVICE_VERSION = %s\n", buffer);
+		(clGetDeviceInfo(device, CL_DRIVER_VERSION, sizeof(buffer),
+			buffer, NULL));
+		printf("    DRIVER_VERSION = %s\n", buffer);
+		(clGetDeviceInfo(device, CL_DEVICE_MAX_COMPUTE_UNITS,
+			sizeof(buf_uint), &buf_uint, NULL));
+		printf("    DEVICE_MAX_COMPUTE_UNITS = %u\n", (unsigned int)buf_uint);
+		(clGetDeviceInfo(device, CL_DEVICE_MAX_CLOCK_FREQUENCY,
+			sizeof(buf_uint), &buf_uint, NULL));
+		printf("    DEVICE_MAX_CLOCK_FREQUENCY = %u\n", (unsigned int)buf_uint);
+		(clGetDeviceInfo(device, CL_DEVICE_GLOBAL_MEM_SIZE,
+			sizeof(buf_ulong), &buf_ulong, NULL));
+		printf("    DEVICE_GLOBAL_MEM_SIZE = %u\n\n", (unsigned int)buf_ulong);
+		(clGetDeviceInfo(device, CL_DEVICE_AVAILABLE,
+			sizeof(buf_bool), &buf_bool, NULL));
+		printf("    DEVICE_AVAILABLE = %s\n\n", buf_bool ? "Yes" : "No");
+	}
+	if (devices_n == 0)
+	{
+		printf("error, on platform 0, there is no GPU device\n");
+	}
+}
+
+bool COpenCLContext::CreateDefaultOpenCLContext()
+{
+	//ShowInfos();
+	
+	cv::ocl::Context context;
+	if (!context.create(cv::ocl::Device::TYPE_GPU))
+		application_context.isOpenCLInitialized = false;
+	else
+		application_context.isOpenCLInitialized = true;
+
+	if (!application_context.isOpenCLInitialized) {
+		cl_int errNum;
+		cl_uint numPlatforms;
+		cl_platform_id firstPlatformId;
+		cl_context _context = NULL;
+		//cl_device_id device;
+		//get Platform and choose first one
+		errNum = clGetPlatformIDs(1, &firstPlatformId, &numPlatforms);
+		if (errNum != CL_SUCCESS || numPlatforms <= 0) {
+			cerr << "No OpenCL platforum found!" << endl;
+			return false;
+		}
+
+		cl_context_properties contextProperties[3] = {
+			  CL_CONTEXT_PLATFORM,
+			  (cl_context_properties)firstPlatformId,
+			  0
+		};
+		_context = clCreateContextFromType(contextProperties, CL_DEVICE_TYPE_ALL, NULL, NULL, &errNum);
+		if (errNum != CL_SUCCESS) {
+			cerr << "Unable to create GPU or CPU context" << endl;
+			//check_error(errNum);
+			return false;
+		}
+		else
+		{
+			context.fromHandle(_context);
+			application_context.isOpenCLInitialized = true;
+		}
+			
+
+		cout << "Created CPU context" << endl;
+	}
+
+	if (application_context.isOpenCLInitialized)
+	{
+		//cv::ocl::Device(context.device(0));
+		clExecCtx = cv::ocl::OpenCLExecutionContext::getCurrent();
+		application_context.platformName = clExecCtx.getDevice().vendorName();
+
+		CRegardsConfigParam* regardsParam = CParamInit::getInstance();
+		if(regardsParam != nullptr)
+			regardsParam->SetOpenCLPlatformName(application_context.platformName);
+		//wxMessageBox(wxString::Format("OpenCL initialized with platform: %s", platformName), "OpenCL Info", wxOK | wxICON_INFORMATION);
+	}
+
+	return true;
+}
+
+void COpenCLContext::CreateCommandQueue(
+	cl_command_queue_properties props)
+{
+	if (commandQueue != nullptr)
+		return;
+
+	cl_int err = CL_SUCCESS;
+
+	commandQueue = clCreateCommandQueue(
+		static_cast<cl_context>(clExecCtx.getContext().ptr()),
+		static_cast<cl_device_id>(clExecCtx.getDevice().ptr()),
+		props,
+		&err);
+
+	Error::CheckError(err);
+}
+
+
+void COpenCLContext::GetOutputData(cl_mem cl_output_buffer, void* dataOut, const int& sizeOutput, const int& flag)
+{
+	cl_int err = 0;
+	CreateCommandQueue();
+
+	if (flag == CL_MEM_USE_HOST_PTR)
+	{
+		
+
+		void* tmp_ptr = clEnqueueMapBuffer(commandQueue, cl_output_buffer, true, CL_MAP_READ, 0, sizeOutput, 0, nullptr, nullptr, &err);
+		ErrorOpenCL::CheckError(err);
+		if (tmp_ptr != dataOut)
+		{// the pointer have to be same because CL_MEM_USE_HOST_PTR option was used in clCreateBuffer
+			throw ErrorOpenCL("clEnqueueMapBuffer failed to return original pointer");
+		}
+
+		err = clFinish(commandQueue);
+		ErrorOpenCL::CheckError(err);
+
+		err = clEnqueueUnmapMemObject(commandQueue, cl_output_buffer, tmp_ptr, 0, nullptr, nullptr);
+		ErrorOpenCL::CheckError(err);
+	}
+	else
+	{
+		err = clEnqueueReadBuffer(commandQueue, cl_output_buffer, CL_TRUE, 0, sizeOutput, dataOut, 0, nullptr, nullptr);
+		ErrorOpenCL::CheckError(err);
+		err = clFinish(commandQueue);
+		ErrorOpenCL::CheckError(err);
+	}
+}

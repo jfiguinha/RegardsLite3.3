@@ -1,0 +1,29 @@
+#pragma once
+#include "SqlExecuteRequest.h"
+#include <ListCriteriaPhoto.h>
+
+namespace Regards
+{
+	namespace Sqlite
+	{
+		class CSqlResult;
+
+		class CSqlPhotoCriteria : public CSqlExecuteRequest
+		{
+		public:
+			CSqlPhotoCriteria();
+			~CSqlPhotoCriteria() = default;
+			bool InsertPhotoListCriteria(const CListCriteriaPhoto& listPhotoCriteria, bool& isNew, const int& numFolder);
+			bool InsertPhotoCriteria(const int64_t& numPhoto, const int64_t& numCriteria);
+			bool DeletePhoto(const int64_t& numPhoto);
+			bool DeleteCriteria(const int64_t& numCriteria);
+			bool DeletePhotoCriteria(const int64_t& numPhoto, const int64_t& numCriteria);
+			bool DeleteFolderCriteria(const int64_t& numFolder);
+			bool DeleteCatalogCriteria(const int64_t& numCatalog);
+			bool DeletePhotoCriteria();
+
+		private:
+			int TraitementResult(CSqlResult* sqlResult) override { return false; };
+		};
+	}
+}
