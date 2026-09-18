@@ -33,11 +33,11 @@
 
 #ifndef wxHAS_IMAGES_IN_RESOURCES
 #ifdef __WXGTK__
-#include "../Resource/sample.xpm"
+#include "../Regards/Resources/regardsliteicon.xpm"
 #elif defined(__APPLE__)
-#include "../Resource/sample.xpm"
+#include "../Regards/Resources/regardsliteicon.xpm"
 #else
-#include "../../Resource/sample.xpm"
+#include "../../Regards/Resources/regardsliteicon.xpm"
 #endif
 #endif
 
@@ -68,7 +68,7 @@ CViewerFrame::CViewerFrame(const wxString& title, const wxPoint& pos, const wxSi
 {
     mainInterface_->parent = this;
     
-    SetIcon(wxICON(sample));
+    SetIcon(wxICON(regardsliteicon));
 
     // 1. Paramètres et thème
     InitParams();
