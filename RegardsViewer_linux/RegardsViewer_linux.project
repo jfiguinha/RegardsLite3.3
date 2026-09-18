@@ -298,13 +298,6 @@
         <Library Value="Imath-3_2"/>
         <Library Value="deflate"/>
         <Library Value="archive"/>
-        <Library Value="ncnn"/>
-        <Library Value="MachineIndependent"/>
-        <Library Value="glslang"/>
-        <Library Value="glslang-default-resource-limits"/>
-        <Library Value="GenericCodeGen"/>
-        <Library Value="OSDependent"/>
-        <Library Value="SPIRV"/>
         <Library Value="protobuf-lite"/>
         <Library Value="protobuf"/>
         <Library Value="absl_log_internal_message"/>
@@ -502,7 +495,7 @@
         <LibraryPath Value="../libVideoConverter/Debug"/>
       </Linker>
       <ResourceCompiler Options="$(shell wx-config --rcflags)" Required="no"/>
-      <General OutputFile="$(IntermediateDirectory)/RegardsViewer" IntermediateDirectory="./Debug" Command="./RegardsViewer" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(IntermediateDirectory)" PauseExecWhenProcTerminates="yes" IsGUIProgram="yes" IsEnabled="yes"/>
+      <General OutputFile="$(IntermediateDirectory)/RegardsLite" IntermediateDirectory="./Debug" Command="./RegardsLite" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(IntermediateDirectory)" PauseExecWhenProcTerminates="yes" IsGUIProgram="yes" IsEnabled="yes"/>
       <BuildSystem Name="Default"/>
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
         <![CDATA[]]>
@@ -598,7 +591,7 @@
         <LibraryPath Value="../libVideoConverter/Release"/>
       </Linker>
       <ResourceCompiler Options="$(shell wx-config --rcflags)" Required="no"/>
-      <General OutputFile="$(IntermediateDirectory)/RegardsLiteViewer" IntermediateDirectory="./Release" Command="./RegardsLiteViewer" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(IntermediateDirectory)" PauseExecWhenProcTerminates="yes" IsGUIProgram="yes" IsEnabled="yes"/>
+      <General OutputFile="$(IntermediateDirectory)/RegardsLite" IntermediateDirectory="./Release" Command="./RegardsLite" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(IntermediateDirectory)" PauseExecWhenProcTerminates="yes" IsGUIProgram="yes" IsEnabled="yes"/>
       <BuildSystem Name="Default"/>
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
         <![CDATA[]]>
@@ -611,7 +604,6 @@
       <PreBuild/>
       <PostBuild>
         <Command Enabled="yes">cp -R ../Regards/Resources ./Release</Command>
-        <Command Enabled="yes">cp ../libextern/vcpkg/installed/x64-linux/lib/libvulkan.so.1.4.341 ./Release/libvulkan.so</Command>
         <Command Enabled="yes">cp ../libextern/ffmpeg-master/lib/libavcodec.so.62 ./Release</Command>
         <Command Enabled="yes">cp ../libextern/ffmpeg-master/lib/libavdevice.so.62 ./Release</Command>
         <Command Enabled="yes">cp ../libextern/ffmpeg-master/lib/libavfilter.so.11 ./Release</Command>
@@ -619,12 +611,11 @@
         <Command Enabled="yes">cp ../libextern/ffmpeg-master/lib/libavutil.so.60 ./Release</Command>
         <Command Enabled="yes">cp ../libextern/ffmpeg-master/lib/libswresample.so.6 ./Release</Command>
         <Command Enabled="yes">cp ../libextern/ffmpeg-master/lib/libswscale.so.9 ./Release</Command>
-        <Command Enabled="yes">cp ../libextern/ffmpeg-master/bin/ffmpeg ./Release</Command>
         <Command Enabled="yes">cp ../libextern/opencl_dll/*.so.* ./Release</Command>
         <Command Enabled="yes">sh patch_release.sh</Command>
         <Command Enabled="yes">cp -R ./Release ./Package</Command>
-        <Command Enabled="yes">if [ -d ./Package/RegardsViewer ]; then rm -R ./Package/RegardsViewer;fi</Command>
-        <Command Enabled="yes">mv ./Package/Release ./Package/RegardsViewer</Command>
+        <Command Enabled="yes">if [ -d ./Package/RegardsLite ]; then rm -R ./Package/RegardsLite;fi</Command>
+        <Command Enabled="yes">mv ./Package/Release ./Package/RegardsLite</Command>
         <Command Enabled="yes">rm ./Release/*.o</Command>
         <Command Enabled="yes">rm ./Release/*.o.*</Command>
       </PostBuild>

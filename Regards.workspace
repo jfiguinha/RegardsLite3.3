@@ -53,9 +53,7 @@
   <VirtualDirectory Name="include">
     <Project Name="include" Path="include/include.project" Active="No"/>
   </VirtualDirectory>
-  <VirtualDirectory Name="Deeplearning">
-    <Project Name="libDeepLearning" Path="libDeepLearning/libDeepLearning.project"/>
-  </VirtualDirectory>
+  <VirtualDirectory Name="Deeplearning"/>
   <BuildMatrix>
     <WorkspaceConfiguration Name="Debug">
       <Environment/>
