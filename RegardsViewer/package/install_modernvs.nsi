@@ -16,21 +16,21 @@ ReserveFile `${NSISDIR}\Plugins\EmbeddedLists.dll`
 
 ;--------------------------------
 ;General
-!define MUI_PRODUCT "RegardsLiteViewer 2.0"
+!define MUI_PRODUCT "RegardsLite 3.0"
 !define MUI_FILE "RegardsLite"
 !define MUI_ICON "regardsliteicon.ico"
-!define UninstId "RegardsLiteViewer2" ; You might want to use a GUID here
-!define MUI_VERSION "2.0.3.3"
+!define UninstId "RegardsLite3" ; You might want to use a GUID here
+!define MUI_VERSION "3.0.0.0"
 
   ;Name and file
-  Name "Regards Viewer 2.0.3.3"
-  OutFile "RegardsLiteViewer2Setup.exe"
+  Name "Regards Viewer 3.0.0.0"
+  OutFile "RegardsLite3Setup.exe"
 
   ;Default installation folder
-  InstallDir "$PROGRAMFILES64\RegardsLiteViewer2"
+  InstallDir "$PROGRAMFILES64\RegardsLite3"
 
   ;Get installation folder from registry if available
-  InstallDirRegKey HKCU "Software\RegardsLiteViewer2" ""
+  InstallDirRegKey HKCU "Software\RegardsLite3" ""
 
   ;Request application privileges for Windows Vista
   RequestExecutionLevel admin
@@ -75,7 +75,7 @@ ${AndIf} ${Cmd} `MessageBox MB_YESNO|MB_ICONQUESTION "Uninstall previous version
 
   RMDIR /r "$INSTDIR"
 
-  DeleteRegKey /ifempty HKCU "Software\RegardsLiteViewer2"
+  DeleteRegKey /ifempty HKCU "Software\RegardsLite3"
 ${EndIf}
 file_not_found:
 	DetailPrint "Uninstall Regards Viewer"
@@ -135,23 +135,23 @@ Call openLinkNewWindow
 
 ;--------------------------------
 ;Installer Sections
-Section "RegardsLiteViewer" SecRegardsViewer
+Section "RegardsLite" SecRegardsViewer
 
   SetOutPath "$INSTDIR"
 
 
   ;ADD YOUR OWN FILES HERE...
-  DetailPrint "*** Installing RegardsLiteViewer 2.0.3.3 ..."
-  File "Prerequisites\RegardsLiteViewer2.zip"
-  ZipDLL::extractall "$INSTDIR\RegardsLiteViewer2.zip" $INSTDIR
+  DetailPrint "*** Installing RegardsLite 3.0.0.0 ..."
+  File "Prerequisites\RegardsLite3.zip"
+  ZipDLL::extractall "$INSTDIR\RegardsLite3.zip" $INSTDIR
   ;Store installation folder
-  WriteRegStr HKCU "Software\RegardsLiteViewer2" "" $INSTDIR
+  WriteRegStr HKCU "Software\RegardsLite3" "" $INSTDIR
 
   ;Create uninstaller
   WriteUninstaller "$INSTDIR\Uninstall.exe"
 
   DetailPrint "*** Remove zip installer ..."
-  Delete "$INSTDIR\RegardsLiteViewer2.zip"
+  Delete "$INSTDIR\RegardsLite3.zip"
 
   ;create desktop shortcut
   CreateShortCut "$DESKTOP\${MUI_PRODUCT}.lnk" "$INSTDIR\${MUI_FILE}.exe" ""
@@ -188,7 +188,7 @@ SectionEnd
 ;Descriptions
 
   ;Language strings
-  LangString DESC_SecRegardsViewer ${LANG_ENGLISH} "RegardsLiteViewer"
+  LangString DESC_SecRegardsViewer ${LANG_ENGLISH} "RegardsLite"
   LangString DESC_SecVisualStudio ${LANG_ENGLISH} "Visual Studio 2017 Redistribuable"
   ;Assign language strings to sections
   !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN

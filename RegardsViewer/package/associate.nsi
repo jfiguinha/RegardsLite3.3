@@ -16,20 +16,20 @@ ReserveFile `${NSISDIR}\Plugins\EmbeddedLists.dll`
 
 ;--------------------------------
 ;General
-!define MUI_PRODUCT "Regards Viewer 2.53"
-!define MUI_FILE "RegardsViewer"
-!define MUI_ICON "viewer.ico"
-!define UninstId "RegardsViewer2" ; You might want to use a GUID here
+!define MUI_PRODUCT "RegardsLite 3"
+!define MUI_FILE "RegardsLite"
+!define MUI_ICON "regardsliteicon.ico"
+!define UninstId "RegardsLite3" ; You might want to use a GUID here
 
   ;Name and file
   Name "Associate"
   OutFile "Associate.exe"
 
   ;Default installation folder
-  InstallDir "$PROGRAMFILES64\RegardsViewer2"
+  InstallDir "$PROGRAMFILES64\RegardsLite3"
   
   ;Get installation folder from registry if available
-  InstallDirRegKey HKCU "Software\RegardsViewer2" ""
+  InstallDirRegKey HKCU "Software\RegardsLite3" ""
 
   ;Request application privileges for Windows Vista
   RequestExecutionLevel admin
@@ -261,7 +261,7 @@ Function ListViewLeave
  
 	${For} $1 1 $0
 		Pop $2
-		${registerExtension} "$INSTDIR\RegardsViewer.exe" $2 "RegardsViewer.Files"
+		${registerExtension} "$INSTDIR\RegardsLite.exe" $2 "RegardsLite.Files"
 		#MessageBox MB_OK "Element #$1: $2"
 	${Next} 
 
