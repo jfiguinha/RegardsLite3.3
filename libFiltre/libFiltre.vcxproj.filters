@@ -285,9 +285,6 @@
     <ClInclude Include="BokehEffectParameter.h">
       <Filter>window\datastructure</Filter>
     </ClInclude>
-    <ClInclude Include="BokehFilter.h">
-      <Filter>window\picture</Filter>
-    </ClInclude>
     <ClInclude Include="hqdn3dEffectParameter.h">
       <Filter>window\datastructure</Filter>
     </ClInclude>
@@ -488,9 +485,6 @@
     <ClCompile Include="VignetteFilter.cpp">
       <Filter>window\picture</Filter>
     </ClCompile>
-    <ClCompile Include="BokehFilter.cpp">
-      <Filter>window\picture</Filter>
-    </ClCompile>
     <ClCompile Include="DecodeRaw.cpp">
       <Filter>window\picture</Filter>
     </ClCompile>
@@ -523,6 +517,9 @@
     </ClCompile>
     <ClCompile Include="2PassScale.cpp">
       <Filter>Filter\Interpolation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libextern\CvPlot\src\cvplot.cpp">
+      <Filter>Fichiers sources</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

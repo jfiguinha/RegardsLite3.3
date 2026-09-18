@@ -11,7 +11,6 @@ namespace Regards::Window
 namespace Regards::Viewer
 {
     class CListPicture;
-    class CListFace;
     class CPreviewWnd;
     class CPanelInfosWnd;
 
@@ -24,7 +23,6 @@ namespace Regards::Viewer
                               CPreviewWnd*                         previewWindow,
                               CPanelInfosWnd*                      panelInfosWindow,
                               CListPicture*                        listPicture,
-                              CListFace*                           listFace,
                               const int&                           faceDetection);
         ~CWindowModeController() = default;
 
@@ -68,7 +66,7 @@ namespace Regards::Viewer
         CPreviewWnd*                         previewWindow    = nullptr;
         CPanelInfosWnd*                      panelInfosWindow = nullptr;
         CListPicture*                        listPicture      = nullptr;
-        CListFace*                           listFace         = nullptr;
+
 
         int  windowMode    = 1;
         int  oldWindowMode = -1;

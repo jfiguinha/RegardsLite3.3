@@ -295,8 +295,7 @@ protected:
 
 	int autoconstrast = 0;
 	int applyStabilization = 0;
-	int filmEnhance = 0;
-	int filmcolorisation = 0;
+
 
 
 	IVideoInterface* eventPlayer;

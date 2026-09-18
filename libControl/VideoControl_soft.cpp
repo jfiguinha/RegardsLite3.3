@@ -23,7 +23,7 @@
 #include <ParamInit.h>
 #include <OpenCLEffectVideo.h>
 #include "DataAVFrame.h"
-#include <FaceDetector.h>
+
 #include <appcontext.h>
 using namespace Regards::OpenCV;
 using namespace Regards::OpenCL;
@@ -87,8 +87,6 @@ CVideoControlSoft::CVideoControlSoft(CWindowMain* windowMain, wxWindow* window, 
 		videoEffectParameter.interpolation = config->GetInterpolationType();
 		autoconstrast = videoEffectParameter.autoConstrast;
 		applyStabilization = videoEffectParameter.stabilizeVideo;
-		filmEnhance = videoEffectParameter.filmEnhance;
-		filmcolorisation = videoEffectParameter.filmcolorisation;
     }
 
     
@@ -1231,9 +1229,7 @@ bool CVideoControlSoft::ApplyVideoEffect()
 
 	return videoEffectParameter.effectEnable &&
 		(videoEffectParameter.autoConstrast ||
-			videoEffectParameter.stabilizeVideo ||
-			videoEffectParameter.filmEnhance ||
-			videoEffectParameter.filmcolorisation);
+			videoEffectParameter.stabilizeVideo);
 }
 
 #ifdef _DEBUG
@@ -1472,11 +1468,7 @@ void CVideoControlSoft::OnPaint3D(wxGLCanvas* canvas, CRenderOpenGL* renderOpenG
 					applyStabilization !=
 					videoEffectParameter.stabilizeVideo ||
 					autoconstrast !=
-					videoEffectParameter.autoConstrast ||
-					filmEnhance !=
-					videoEffectParameter.filmEnhance ||
-					filmcolorisation !=
-					videoEffectParameter.filmcolorisation;
+					videoEffectParameter.autoConstrast;
 
 				if (textureParametersChanged)
 				{
@@ -1485,12 +1477,6 @@ void CVideoControlSoft::OnPaint3D(wxGLCanvas* canvas, CRenderOpenGL* renderOpenG
 
 					applyStabilization =
 						videoEffectParameter.stabilizeVideo;
-
-					filmEnhance =
-						videoEffectParameter.filmEnhance;
-
-					filmcolorisation =
-						videoEffectParameter.filmcolorisation;
 
 					deleteTexture = true;
 				}
@@ -2278,8 +2264,7 @@ void CVideoControlSoft::RenderToTexture()
 					(int)GetZoomRatio() * 100, true);
 	}
 
-	if ((videoEffectParameter.autoConstrast || videoEffectParameter.filmEnhance || videoEffectParameter.filmcolorisation) && videoEffectParameter.
-		effectEnable)
+	if ((videoEffectParameter.autoConstrast) && videoEffectParameter.effectEnable)
 	{
 		openclEffectYUV->ApplyOpenCVEffect(&videoEffectParameter);
 	}
@@ -2322,15 +2307,6 @@ bool CVideoControlSoft::ApplyOpenCVEffect(cv::Mat& image)
 		}
 	}
 
-	if (videoEffectParameter.filmEnhance)
-	{
-		image = CFaceDetector::SuperResolution(image);
-	}
-	if (videoEffectParameter.filmcolorisation)
-	{
-
-		image = CFaceDetector::Colorisation(image);
-	}
 
 	if (videoEffectParameter.autoConstrast)
 	{
@@ -2391,7 +2367,7 @@ void CVideoControlSoft::RenderFFmpegToTexture()
 			flipH, flipV, angle, (int)GetZoomRatio() * 100);
 	}
 
-	if (videoEffectParameter.autoConstrast || videoEffectParameter.filmcolorisation || videoEffectParameter.filmEnhance)
+	if (videoEffectParameter.autoConstrast)
 	{
 		if (cvImage.channels() == 4)
 			cv::cvtColor(cvImage, cvImage, cv::COLOR_BGRA2BGR);

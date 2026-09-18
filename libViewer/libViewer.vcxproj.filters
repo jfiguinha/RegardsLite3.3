@@ -60,15 +60,6 @@
     <ClInclude Include="ViewerFrame.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
-    <ClInclude Include="ThumbnailFace.h">
-      <Filter>Thumbnail\include</Filter>
-    </ClInclude>
-    <ClInclude Include="ThumbnailFacePertinenceToolBar.h">
-      <Filter>Thumbnail\include</Filter>
-    </ClInclude>
-    <ClInclude Include="ThumbnailFaceToolBar.h">
-      <Filter>Thumbnail\include</Filter>
-    </ClInclude>
     <ClInclude Include="ThumbnailFolder.h">
       <Filter>Thumbnail\include</Filter>
     </ClInclude>
@@ -82,9 +73,6 @@
       <Filter>Thumbnail\include</Filter>
     </ClInclude>
     <ClInclude Include="AnimationToolbar.h">
-      <Filter>Fichiers d%27en-tête</Filter>
-    </ClInclude>
-    <ClInclude Include="ListFace.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
     <ClInclude Include="ListPicture.h">
@@ -112,9 +100,6 @@
       <Filter>Toolbar\include</Filter>
     </ClInclude>
     <ClInclude Include="PictureElement.h">
-      <Filter>Fichiers d%27en-tête</Filter>
-    </ClInclude>
-    <ClInclude Include="FaceInfosUpdate.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
     <ClInclude Include="WaitingWindow.h">
@@ -151,9 +136,6 @@
       <Filter>FolderProcess</Filter>
     </ClInclude>
     <ClInclude Include="FileWatcherService.h">
-      <Filter>Fichiers d%27en-tête</Filter>
-    </ClInclude>
-    <ClInclude Include="ModelManager.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
     <ClInclude Include="myFrame.h">
@@ -212,15 +194,6 @@
     <ClCompile Include="ViewerFrame.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
-    <ClCompile Include="ThumbnailFace.cpp">
-      <Filter>Thumbnail\source</Filter>
-    </ClCompile>
-    <ClCompile Include="ThumbnailFacePertinenceToolBar.cpp">
-      <Filter>Thumbnail\source</Filter>
-    </ClCompile>
-    <ClCompile Include="ThumbnailFaceToolBar.cpp">
-      <Filter>Thumbnail\source</Filter>
-    </ClCompile>
     <ClCompile Include="ThumbnailFolder.cpp">
       <Filter>Thumbnail\source</Filter>
     </ClCompile>
@@ -231,9 +204,6 @@
       <Filter>Thumbnail\source</Filter>
     </ClCompile>
     <ClCompile Include="AnimationToolbar.cpp">
-      <Filter>Fichiers sources</Filter>
-    </ClCompile>
-    <ClCompile Include="ListFace.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
     <ClCompile Include="ListPicture.cpp">
@@ -288,9 +258,6 @@
       <Filter>FolderProcess</Filter>
     </ClCompile>
     <ClCompile Include="FileWatcherService.cpp">
-      <Filter>Fichiers sources</Filter>
-    </ClCompile>
-    <ClCompile Include="ModelManager.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
     <ClCompile Include="PrintService.cpp">

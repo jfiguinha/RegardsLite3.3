@@ -34,7 +34,7 @@
 #include "CropFilter.h"
 #include <hqdn3dFilter.h>
 #include <OilPaintingFilter.h>
-#include "BokehFilter.h"
+
 #include <CartoonFilter.h>
 #include "FiltreImplementation.h"
 #include "DetailEnhance.h"
@@ -81,7 +81,6 @@ const std::unordered_map<int, CFiltreData::FilterFactory>& CFiltreData::GetFacto
 		FILTER_ENTRY(IDM_FILTRE_CLOUDS, CCloudsFilter),
 		FILTER_ENTRY(IDM_FILTER_OILPAINTING, COilPaintingFilter),
 		FILTER_ENTRY(IDM_SHARPENMASKING, CSharpenMaskingFilter),
-		FILTER_ENTRY(IDM_FILTRE_BOKEH, CBokehFilter),
 		FILTER_ENTRY(IDM_FILTRE_BILATERAL, CBilateralFilter),
 		FILTER_ENTRY(IDM_FILTRE_STYLISATION, CStylizationEffect),
 		FILTER_ENTRY(IDM_FILTRE_PENCILSKETCH, CPencilSketchFilter),
@@ -100,9 +99,6 @@ const std::unordered_map<int, CFiltreData::FilterFactory>& CFiltreData::GetFacto
 		FILTER_ENTRY(IDM_BLACKANDWHITE, CNoirEtBlancFilter),
 		FILTER_ENTRY(IDM_FILTRE_EDGE, CEdgeFilter),
 		FILTER_ENTRY(IDM_NEGATIF, CNegatifFilter),
-		FILTER_ENTRY(IDM_REDEYE, CRedEyeFilter),
-		FILTER_ENTRY(IDM_FILTRE_RESTORE, CRestoreFilter),
-		FILTER_ENTRY(IDM_FILTRE_COLORISATION, CColorisationFilter),
 		FILTER_ENTRY(IDM_WAVE_EFFECT, CWaveFilter),
 		FILTER_ENTRY(IDM_FILTRELENSFLARE, CLensFlareFilter),
 		FILTER_ENTRY(IDM_FILTRELENSCORRECTION, CLensDistortion),

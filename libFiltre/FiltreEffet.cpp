@@ -45,20 +45,12 @@ int CFiltreEffet::GetWidth()
 	return filtreEffet->GetWidth();
 }
 
-int CFiltreEffet::SuperResolutionNCNN()
-{
-	return filtreEffet->SuperResolutionNCNN();
-}
 
 int CFiltreEffet::Inpaint(const cv::Mat &mask, int algorithm)
 {
     return filtreEffet->Inpaint(mask, algorithm);
 }
 
-int CFiltreEffet::Colorization()
-{
-	return filtreEffet->Colorization();
-}
 
 int CFiltreEffet::GetHeight()
 {
@@ -191,11 +183,6 @@ void CFiltreEffet::SetBitmap(CImageLoadingFormat* bitmap)
 		filtreEffet->SetBitmap(bitmap);
 }
 
-int CFiltreEffet::RedEye()
-{
-	filtreEffet->RedEye();
-	return 0;
-}
 
 wxImage CFiltreEffet::GetwxImage()
 {

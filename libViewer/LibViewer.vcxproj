@@ -881,7 +881,6 @@
     <ClInclude Include="..\include\header.h" />
     <ClInclude Include="AnimationToolbar.h" />
     <ClInclude Include="ExportDiaporama.h" />
-    <ClInclude Include="FaceInfosUpdate.h" />
     <ClInclude Include="FileSystemValidator.h" />
     <ClInclude Include="FileWatcherService.h" />
     <ClInclude Include="FolderProcess.h" />
@@ -889,12 +888,10 @@
     <ClInclude Include="MainViewerController.h" />
     <ClInclude Include="md5check.h" />
     <ClInclude Include="MediaLoader.h" />
-    <ClInclude Include="ModelManager.h" />
     <ClInclude Include="MusicController.h" />
     <ClInclude Include="myFrame.h" />
     <ClInclude Include="PictureElement.h" />
     <ClInclude Include="CentralWindow.h" />
-    <ClInclude Include="ListFace.h" />
     <ClInclude Include="ListPicture.h" />
     <ClInclude Include="MainWindow.h" />
     <ClInclude Include="PanelInfosWnd.h" />
@@ -906,9 +903,6 @@
     <ClInclude Include="SlideshowController.h" />
     <ClInclude Include="SqlBatchOps.h" />
     <ClInclude Include="StatusText.h" />
-    <ClInclude Include="ThumbnailFace.h" />
-    <ClInclude Include="ThumbnailFacePertinenceToolBar.h" />
-    <ClInclude Include="ThumbnailFaceToolBar.h" />
     <ClInclude Include="ThumbnailFolder.h" />
     <ClInclude Include="ThumbnailProcess.h" />
     <ClInclude Include="ThumbnailScheduler.h" />
@@ -947,13 +941,11 @@
     <ClCompile Include="FileWatcherService.cpp" />
     <ClCompile Include="FolderProcess.cpp" />
     <ClCompile Include="FolderRefreshService.cpp" />
-    <ClCompile Include="ListFace.cpp" />
     <ClCompile Include="ListPicture.cpp" />
     <ClCompile Include="MainViewerController.cpp" />
     <ClCompile Include="MainWindow.cpp" />
     <ClCompile Include="md5check.cpp" />
     <ClCompile Include="MediaLoader.cpp" />
-    <ClCompile Include="ModelManager.cpp" />
     <ClCompile Include="MusicController.cpp" />
     <ClCompile Include="PanelInfosWnd.cpp" />
     <ClCompile Include="PicturePanel.cpp" />
@@ -963,9 +955,6 @@
     <ClCompile Include="ScannerLauncher.cpp" />
     <ClCompile Include="SlideshowController.cpp" />
     <ClCompile Include="SqlBatchOps.cpp" />
-    <ClCompile Include="ThumbnailFace.cpp" />
-    <ClCompile Include="ThumbnailFacePertinenceToolBar.cpp" />
-    <ClCompile Include="ThumbnailFaceToolBar.cpp" />
     <ClCompile Include="ThumbnailFolder.cpp" />
     <ClCompile Include="ThumbnailProcess.cpp" />
     <ClCompile Include="ThumbnailScheduler.cpp" />

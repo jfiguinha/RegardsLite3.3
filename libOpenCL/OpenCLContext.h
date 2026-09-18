@@ -16,7 +16,7 @@ namespace Regards
             void Bind();
 
             void initializeContextFromGL();
-            void AssociateToVulkan();
+
             bool CreateDefaultOpenCLContext();
 
             void GetOutputData(

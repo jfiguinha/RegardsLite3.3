@@ -26,7 +26,7 @@
 #ifdef __WXGTK__
 #include <fontconfig/fontconfig.h>
 #endif
-#include <ncnn/gpu.h>
+
 #include <exiv2/image.hpp>
 AppContext application_context;
 
@@ -34,7 +34,7 @@ AppContext application_context;
 #include <appglcontext.h>
 AppGLContext application_glcontext;
 #endif
-ncnn::VulkanDevice* vkdev = nullptr;
+
 
 using namespace cv;
 using namespace Regards::Picture;
@@ -158,9 +158,6 @@ int MyApp::Close()
 	//_CrtDumpMemoryLeaks();
 #endif
 
-
-	if(vkdev != nullptr)
-		ncnn::destroy_gpu_instance();
 
 	// Signal the main loop to exit instead of abruptly terminating the process
 	ExitMainLoop();
@@ -332,16 +329,6 @@ bool MyApp::InitializeDirectories()
 	if (!LocaleMakeDir("temp"))
 	{
 		printf("Unable to make folder temp");
-		exit(0);
-	}
-	if (!LocaleMakeDir("Face"))
-	{
-		printf("Unable to make folder Face");
-		exit(0);
-	}
-	if (!LocaleMakeDir("model"))
-	{
-		printf("Unable to make folder Face");
 		exit(0);
 	}
 

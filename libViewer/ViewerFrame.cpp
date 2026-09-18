@@ -61,15 +61,6 @@ CViewerFrame::CViewerFrame(const wxString& title, const wxPoint& pos, const wxSi
     // 1. Paramètres et thème
     InitParams();
 
-    // 2. Vérification du modèle IA
-    modelManager_ = std::make_unique<CModelManager>(this);
-    if (!modelManager_->VerifyAndUpdate())
-    {
-        wxMessageBox(wxT("IA model not found. Program can't be started."),
-                     wxT("Error"), wxICON_ERROR);
-        mainInterface_->Close();
-        return;
-    }
 
     // 3. Fichier à ouvrir
     if (!wxFileExists(fileToOpen_))

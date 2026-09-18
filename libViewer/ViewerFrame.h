@@ -4,7 +4,7 @@
 
 
 // Services extraits
-#include "ModelManager.h"
+
 #include "FileWatcherService.h"
 #include "PrintService.h"
 #include "ViewerNavigationController.h"
@@ -160,7 +160,7 @@ namespace Regards::Viewer
         CMainWindow *   mainWindow_;
         CWaitingWindow * mainWindowWaiting;
         // Services
-        std::unique_ptr<CModelManager>               modelManager_;
+
         std::unique_ptr<CFileWatcherService>         fileWatcherService_;
         std::unique_ptr<CPrintService>               printService_;
         std::unique_ptr<CViewerNavigationController> navigationCtrl_;

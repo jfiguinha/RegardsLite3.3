@@ -9,13 +9,11 @@
 #include "LensFlare.h"
 #include "MotionBlur.h"
 #include "Filtre.h"
-#include <DeepLearning.h>
 #include "Wave.h"
 #include <ImageLoadingFormat.h>
 #include "avir.h"
 #include "MeanShift.h"
 #include <opencv2/xphoto.hpp>
-#include <FaceDetector.h>
 #include "VideoStabilization.h"
 #include <opencv2/dnn_superres.hpp>
 #include <FileUtility.h>
@@ -30,7 +28,6 @@
 #include <appcontext.h>
 using namespace Regards::OpenCV;
 using namespace Regards::OpenGL;
-using namespace Regards::DeepLearning;
 using namespace cv;
 using namespace dnn;
 using namespace dnn_superres;
@@ -65,9 +62,8 @@ public:
 	static void generateGradient(Mat& mask, const double& radius, const double& power);
 	static double getMaxDisFromCorners(const Size& imgSize, const Point& center);
 	static double dist(Point a, Point b);
-	static Mat upscaleImage(Mat img, int method, int scale);
-	static string GenerateModelPath(string modelName, int scale);
-	static bool TestIfMethodIsValid(int method, int scale);
+
+
 	static Rect CalculRect(int widthIn, int heightIn, int widthOut, int heightOut, int flipH, int flipV, int angle,
 	                       float ratioX, float ratioY, int x, int y, float left, float top);
 	static cv::Mat BuildContrastLUT(double alpha, double beta);
@@ -170,93 +166,6 @@ Rect CFiltreEffetCPUImpl::CalculRect(int widthIn, int heightIn, int widthOut, in
 }
 
 
-
-
-string CFiltreEffetCPUImpl::GenerateModelPath(string modelName, int scale)
-{
-	wxString documentPath = CFileUtility::GetDocumentFolderPathWithFilename("model");
-	wxFileName file(documentPath, wxString::Format("%s_x%d.pb", modelName, scale));
-	return CConvertUtility::ConvertToStdString(file.GetFullPath());
-}
-
-bool CFiltreEffetCPUImpl::TestIfMethodIsValid(int method, int scale)
-{
-	if (method == EDSR && (scale == 2 || scale == 3 || scale == 4))
-	{
-		return true;
-	}
-	if (method == ESPCN && (scale == 2 || scale == 3 || scale == 4))
-	{
-		return true;
-	}
-	if (method == FSRCNN && (scale == 2 || scale == 3 || scale == 4))
-	{
-		return true;
-	}
-	if (method == LapSRN && (scale == 2 || scale == 4 || scale == 8))
-	{
-		return true;
-	}
-	return false;
-}
-
-Mat CFiltreEffetCPUImpl::upscaleImage(Mat img, int method, int scale)
-{
-	Mat outputImage;
-	try
-	{
-		//muDnnSuperResImpl.lock();
-
-		DnnSuperResImpl sr;
-
-
-		switch (method)
-		{
-		case EDSR:
-			{
-				string algorithm = "edsr";
-				sr.readModel(GenerateModelPath("EDSR", scale));
-				sr.setModel(algorithm, scale);
-			}
-			break;
-
-		case ESPCN:
-			{
-				string algorithm = "espcn";
-				sr.readModel(GenerateModelPath("ESPCN", scale));
-				sr.setModel(algorithm, scale);
-			}
-			break;
-		case FSRCNN:
-			{
-				string algorithm = "fsrcnn";
-				sr.readModel(GenerateModelPath("FSRCNN", scale));
-				sr.setModel(algorithm, scale);
-			}
-			break;
-		case LapSRN:
-			{
-				string algorithm = "lapsrn";
-				sr.readModel(GenerateModelPath("LapSRN", scale));
-				sr.setModel(algorithm, scale);
-			}
-			break;
-		}
-
-		sr.setPreferableTarget(DNN_TARGET_CPU);
-		sr.upsample(img, outputImage);
-
-		//muDnnSuperResImpl.unlock();
-	}
-	catch (Exception& e)
-	{
-		const char* err_msg = e.what();
-		std::cout << "exception caught: " << err_msg << std::endl;
-		std::cout << "wrong file format, please input the name of an IMAGE file" << std::endl;
-	}
-
-	return outputImage;
-}
 
 
 CFiltreEffetCPU::CFiltreEffetCPU(CRgbaquad back_color, CImageLoadingFormat* bitmap)
@@ -809,20 +718,6 @@ void CFiltreEffetCPU::SetBitmap(CImageLoadingFormat* bitmap)
 	}
 }
 
-int CFiltreEffetCPU::RedEye()
-{
-	ExecuteSafe([&](cv::Mat& image)
-		{
-			bool fastDetection = true;
-			CRegardsConfigParam* param = CParamInit::getInstance();
-			if (param != nullptr)
-				fastDetection = param->GetFastDetectionFace();
-
-			CDeepLearning::RemoveRedEyes(image, fastDetection);
-		});
-
-	return 0;
-}
 
 int CFiltreEffetCPU::WaveFilter(int x, int y, short height, int scale, int radius)
 {
@@ -1753,29 +1648,6 @@ int CFiltreEffetCPU::FlipVertical()
 	return 0;
 }
 
-
-int CFiltreEffetCPU::SuperResolutionNCNN()
-{
-
-	ExecuteSafe([&](cv::Mat& image)
-		{
-			image = CFaceDetector::SuperResolution(image);
-		});
-	
-	return 0;
-}
-
-int CFiltreEffetCPU::Colorization()
-{
-	ExecuteSafe([&](cv::Mat& image)
-		{
-			image = CFaceDetector::Colorisation(image);
-		});
-
-
-
-	return 0;
-}
 
 //----------------------------------------------------------------------------
 //

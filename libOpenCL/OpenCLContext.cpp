@@ -33,7 +33,7 @@
 #include <EGL/eglext.h>
 #endif
 #endif
-#include <ncnn/gpu.h>
+
 #include <utility.h>
 #include <ParamInit.h>
 #include <RegardsConfigParam.h>
@@ -41,7 +41,7 @@
 #include <LibResource.h>
 #include <appcontext.h>
 extern AppContext application_context;
-extern ncnn::VulkanDevice* vkdev;
+
 
 #if defined (__APPLE__) || defined(MACOSX)
 static const char* CL_GL_SHARING_EXT = "cl_APPLE_gl_sharing";
@@ -66,63 +66,6 @@ void COpenCLContext::Bind()
 {
 	if (!clExecCtx.empty())
 		clExecCtx.bind();
-}
-
-void COpenCLContext::AssociateToVulkan()
-{
-    if (!cv::ocl::haveOpenCL())
-        return;
-
-    constexpr const char* preferredGpu[] =
-    {
-        "nvidia",
-        "amd",
-        "intel",
-        "apple"
-    };
-
-    int selectedIndex = -1;
-    int selectedPriority = INT_MAX;
-
-    const int gpuCount = ncnn::get_gpu_count();
-
-    for (int i = 0; i < gpuCount; ++i)
-    {
-        const ncnn::GpuInfo& info =
-            ncnn::get_gpu_info(i);
-
-        std::string deviceName =
-            info.device_name();
-
-        std::transform(deviceName.begin(),
-                       deviceName.end(),
-                       deviceName.begin(),
-                       [](unsigned char c)
-                       {
-                           return std::tolower(c);
-                       });
-
-        for (int priority = 0;
-             priority < 4;
-             ++priority)
-        {
-            if (deviceName.find(preferredGpu[priority])
-                != std::string::npos)
-            {
-                if (priority < selectedPriority)
-                {
-                    selectedPriority = priority;
-                    selectedIndex = i;
-                }
-                break;
-            }
-        }
-    }
-
-    if (selectedIndex >= 0)
-    {
-		vkdev = ncnn::get_gpu_device(selectedIndex);
-    }
 }
 
 wxString COpenCLContext::GetDeviceInfo(

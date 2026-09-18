@@ -20,7 +20,7 @@ public:
 	int HistogramNormalize() override;
 	int HistogramEqualize() override;
 	Regards::Picture::CPictureArray GetMatrix() override;
-	int RedEye() override;
+
 	int BokehEffect(const int& radius, const int& boxsize, const int& nbFace, const wxRect& listFace) override;
 	int HQDn3D(const double& LumSpac = 4, const double& temporalLumaDefault = 6.0, const double& temporalSpatialLumaDefault = 4.0) override;
 	int BilateralFilter(const int& fSize, const int& sigmaX, const int& sigmaP) override;
@@ -88,8 +88,7 @@ public:
 	int PencilSketch(const double& sigma_s, const double& sigma_r, const double& shade_factor) override;
 	int Stylization(const double& sigma_s, const double& sigma_r) override;
 
-	int SuperResolutionNCNN() override;
-	int Colorization() override;
+
     int Inpaint(const cv::Mat &mask, int algorithm) override;
 private:
 	template<typename T, typename... Args>

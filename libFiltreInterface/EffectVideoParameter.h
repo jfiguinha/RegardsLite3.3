@@ -83,8 +83,7 @@ public:
 		searchWindowSize = 4;
 
 		filmgrainenable = 0;
-		filmcolorisation = 0;
-		filmEnhance = 0;
+
 		ratioSelect = 0;
 
 		tabRatio = zoom;
@@ -139,8 +138,7 @@ public:
 	int streamVideoUpdate;
 	int streamSubtitleUpdate;
 	int filmgrainenable;
-	int filmcolorisation;
-	int filmEnhance;
+
 	vector<float> tabRatio;
 	vector<float> tabZoom;
 	int ratioSelect = 4;

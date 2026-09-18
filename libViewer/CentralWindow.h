@@ -99,9 +99,7 @@ namespace Regards::Viewer
         CListPicture *                            listPicture      = nullptr;
         CThumbnailViewerPicture *                 thumbnailPicture = nullptr;
         CPanelWithClickToolbar *                  panelInfosClick  = nullptr;
-#ifndef __NOFACE_DETECTION__
-        CListFace *                               listFace         = nullptr;
-#endif
+
         CScrollbarWnd *                           scrollVideoWindow   = nullptr;
         CThumbnailViewerVideo *                   thumbnailVideo      = nullptr;
         CPanelInfosWnd *                          panelInfosWindow    = nullptr;

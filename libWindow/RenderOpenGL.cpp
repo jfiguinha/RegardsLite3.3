@@ -109,7 +109,7 @@ void CRenderOpenGL::Init(wxGLCanvas* canvas)
 
 	if (regardsParam != nullptr && openCLContext != nullptr)
 	{
-		openCLContext->AssociateToVulkan();
+
 		const bool openCLAvailable = cv::ocl::haveOpenCL() && regardsParam->GetIsOpenCLSupport();
 
 		if (openCLAvailable)

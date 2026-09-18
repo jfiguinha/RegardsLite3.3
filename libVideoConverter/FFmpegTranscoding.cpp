@@ -1710,11 +1710,6 @@ void CFFmpegTranscoding::VideoTreatment(AVFrame*& tmp_frame, StreamContext* stre
 				openclEffectVideo.ApplyStabilization(&videoCompressOption->videoEffectParameter, openCVStabilization.get());
 			}
 
-			if (correctedContrast || videoCompressOption->videoEffectParameter.filmcolorisation || videoCompressOption->videoEffectParameter.filmEnhance)
-			{
-				openclEffectVideo.ApplyOpenCVEffect(&videoCompressOption->videoEffectParameter);
-			}
-
 			openclEffectVideo.ApplyVideoEffect(&videoCompressOption->videoEffectParameter);
 		}
 
@@ -1826,11 +1821,6 @@ cv::Mat CFFmpegTranscoding::ApplyProcess(cv::Mat& src)
 			openclEffectVideo.ApplyStabilization(&videoCompressOption->videoEffectParameter, openCVStabilization.get());
 		}
 
-		if (correctedContrast || videoCompressOption->videoEffectParameter.filmcolorisation || videoCompressOption->videoEffectParameter.filmEnhance)
-		{
-			openclEffectVideo.ApplyOpenCVEffect(&videoCompressOption->videoEffectParameter);
-		}
-
 		openclEffectVideo.ApplyVideoEffect(&videoCompressOption->videoEffectParameter);
 
 		mat = openclEffectVideo.GetMatrix().getMat().clone();
@@ -1908,16 +1898,6 @@ cv::Mat CFFmpegTranscoding::ApplyProcess(cv::Mat& src)
 				if (videoCompressOption->videoEffectParameter.grayEnable)
 				{
 					filtre.NiveauDeGris();
-				}
-
-				if (videoCompressOption->videoEffectParameter.filmcolorisation)
-				{
-					filtre.Colorization();
-				}
-
-				if (videoCompressOption->videoEffectParameter.filmEnhance)
-				{
-					filtre.SuperResolutionNCNN();
 				}
 			}
 		}

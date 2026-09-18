@@ -28,7 +28,6 @@ namespace Regards::Viewer
         CViewerController(wxWindow*                parent,
                           CThumbnailViewerPicture* thumbnailPicture,
                           CListPicture*            listPicture,
-                          CListFace*               listFace,
                           CPreviewWnd*             previewWindow,
                           CMediaLoader*            mediaLoader);
         ~CViewerController() = default;
@@ -73,7 +72,6 @@ namespace Regards::Viewer
         wxWindow*                parent           = nullptr;
         CThumbnailViewerPicture* thumbnailPicture = nullptr;
         CListPicture*            listPicture      = nullptr;
-        CListFace*               listFace         = nullptr;
         CPreviewWnd*             previewWindow    = nullptr;
         CMediaLoader*            mediaLoader      = nullptr;
 

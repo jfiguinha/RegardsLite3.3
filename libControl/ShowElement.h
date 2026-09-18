@@ -127,8 +127,6 @@ namespace Regards
             void ResizeImage(int w, int h);   // sous-routine de Resize() mode image
             void ResizeVideo(int w, int h);   // sous-routine de Resize() mode vidéo
 
-            // ---- Thread rotation ----
-            static void RotateRecognition(void* param);
 
             // ---- Event handlers ----
             void OnViewerDblClick(wxCommandEvent& event);

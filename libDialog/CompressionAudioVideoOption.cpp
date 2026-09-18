@@ -549,8 +549,6 @@ void CompressionAudioVideoOption::OnbtnCheckFilterClick(wxCommandEvent& event)
 	videoEffectParameter->SharpenEnable = cksharpenFilter->GetValue();
 	videoEffectParameter->grayEnable = ckgrey->GetValue();
 	videoEffectParameter->sepiaEnable = cksepia->GetValue();
-	videoEffectParameter->filmcolorisation = ckenableColorisation->GetValue();
-	videoEffectParameter->filmEnhance = ckenableRestore->GetValue();
 	videoEffectParameter->filmgrainenable = cknoise->GetValue();
 	videoEffectParameter->contrast = contrastFilter->GetValue();
 	videoEffectParameter->brightness = lightFilter->GetValue();
@@ -821,8 +819,6 @@ void CompressionAudioVideoOption::GetCompressionOption()
 		videoCompressOption->videoEffectParameter.contrast = contrastFilter->GetValue();
 		videoCompressOption->videoEffectParameter.brightness = lightFilter->GetValue();
 		videoCompressOption->videoEffectParameter.ColorBoostEnable = ckcolorBoost->GetValue();
-		videoCompressOption->videoEffectParameter.filmcolorisation = ckenableColorisation->GetValue();
-		videoCompressOption->videoEffectParameter.filmEnhance = ckenableRestore->GetValue();
 		videoCompressOption->videoEffectParameter.color_boost[0] = redFilter->GetValue();
 		videoCompressOption->videoEffectParameter.color_boost[1] = greenFilter->GetValue();
 		videoCompressOption->videoEffectParameter.color_boost[2] = blueFilter->GetValue();

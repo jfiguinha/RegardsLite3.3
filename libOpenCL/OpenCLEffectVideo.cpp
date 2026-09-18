@@ -5,7 +5,6 @@
 #include "OpenCLFilter.h"
 #include "OpenCLKernelBuilder.h"
 #include "VideoStabilization.h"
-#include <FaceDetector.h>
 #include <appcontext.h>
 #include "OpenCLContext.h"
 extern AppContext application_context;
@@ -182,39 +181,6 @@ void COpenCLEffectVideo::ApplyOpenCVEffect(CVideoEffectParameter* videoEffectPar
 		ExecuteSafe([&](cv::UMat& image)
 			{
 				openclFilter->BrightnessAndContrastAuto(image, 1.0);
-			});
-	}
-
-	if (videoEffectParameter->filmEnhance || videoEffectParameter->filmcolorisation)
-	{
-		cv::Mat image;
-
-		ExecuteSafe([&](cv::UMat& image_umat)
-			{
-				image_umat.copyTo(image);
-			});
-		/*
-		if (interpolatePicture)
-		{
-			paramOutput.copyTo(image);
-		}
-		else
-		{
-			paramSrc.copyTo(image);
-		}*/
-		if (videoEffectParameter->filmEnhance)
-		{
-			image = CFaceDetector::SuperResolution(image);
-
-		}
-		if (videoEffectParameter->filmcolorisation)
-		{
-			image = CFaceDetector::Colorisation(image);
-		}
-
-		ExecuteSafe([&](cv::UMat& image_umat)
-			{
-				image.copyTo(image_umat);
 			});
 	}
 }

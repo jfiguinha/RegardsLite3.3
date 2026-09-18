@@ -9,7 +9,6 @@
 #include <RegardsConfigParam.h>
 #include <ImageLoadingFormat.h>
 #include <SqlPhotos.h>
-#include <DeepLearning.h>
 #include "BitmapWndViewer.h"
 #include "SliderVideo.h"
 #include "VideoControl_soft.h"
@@ -569,30 +568,6 @@ void CShowElement::SavePicture()
     }
 }
 
-// ============================================================================
-// Thread de reconnaissance d'orientation (ML)
-// ============================================================================
-/*static*/
-void CShowElement::RotateRecognition(void* param)
-{
-    auto* tr = static_cast<CThreadRotate*>(param);
-    if (!tr) return;
-
-    if (!tr->bitmap.empty())
-    {
-        CRegardsConfigParam* cfg = CParamInit::getInstance();
-        const bool fast = cfg ? cfg->GetFastDetectionFace() : true;
-        tr->exif    = DeepLearning::CDeepLearning::GetExifOrientation(tr->bitmap, fast);
-        tr->isReady = true;
-    }
-
-    if (tr->mainWindow)
-    {
-        wxCommandEvent evt(wxEVENT_ROTATEDETECT);
-        evt.SetClientData(tr);
-        tr->mainWindow->GetEventHandler()->AddPendingEvent(evt);
-    }
-}
 
 void CShowElement::OnRotateDetect(wxCommandEvent& event)
 {

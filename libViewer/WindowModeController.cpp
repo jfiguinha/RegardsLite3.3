@@ -1,7 +1,6 @@
 #include <header.h>
 #include "WindowModeController.h"
 #include "ListPicture.h"
-#include "ListFace.h"
 #include "PreviewWnd.h"
 #include "PanelInfosWnd.h"
 #include <WindowManager.h>
@@ -20,7 +19,6 @@ CWindowModeController::CWindowModeController(wxWindow*              parent,
                                              CPreviewWnd*           previewWindow,
                                              CPanelInfosWnd*        panelInfosWindow,
                                              CListPicture*          listPicture,
-                                             CListFace*             listFace,
                                              const int&             faceDetection)
     : parent(parent)
     , windowManager(windowManager)
@@ -28,7 +26,6 @@ CWindowModeController::CWindowModeController(wxWindow*              parent,
     , previewWindow(previewWindow)
     , panelInfosWindow(panelInfosWindow)
     , listPicture(listPicture)
-    , listFace(listFace)
     , faceDetection(faceDetection)
 {
 }
@@ -70,8 +67,7 @@ void CWindowModeController::SetMode(wxCommandEvent& event)
     previewWindow->SetNormalMode();
     panelInfosWindow->Show(false);
     panelInfosClick->Show(false);
-    if (faceDetection && listFace != nullptr)
-        listFace->Show(false);
+
     listPicture->Show(false);
 
     if (windowInit)
@@ -133,35 +129,6 @@ void CWindowModeController::SetMode(wxCommandEvent& event)
 
         if (windowInit && !showInfos)
             windowManager->HidePaneWindow(Pos::wxRIGHT);
-    }
-    break;
-
-    case WINDOW_FACE:
-    {
-        wxWindow* window = parent->FindWindowById(PREVIEWVIEWERID);
-        if (window != nullptr)
-        {
-            wxCommandEvent evt(wxEVENT_HIDESCREENBUTTON);
-            window->GetEventHandler()->AddPendingEvent(evt);
-        }
-
-        if (faceDetection && listFace != nullptr)
-        {
-            panelInfosClick->Show(true);
-            if (!windowManager->GetWindowIsShow(Pos::wxLEFT))   windowManager->ShowWindow(Pos::wxLEFT);
-            if (!windowManager->GetWindowIsShow(Pos::wxRIGHT))  windowManager->ShowWindow(Pos::wxRIGHT);
-            if (windowManager->GetWindowIsShow(Pos::wxBOTTOM))  windowManager->HideWindow(Pos::wxBOTTOM);
-            if (windowManager->GetWindowIsShow(Pos::wxTOP))     windowManager->HideWindow(Pos::wxTOP);
-
-            windowManager->ShowPaneWindow(Pos::wxRIGHT);
-            listFace->Show(true);
-            panelInfosClick->SetWindow(listFace);
-            panelInfosClick->Show(true);
-            panelInfosClick->SetTitle("Face List");
-
-            if (windowInit && !showInfos)
-                windowManager->HidePaneWindow(Pos::wxRIGHT);
-        }
     }
     break;
 

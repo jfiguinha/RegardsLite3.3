@@ -100,15 +100,14 @@ public:
 	                      const int& iIntensity, const int& iColor, const int& iColorIntensity) = 0;
 	virtual int Fusion(cv::Mat& bitmapSecond, const float& pourcentage) = 0;
 	virtual wxImage GetwxImage() = 0;
-	virtual int RedEye() = 0;
+
 	virtual void SetBitmap(CImageLoadingFormat* bitmap) = 0;
 	virtual cv::Mat GetBitmap(const bool& source) = 0;
 	virtual int GetWidth() = 0;
 	virtual int GetHeight() = 0;
 	virtual int BrightnessAndContrastAuto(float clipHistPercent) = 0;
 	virtual bool StabilizeVideo(Regards::OpenCV::COpenCVStabilization* stabilization) = 0;
-	virtual int SuperResolutionNCNN() = 0;
-	virtual int Colorization() = 0;
+
     virtual int Inpaint(const cv::Mat &mask, int algorithm) = 0;
 protected:
 	//CRegardsBitmap * pBitmap;

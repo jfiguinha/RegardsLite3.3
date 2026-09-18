@@ -54,7 +54,7 @@ public:
 	int Noise();
 	int Dilate();
 	int Negatif();
-	int RedEye();
+
 	int FiltreEdge();
 	int FiltreMosaic(const int& size);
 	int FlipVertical();
@@ -89,9 +89,6 @@ public:
 	int PencilSketch(const double& sigma_s, const double& sigma_r, const double& shade_factor);
 	int Stylization(const double& sigma_s, const double& sigma_r);
 
-	//Image Restoration
-	int SuperResolutionNCNN();
-	int Colorization();
 
 	int GetLib();
 	wxImage GetwxImage();

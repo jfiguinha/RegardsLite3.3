@@ -3,7 +3,7 @@
 #include "MediaLoader.h"
 #include "ThumbnailViewerPicture.h"
 #include "ListPicture.h"
-#include "ListFace.h"
+
 #include "PreviewWnd.h"
 #include <SqlPhotos.h>
 #include "window_mode_id.h"
@@ -17,13 +17,11 @@ using namespace Regards::Viewer;
 CViewerController::CViewerController(wxWindow*                parent,
                                      CThumbnailViewerPicture* thumbnailPicture,
                                      CListPicture*            listPicture,
-                                     CListFace*               listFace,
                                      CPreviewWnd*             previewWindow,
                                      CMediaLoader*            mediaLoader)
     : parent(parent)
     , thumbnailPicture(thumbnailPicture)
     , listPicture(listPicture)
-    , listFace(listFace)
     , previewWindow(previewWindow)
     , mediaLoader(mediaLoader)
     , windowMode(mediaLoader->windowMode)
@@ -111,19 +109,7 @@ wxString CViewerController::LoadingNextPicture(const bool& loadPicture, LoadingM
         }
         filename = thumbnailPicture->GetFilename(numItem);
     }
-    else if (windowMode == WINDOW_FACE && listFace != nullptr)
-    {
-        switch (mode)
-        {
-        case Next:
-            numItem = listFace->ImageSuivante();
-            break;
-        case Previous:
-            numItem = listFace->ImagePrecedente();
-            break;
-        }
-        filename = listFace->GetFilename(numItem);
-    }
+
 
     if (!filename.empty() && loadPicture)
         mediaLoader->LoadPicture(filename);

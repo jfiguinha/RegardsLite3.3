@@ -132,10 +132,6 @@ void CVideoFilter::Filter(CEffectParameter* effectParameter, const wxString& fil
 	filtreInterface->AddTreeInfos(enableSepia, new CTreeElementValueInt(videoEffectParameter->sepiaEnable),
 		&videoEffectParameter->sepiaEnable, 2, 2);
 
-	filtreInterface->AddTreeInfos(enableColorisation, new CTreeElementValueInt(videoEffectParameter->filmcolorisation),
-		&videoEffectParameter->filmcolorisation, 2, 2);
-	filtreInterface->AddTreeInfos(enableRestore, new CTreeElementValueInt(videoEffectParameter->filmEnhance),
-		&videoEffectParameter->filmEnhance, 2, 2);
 	filtreInterface->AddTreeInfos(enableVHSEffect, new CTreeElementValueInt(videoEffectParameter->vhsEnable),
 	                              &videoEffectParameter->vhsEnable, 2, 2);
 	filtreInterface->AddTreeInfos(enableBandCEffect, new CTreeElementValueInt(videoEffectParameter->bandcEnable),
@@ -276,17 +272,9 @@ void CVideoFilter::FilterChangeParam(CEffectParameter* effectParameter, CTreeEle
 	{
 		videoEffectParameter->stabilizeImageBuffere = value;
 	}
-	else if (key == enableRestore)
-	{
-		videoEffectParameter->filmEnhance = value;
-	}
 	else if (key == libelleAutoContrast)
 	{
 		videoEffectParameter->autoConstrast = value;
-	}
-	else if (key == enableColorisation)
-	{
-		videoEffectParameter->filmcolorisation = value;
 	}
 	else if (key == libelleStabilize)
 	{

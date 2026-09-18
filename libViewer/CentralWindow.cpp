@@ -11,7 +11,7 @@
 #include "ThumbnailViewerVideo.h"
 #include "ThumbnailViewerPicture.h"
 #ifndef __NOFACE_DETECTION__
-#include "ListFace.h"
+
 #endif
 #include "ViewerParam.h"
 #include "PanelInfosWnd.h"
@@ -28,7 +28,7 @@
 #include "ViewerController.h"
 #include "SlideshowController.h"
 #include "WindowModeController.h"
-#include "ThumbnailFace.h"
+
 #include "window_mode_id.h"
 
 using namespace Regards::Picture;
@@ -136,10 +136,7 @@ CCentralWindow::CCentralWindow(wxWindow* parent, wxWindowID id,
         {
             listPicture = new CListPicture(windowManager, LISTPICTUREID);
             listPicture->Show(false);
-#ifndef __NOFACE_DETECTION__
-            listFace = new CListFace(windowManager, LISTFACEID);
-            listFace->Show(false);
-#endif
+
         }
     }
 
@@ -150,11 +147,11 @@ CCentralWindow::CCentralWindow(wxWindow* parent, wxWindowID id,
     
     mediaLoader->windowMode = initialWindowMode;
 
-    viewerController = std::make_unique<CViewerController>(this, thumbnailPicture, listPicture,listFace, previewWindow, mediaLoader.get());
+    viewerController = std::make_unique<CViewerController>(this, thumbnailPicture, listPicture, previewWindow, mediaLoader.get());
 
     slideshowController = std::make_unique<CSlideshowController>(this, previewWindow ,musicController.get(), viewerController.get());
 
-    windowModeController = std::make_unique<CWindowModeController>(this, windowManager, panelInfosClick, previewWindow, panelInfosWindow, listPicture, listFace, faceDetection);
+    windowModeController = std::make_unique<CWindowModeController>(this, windowManager, panelInfosClick, previewWindow, panelInfosWindow, listPicture, faceDetection);
 
     // ── wxWidgets event bindings ──────────────────────────────────────
     Connect(wxEVT_ANIMATIONTIMERSTOP,    wxCommandEventHandler(CCentralWindow::StopAnimationEvent));
@@ -375,15 +372,7 @@ void CCentralWindow::UpdateThumbnailIcone(wxCommandEvent& e)
                     ptFolder->Refresh();
             }
         };
-    auto refreshFace = [&]()
-        {
-            if (listFace != nullptr)
-            {
-                CThumbnailFace* ptListFace = listFace->GetThumbnailFace();
-                if (ptListFace->IsShown())
-                    ptListFace->Refresh();
-            }
-        };
+
     auto refreshPicture = [&]()
         {
             if (thumbnailPicture != nullptr && thumbnailPicture->IsShown())
@@ -402,7 +391,6 @@ void CCentralWindow::UpdateThumbnailIcone(wxCommandEvent& e)
     if (longWindow == 0)
     {
         refreshFolder();
-        refreshFace();
         refreshPicture();
         refreshVideo();
     }
@@ -416,9 +404,7 @@ void CCentralWindow::UpdateThumbnailIcone(wxCommandEvent& e)
         case LISTPICTUREID:
             refreshFolder();
             break;
-        case LISTFACEID:
-            refreshFace();
-            break;
+
         case THUMBNAILVIEWERPICTURE:
             refreshPicture();
             if (thumbnailVideo != nullptr &&
