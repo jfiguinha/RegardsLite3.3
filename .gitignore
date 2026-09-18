@@ -125,3 +125,9 @@ RegardsViewer_macsilicon/package/RegardsLite/.DS_Store
 Otherlib/.DS_Store
 libextern/.DS_Store
 compile_commands.json
+/libAppleFunction/Release
+/RegardsViewer_macsilicon/Debug
+RegardsViewer_macsilicon/RegardsLite_macsilicon.txt
+libAppleFunction/libAppleFunction.txt
+/.ctagsd
+.ctagsd/ctagsd.json
