@@ -118,3 +118,10 @@ libWindow/libWindow.txt
 RegardsViewer_linux/Package/deb/RegardsLite_3.00.0.0_linux_amd64.deb
 /RegardsViewer_linux/Package/RegardsLite
 RegardsViewer_macsilicon/package/RegardsLite/.DS_Store
+/Otherlib/wxPDFDoc/Debug
+/Otherlib/wxPDFDoc/Debug
+/Otherlib/wxPDFDoc/Release
+/include/Debug
+Otherlib/.DS_Store
+libextern/.DS_Store
+compile_commands.json

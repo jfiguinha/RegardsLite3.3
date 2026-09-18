@@ -20,9 +20,7 @@
   <VirtualDirectory Name="Exif">
     <Project Name="libGeolocalisation" Path="libGeolocalisation/libGeolocalisation.project" Active="No"/>
   </VirtualDirectory>
-  <VirtualDirectory Name="wxWidgetComponent">
-    <Project Name="wxPDFDoc" Path="Otherlib/wxPDFDoc/wxPDFDoc.project" Active="No"/>
-  </VirtualDirectory>
+  <VirtualDirectory Name="wxWidgetComponent"/>
   <VirtualDirectory Name="Window">
     <Project Name="libControl" Path="libControl/libControl.project" Active="No"/>
     <Project Name="libViewer" Path="libViewer/libViewer.project" Active="No"/>
@@ -31,7 +29,7 @@
   </VirtualDirectory>
   <VirtualDirectory Name="RegardsViewer_exe">
     <Project Name="RegardsViewer" Path="RegardsViewer/RegardsViewer.project" Active="No"/>
-    <Project Name="RegardsViewer_linux" Path="RegardsViewer_linux/RegardsViewer_linux.project" Active="Yes"/>
+    <Project Name="RegardsViewer_linux" Path="RegardsViewer_linux/RegardsViewer_linux.project" Active="No"/>
     <Project Name="MacOsLibExplorer" Path="MacOsLibExplorer/MacOsLibExplorer.project" Active="No"/>
     <Project Name="RegardsViewer_macsilicon" Path="RegardsViewer_macsilicon/RegardsViewer_macsilicon.project" Active="No"/>
     <Project Name="RegardsLiteViewer_macsilicon" Path="RegardsViewer_macsilicon/RegardsViewer_macsilicon.project" Active="No"/>
