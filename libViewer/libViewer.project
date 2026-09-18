@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CodeLite_Project Name="libViewer" InternalType="Library" Version="11000">
-  <VirtualDirectory Name="cvplot">
-    <File Name="../libextern/CvPlot/src/cvplot.cpp"/>
-  </VirtualDirectory>
   <Plugins>
     <Plugin Name="qmake">
       <![CDATA[00020001N0005Debug0000000000000001N0007Release000000000000]]>
@@ -29,6 +26,9 @@
  }]]]>
     </Plugin>
   </Plugins>
+  <VirtualDirectory Name="cvplot">
+    <File Name="../libextern/CvPlot/src/cvplot.cpp"/>
+  </VirtualDirectory>
   <VirtualDirectory Name="FolderProcess">
     <File Name="md5check.h"/>
     <File Name="md5check.cpp"/>
@@ -127,8 +127,6 @@
       <File Name="ThumbnailViewerVideo.h"/>
     </VirtualDirectory>
   </VirtualDirectory>
-  <Dependencies Name="Debug"/>
-  <Dependencies Name="Release"/>
   <Settings Type="Static Library">
     <GlobalSettings>
       <Compiler Options="$(shell ../libextern/wxconfig_cpp.sh);-Wall;-pthread;-std=gnu++17;-Wall" C_Options=";-Wall" Assembler="">
@@ -254,4 +252,6 @@
       </Completion>
     </Configuration>
   </Settings>
+  <Dependencies Name="Debug"/>
+  <Dependencies Name="Release"/>
 </CodeLite_Project>
