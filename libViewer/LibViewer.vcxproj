@@ -880,23 +880,12 @@
   <ItemGroup>
     <ClInclude Include="..\include\header.h" />
     <ClInclude Include="AnimationToolbar.h" />
-    <ClInclude Include="CategoryFolderWindow.h" />
-    <ClInclude Include="CategoryHierarchyIndex.h" />
-    <ClInclude Include="CategoryQueryService.h" />
-    <ClInclude Include="CategoryRepository.h" />
-    <ClInclude Include="CategorySelectionController.h" />
-    <ClInclude Include="CategoryTreeStatePersistence.h" />
-    <ClInclude Include="CategoryWnd.h" />
-    <ClInclude Include="CriteriaWindow.h" />
     <ClInclude Include="ExportDiaporama.h" />
     <ClInclude Include="FaceInfosUpdate.h" />
     <ClInclude Include="FileSystemValidator.h" />
     <ClInclude Include="FileWatcherService.h" />
     <ClInclude Include="FolderProcess.h" />
     <ClInclude Include="FolderRefreshService.h" />
-    <ClInclude Include="KeywordManagementWindow.h" />
-    <ClInclude Include="KeywordWnd.h" />
-    <ClInclude Include="KeywordWndToolbar.h" />
     <ClInclude Include="MainViewerController.h" />
     <ClInclude Include="md5check.h" />
     <ClInclude Include="MediaLoader.h" />
@@ -909,7 +898,6 @@
     <ClInclude Include="ListPicture.h" />
     <ClInclude Include="MainWindow.h" />
     <ClInclude Include="PanelInfosWnd.h" />
-    <ClInclude Include="PanelPhotoWnd.h" />
     <ClInclude Include="PicturePanel.h" />
     <ClInclude Include="PreviewToolbar.h" />
     <ClInclude Include="PreviewWnd.h" />
@@ -929,7 +917,6 @@
     <ClInclude Include="ThumbnailViewerPicture.h" />
     <ClInclude Include="ThumbnailViewerVideo.h" />
     <ClInclude Include="ToolbarInfos.h" />
-    <ClInclude Include="ToolbarKeyword.h" />
     <ClInclude Include="ToolbarPhoto.h" />
     <ClInclude Include="ToolbarViewerMode.h" />
     <ClInclude Include="TreatmentData.h" />
@@ -954,23 +941,12 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_cuda|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="AnimationToolbar.cpp" />
-    <ClCompile Include="CategoryFolderWindow.cpp" />
-    <ClCompile Include="CategoryHierarchyIndex.cpp" />
-    <ClCompile Include="CategoryQueryService.cpp" />
-    <ClCompile Include="CategoryRepository.cpp" />
-    <ClCompile Include="CategorySelectionController.cpp" />
-    <ClCompile Include="CategoryTreeStatePersistence.cpp" />
-    <ClCompile Include="CategoryWnd.cpp" />
     <ClCompile Include="CentralWindow.cpp" />
-    <ClCompile Include="CriteriaWindow.cpp" />
     <ClCompile Include="ExportDiaporama.cpp" />
     <ClCompile Include="FileSystemValidator.cpp" />
     <ClCompile Include="FileWatcherService.cpp" />
     <ClCompile Include="FolderProcess.cpp" />
     <ClCompile Include="FolderRefreshService.cpp" />
-    <ClCompile Include="KeywordManagementWindow.cpp" />
-    <ClCompile Include="KeywordWnd.cpp" />
-    <ClCompile Include="KeywordWndToolbar.cpp" />
     <ClCompile Include="ListFace.cpp" />
     <ClCompile Include="ListPicture.cpp" />
     <ClCompile Include="MainViewerController.cpp" />
@@ -980,7 +956,6 @@
     <ClCompile Include="ModelManager.cpp" />
     <ClCompile Include="MusicController.cpp" />
     <ClCompile Include="PanelInfosWnd.cpp" />
-    <ClCompile Include="PanelPhotoWnd.cpp" />
     <ClCompile Include="PicturePanel.cpp" />
     <ClCompile Include="PreviewToolbar.cpp" />
     <ClCompile Include="PreviewWnd.cpp" />
@@ -999,7 +974,6 @@
     <ClCompile Include="ThumbnailViewerPicture.cpp" />
     <ClCompile Include="ThumbnailViewerVideo.cpp" />
     <ClCompile Include="ToolbarInfos.cpp" />
-    <ClCompile Include="ToolbarKeyword.cpp" />
     <ClCompile Include="ToolbarPhoto.cpp" />
     <ClCompile Include="ToolbarViewerMode.cpp" />
     <ClCompile Include="ViewerController.cpp" />

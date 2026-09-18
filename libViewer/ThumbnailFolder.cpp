@@ -222,31 +222,9 @@ void CThumbnailFolder::ChangeTypeAffichage(const int& typeAffichage, bool needFi
 
 void CThumbnailFolder::Init(const int& typeAffichage, const bool& isDeleteFolder, const bool& isSqlUpdate)
 {
-	if ((isDeleteFolder || isSqlUpdate) && nbElementInIconeList > 0)
+	if (nbElementInIconeList > 0)
 	{
-		int size = iconeList->GetNbElement();
-		if (size > 0)
-		{
-			CIconeList * newIconeList = new CIconeList();
-
-			GenerateList(newIconeList);
-
-			if (newIconeList->GetNbElement() > 0)
-			{
-				auto old = std::move(iconeList);
-				iconeList.reset(newIconeList);
-
-				nbElementInIconeList = iconeList->GetNbElement();
-
-				//old->EraseThumbnailListWithIcon();
-			}
-			// sinon newIconeList est détruit automatiquement en sortant de portée
-			// (plus de delete explicite nécessaire)
-		}
-		else if (CThumbnailBuffer::GetVectorSize() == 0)
-		{
-			iconeList->EraseThumbnailListWithIcon();
-		}
+		iconeList->EraseThumbnailListWithIcon();
 	}
 
 	ChangeTypeAffichage(typeAffichage, !isDeleteFolder);

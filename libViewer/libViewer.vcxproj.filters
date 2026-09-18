@@ -49,12 +49,6 @@
     <Filter Include="Resource">
       <UniqueIdentifier>{8bbf014a-b4f4-4b6c-a5cc-5e3b0ad81160}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Window">
-      <UniqueIdentifier>{99be6f0d-57d5-445f-80e8-f6b7021b72db}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Window\Keyword Management">
-      <UniqueIdentifier>{0cb48d58-8402-42b1-a7b6-ef33346be6c3}</UniqueIdentifier>
-    </Filter>
     <Filter Include="ExportDiaporama">
       <UniqueIdentifier>{6c4340b1-d81d-4918-a8c9-8e2d0b230e0c}</UniqueIdentifier>
     </Filter>
@@ -90,12 +84,6 @@
     <ClInclude Include="AnimationToolbar.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
-    <ClInclude Include="CategoryFolderWindow.h">
-      <Filter>Fichiers d%27en-tête</Filter>
-    </ClInclude>
-    <ClInclude Include="CategoryWnd.h">
-      <Filter>Fichiers d%27en-tête</Filter>
-    </ClInclude>
     <ClInclude Include="ListFace.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
@@ -120,9 +108,6 @@
     <ClInclude Include="PanelInfosWnd.h">
       <Filter>Panel\include</Filter>
     </ClInclude>
-    <ClInclude Include="PanelPhotoWnd.h">
-      <Filter>Panel\include</Filter>
-    </ClInclude>
     <ClInclude Include="ToolbarPhoto.h">
       <Filter>Toolbar\include</Filter>
     </ClInclude>
@@ -137,21 +122,6 @@
     </ClInclude>
     <ClInclude Include="CentralWindow.h">
       <Filter>Fichiers d%27en-tête</Filter>
-    </ClInclude>
-    <ClInclude Include="CriteriaWindow.h">
-      <Filter>Window</Filter>
-    </ClInclude>
-    <ClInclude Include="KeywordManagementWindow.h">
-      <Filter>Window\Keyword Management</Filter>
-    </ClInclude>
-    <ClInclude Include="KeywordWnd.h">
-      <Filter>Window\Keyword Management</Filter>
-    </ClInclude>
-    <ClInclude Include="KeywordWndToolbar.h">
-      <Filter>Window\Keyword Management</Filter>
-    </ClInclude>
-    <ClInclude Include="ToolbarKeyword.h">
-      <Filter>Window\Keyword Management</Filter>
     </ClInclude>
     <ClInclude Include="StatusText.h">
       <Filter>DataStructure</Filter>
@@ -225,21 +195,6 @@
     <ClInclude Include="ThumbnailScheduler.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
-    <ClInclude Include="CategoryHierarchyIndex.h">
-      <Filter>Fichiers d%27en-tête</Filter>
-    </ClInclude>
-    <ClInclude Include="CategoryQueryService.h">
-      <Filter>Fichiers d%27en-tête</Filter>
-    </ClInclude>
-    <ClInclude Include="CategoryRepository.h">
-      <Filter>Fichiers d%27en-tête</Filter>
-    </ClInclude>
-    <ClInclude Include="CategorySelectionController.h">
-      <Filter>Fichiers d%27en-tête</Filter>
-    </ClInclude>
-    <ClInclude Include="CategoryTreeStatePersistence.h">
-      <Filter>Fichiers d%27en-tête</Filter>
-    </ClInclude>
     <ClInclude Include="FileSystemValidator.h">
       <Filter>FolderProcess</Filter>
     </ClInclude>
@@ -278,12 +233,6 @@
     <ClCompile Include="AnimationToolbar.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
-    <ClCompile Include="CategoryFolderWindow.cpp">
-      <Filter>Fichiers sources</Filter>
-    </ClCompile>
-    <ClCompile Include="CategoryWnd.cpp">
-      <Filter>Fichiers sources</Filter>
-    </ClCompile>
     <ClCompile Include="ListFace.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
@@ -305,9 +254,6 @@
     <ClCompile Include="PanelInfosWnd.cpp">
       <Filter>Panel\source</Filter>
     </ClCompile>
-    <ClCompile Include="PanelPhotoWnd.cpp">
-      <Filter>Panel\source</Filter>
-    </ClCompile>
     <ClCompile Include="ThumbnailViewerPicture.cpp">
       <Filter>Thumbnail\source</Filter>
     </ClCompile>
@@ -319,21 +265,6 @@
     </ClCompile>
     <ClCompile Include="CentralWindow.cpp">
       <Filter>Fichiers sources</Filter>
-    </ClCompile>
-    <ClCompile Include="CriteriaWindow.cpp">
-      <Filter>Window</Filter>
-    </ClCompile>
-    <ClCompile Include="KeywordManagementWindow.cpp">
-      <Filter>Window\Keyword Management</Filter>
-    </ClCompile>
-    <ClCompile Include="KeywordWnd.cpp">
-      <Filter>Window\Keyword Management</Filter>
-    </ClCompile>
-    <ClCompile Include="KeywordWndToolbar.cpp">
-      <Filter>Window\Keyword Management</Filter>
-    </ClCompile>
-    <ClCompile Include="ToolbarKeyword.cpp">
-      <Filter>Window\Keyword Management</Filter>
     </ClCompile>
     <ClCompile Include="PicturePanel.cpp">
       <Filter>Fichiers sources</Filter>
@@ -393,21 +324,6 @@
       <Filter>Fichiers sources</Filter>
     </ClCompile>
     <ClCompile Include="ThumbnailScheduler.cpp">
-      <Filter>Fichiers sources</Filter>
-    </ClCompile>
-    <ClCompile Include="CategoryHierarchyIndex.cpp">
-      <Filter>Fichiers sources</Filter>
-    </ClCompile>
-    <ClCompile Include="CategoryQueryService.cpp">
-      <Filter>Fichiers sources</Filter>
-    </ClCompile>
-    <ClCompile Include="CategoryRepository.cpp">
-      <Filter>Fichiers sources</Filter>
-    </ClCompile>
-    <ClCompile Include="CategorySelectionController.cpp">
-      <Filter>Fichiers sources</Filter>
-    </ClCompile>
-    <ClCompile Include="CategoryTreeStatePersistence.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
     <ClCompile Include="FileSystemValidator.cpp">

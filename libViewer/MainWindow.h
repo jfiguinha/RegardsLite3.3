@@ -109,6 +109,8 @@ namespace Regards::Viewer
 
         void SetDataToStatusBar(void* thumbnailMessage, const wxString& message);
 
+        wxString AddFolder(const wxString& folder, const bool& showDialog);
+
         // ── Widgets UI ────────────────────────────────────────────────
         wxGauge *                           progressBar        = nullptr;
         wxStatusBar *                       statusBar          = nullptr;
@@ -133,7 +135,7 @@ namespace Regards::Viewer
         bool        needToReload    = false;
         int         typeAffichage   = 0;
 
-        bool        updateCriteria  = true;
+
         bool        updateFolder    = false;
         bool        refreshFolder   = false;
 

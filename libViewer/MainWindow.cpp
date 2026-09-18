@@ -35,6 +35,8 @@
 #include "ThumbnailProcess.h"
 #include <MediaInfo.h>
 #include <SqlInsertFile.h>
+#include <SqlFolderCatalog.h>
+#include <SQLRemoveData.h>
 using namespace Regards::Picture;
 using namespace Regards::Control;
 using namespace Regards::Viewer;
@@ -131,7 +133,7 @@ void CMainWindow::InitState()
     multithread     = true;
     needToReload    = false;
     typeAffichage   = THUMB_SHOW_ALL;
-    updateCriteria  = true;
+
     refreshFolder   = false;
     start           = true;
     criteriaSendMessage = false;
@@ -308,21 +310,6 @@ void CMainWindow::ProcessIdle()
     if (processEnd)
         return;
 
-    //---------------------------------------
-    // Mise à jour des critères
-    //---------------------------------------
-    if (updateCriteria)
-    {
-        updateCriteria = false;
-        hasPendingWork = true;
-
-        if (auto* w = FindWindowById(CRITERIAFOLDERWINDOWID); w != nullptr)
-        {
-            wxCommandEvent evt(wxEVENT_UPDATECRITERIA);
-            evt.SetExtraLong(1);
-            w->GetEventHandler()->AddPendingEvent(evt);
-        }
-    }
 
     //---------------------------------------
     // Rafraîchissement du dossier
@@ -422,6 +409,60 @@ void CMainWindow::SetViewerMode()
     if (toolbarViewerMode) toolbarViewerMode->SetViewerWindowPush();
 }
 
+
+wxString CMainWindow::AddFolder(const wxString& folder, const bool& showDialog)
+{
+    auto windowMain = static_cast<CWindowMain*>(FindWindowById(MAINVIEWERWINDOWID));
+    wxString localFilename = "";
+    wxString msg = "In progress ...";
+
+    wxString title = CLibResource::LoadStringFromResource(L"LBLSTOPALLPROCESS", 1);
+    wxString message = CLibResource::LoadStringFromResource(L"LBLSTOPPROCESS", 1);
+    StopAllProcess(title, message, this);
+	CSQLRemoveData::DeleteCatalog(NUMCATALOGID);
+    SetStopProcess(false);
+
+    wxArrayString files;
+    wxDir::GetAllFiles(folder, &files, wxEmptyString, wxDIR_FILES);
+    if (files.size() > 0)
+        sort(files.begin(), files.end());
+
+
+    wxProgressDialog dlg
+    (
+        "Progress in progress",
+        "Please wait, starting...",
+        files.size(),
+        nullptr,
+        wxPD_ELAPSED_TIME |
+        wxPD_ESTIMATED_TIME |
+        wxPD_REMAINING_TIME |
+        wxPD_AUTO_HIDE |
+        wxPD_SMOOTH // - makes indeterminate mode bar on WinXP very small
+    );
+
+    //Indication d'imporation des critères 
+    CSqlFolderCatalog sqlFolderCatalog;
+    int64_t idFolder = sqlFolderCatalog.GetFolderCatalogId(NUMCATALOGID, folder);
+
+    //printf("AddFolder : %s \n", CConvertUtility::ConvertToStdString(folder));
+
+    if (idFolder == -1)
+    {
+        idFolder = sqlFolderCatalog.GetOrInsertFolderCatalog(NUMCATALOGID, folder);
+        //Insert la liste des photos dans la base de données.
+        CSqlInsertFile sqlInsertFile;
+        sqlInsertFile.AddFileFromFolder(this, &dlg, files, folder, idFolder, localFilename);
+        //printf("CMainWindow::AddFolder : %s \n", CConvertUtility::ConvertToStdString(localFilename));
+    }
+
+    dlg.Close();
+
+    return localFilename;
+}
+
+
+
 // ═════════════════════════════════════════════════════════════════════════════
 // Navigation / ouverture de fichiers
 // ═════════════════════════════════════════════════════════════════════════════
@@ -430,37 +471,17 @@ bool CMainWindow::OpenFolder(const wxString& path)
 {
     if (wxDirExists(path))
 	{
-        /*
-		bool find = false;
-		FolderCatalogVector folderList;
+        wxString fileToOpen = AddFolder(path, false);
 
-		wxString folder = path;
-		//Test if folder is on database
-		CSqlFolderCatalog sqlFolderCatalog;
-		int64_t idFolder = sqlFolderCatalog.GetFolderCatalogId(NUMCATALOGID, folder);
-
-		if (idFolder == -1)
-        {
-			CSqlFindFolderCatalog folderCatalog;
-			folderCatalog.GetFolderCatalog(&folderList, NUMCATALOGID);
-			for (CFolderCatalog folderlocal : folderList)
-			{
-				RemoveFSEntry(folderlocal.GetFolderPath());
-			}
-
-            CSQLRemoveData::DeleteCatalog(1);
-            firstFileToShow = AddFolder(path, nullptr);
-			AddFSEntry(path);
-        }
-		*/
-
-        CSQLRemoveData::DeleteCatalog();
-        wxString firstFileToShow = AddFolder(path, nullptr);
-        folderService->SetFirstFileToShow(firstFileToShow);
+        
+        folderService->SetFirstFileToShow(fileToOpen);
         folderService->UpdateFolderStatic(false);
-		processIdle = true;
+        processIdle = true;
 
+        viewerCtrl->LoadPicture(fileToOpen);
 	}
+
+    return true;
 }
 
 void CMainWindow::OpenFile(const wxString& fileToOpen)
@@ -473,14 +494,10 @@ void CMainWindow::OpenFile(const wxString& fileToOpen)
     wxString folder = fn.GetPath();
     bool find = false;
 
-    for (CFolderCatalog& fl : folderList)
-    {
-        if (folder == fl.GetFolderPath()) { find = true; break; }
-    }
+    if (!find)
+        OpenFolder(folder);
 
-    if (!find) OpenFolder(folder);
-
-    updateCriteria = true;
+    
     folderService->SetFirstFileToShow(fileToOpen);
     folderService->UpdateFolderStatic(false);
     processIdle = true;
@@ -555,7 +572,7 @@ void CMainWindow::InitPictures(wxCommandEvent& /*event*/)
 
 void CMainWindow::OnFaceInfosUpdate(wxCommandEvent& /*event*/)
 {
-    updateCriteria = true;
+    
     processIdle    = true;
 }
 
@@ -701,7 +718,7 @@ void CMainWindow::OnUpdateFolder(wxCommandEvent& event)
         }
     }
 
-    updateCriteria = true;
+    
     scheduler->ReloadFromDatabase();
 
     if (newPath) delete newPath;
@@ -712,7 +729,7 @@ void CMainWindow::OnUpdateFolder(wxCommandEvent& event)
 
 void CMainWindow::OnRemoveFileFromCheckIn(wxCommandEvent& /*event*/)
 {
-    updateCriteria = true;
+    
     folderService->UpdateFolderStatic(true);
     processIdle = true;
 }

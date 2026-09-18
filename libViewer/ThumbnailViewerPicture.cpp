@@ -9,7 +9,7 @@
 using namespace Regards::Viewer;
 using namespace Regards::Sqlite;
 
-//#define TEST
+#define REGARDSLITE
 
 
 std::mutex CThumbnailViewerPicture::localmu;
@@ -47,7 +47,7 @@ vector<wxString> CThumbnailViewerPicture::GetFileList()
 
 void CThumbnailViewerPicture::PregenerateList(const bool& isDeleteFolder, const bool& isSqlUpdate)
 {
-#ifdef TEST
+#ifdef REGARDSLITE
 	iconeList->EraseThumbnailListWithIcon();
 	int size = CThumbnailBuffer::GetVectorSize();
 	int iconWidth = themeThumbnail.themeIcone.GetWidth();
