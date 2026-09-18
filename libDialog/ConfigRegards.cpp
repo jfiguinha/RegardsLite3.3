@@ -41,13 +41,13 @@ ConfigRegards::ConfigRegards(wxWindow* parent)
 	scTime = static_cast<wxSpinCtrl*>(FindWindow(XRCID("ID_SCTIME")));
 	stTime = static_cast<wxStaticText*>(FindWindow(XRCID("ID_STTIME")));
 	scProcessExif = static_cast<wxSpinCtrl*>(FindWindow(XRCID("ID_SCEXIF")));
-	scProcessFace = static_cast<wxSpinCtrl*>(FindWindow(XRCID("ID_SCFACE")));
+
 	scProcessThumbnail = static_cast<wxSpinCtrl*>(FindWindow(XRCID("ID_SCTHUMBNAIL")));
 	btCancel = static_cast<wxButton*>(FindWindow(XRCID("ID_CANCEL")));
 	sbThumbnail = static_cast<wxStaticBox*>(FindWindow(XRCID("ID_STATICBOX2")));
 	//ID_RBVIDEOFACEDETECTION
-	rbVideoFaceDetection = static_cast<wxRadioBox*>(FindWindow(XRCID("ID_RBVIDEOFACEDETECTION")));
-	rbFaceDetection = static_cast<wxRadioBox*>(FindWindow(XRCID("ID_RBFACEDETECTION")));
+
+
 	txtPicturePath = static_cast<wxTextCtrl*>(FindWindow(XRCID("ID_TXTPICTUREPATH")));
 	btPicturePath = static_cast<wxButton*>(FindWindow(XRCID("ID_PICTUREPATH")));
 	txtVideoPath = static_cast<wxTextCtrl*>(FindWindow(XRCID("ID_TXTVIDEOPATH")));
@@ -63,10 +63,6 @@ ConfigRegards::ConfigRegards(wxWindow* parent)
 
 	txtMusicDiaporamaPath = static_cast<wxTextCtrl*>(FindWindow(XRCID("ID_TXTMUSICDIAPORAMAPATH")));
 	btMusicDiaporamaPath = static_cast<wxButton*>(FindWindow(XRCID("ID_MUSICDIAPORAMAPATH")));
-
-
-	rbUSESUPERDNN = static_cast<wxRadioBox*>(FindWindow(XRCID("ID_RBUSESUPERDNN")));
-	cbUSESUPERDNNFILTER = static_cast<wxComboBox*>(FindWindow(XRCID("ID_CBUSESUPERDNNFILTER")));
 
 
 	rbVideoEncoderHard = static_cast<wxComboBox*>(FindWindow(XRCID("ID_CBVIDEOENCODERHARD")));
@@ -216,10 +212,8 @@ void ConfigRegards::init()
 
 	SetInvertedRadioSelection(rbAutoRotate, regardsParam->GetDetectOrientation());
 	SetInvertedRadioSelection(rbContrastCorrection, regardsParam->GetAutoConstrast());
-	SetInvertedRadioSelection(rbVideoFaceDetection, regardsParam->GetFaceVideoDetection());
-	SetInvertedRadioSelection(rbUSESUPERDNN, regardsParam->GetUseSuperResolution());
 
-	SetInvertedRadioSelection(rbFaceDetection, regardsParam->GetFaceDetection());
+
 
 	txtMusicDiaporamaPath->SetValue(regardsParam->GetMusicDiaporama());
 
@@ -232,16 +226,10 @@ void ConfigRegards::init()
 	int exifProcess = regardsParam->GetExifProcess();
 	scProcessExif->SetValue(exifProcess);
 
-	int faceProcess = regardsParam->GetFaceProcess();
-	scProcessFace->SetValue(faceProcess);
-
 	SetInvertedRadioSelection(rbDatabaseInMemory, regardsParam->GetDatabaseInMemory());
 
 	int interpolation = regardsParam->GetInterpolationType();
 	rbInterpolation->SetSelection(interpolation);
-
-	int superDnn = regardsParam->GetSuperResolutionType();
-	cbUSESUPERDNNFILTER->SetSelection(superDnn);
 
 
 	SetInvertedRadioSelection(rbOpenCLOpenGLInterop, regardsParam->GetIsOpenCLOpenGLInteropSupport());
@@ -320,21 +308,12 @@ void ConfigRegards::OnbtnOkClick(wxCommandEvent& event)
 	regardsParam->SetDiaporamaTransitionEffect(transitionDiaporama + 400);
 
 	regardsParam->SetDectectOrientation(GetInvertedRadioValue(rbAutoRotate));
-	regardsParam->SetFaceVideoDetection(GetInvertedRadioValue(rbVideoFaceDetection));
-
-	int newFaceDetection = GetInvertedRadioValue(rbFaceDetection);
-	regardsParam->SetFaceDetection(newFaceDetection);
-	if (oldFaceDetection != newFaceDetection)
-		showInfosRestart = true;
 
 	regardsParam->SetAutoConstrast(GetInvertedRadioValue(rbContrastCorrection));
-	regardsParam->SetUseSuperResolution(GetInvertedRadioValue(rbUSESUPERDNN));
+
 
 	int interpolation = rbInterpolation->GetSelection();
 	regardsParam->SetInterpolationType(interpolation);
-
-	int superDnn = cbUSESUPERDNNFILTER->GetSelection();
-	regardsParam->SetSuperResolutionType(superDnn);
 
 	int timeDiaporama = scTime->GetValue();
 	regardsParam->SetDiaporamaTime(timeDiaporama);
@@ -343,7 +322,7 @@ void ConfigRegards::OnbtnOkClick(wxCommandEvent& event)
 	regardsParam->SetSkinWindowMode(skinMode);
 
 	int thumbnailProcess = scProcessThumbnail->GetValue();
-	int faceProcess = scProcessFace->GetValue();
+
 	int exifProcess = scProcessExif->GetValue();
 
 	regardsParam->SetIsOpenCLOpenGLInteropSupport(GetInvertedRadioValue(rbOpenCLOpenGLInterop));
@@ -410,14 +389,14 @@ void ConfigRegards::OnbtnOkClick(wxCommandEvent& event)
 		}
 	}
 
-	if (thumbnailProcess == 0 || faceProcess == 0 || exifProcess == 0)
+	if (thumbnailProcess == 0 || exifProcess == 0)
 	{
 		wxString errorProcessNumberMin = CLibResource::LoadStringFromResource(L"ErrorProcessNumberMin", 1);
 		wxString errorInfo = CLibResource::LoadStringFromResource(L"informationserror", 1);
 		wxMessageBox(errorProcessNumberMin, errorInfo);
 	}
-	else if ((thumbnailProcess + exifProcess) > nbProcesseur && faceProcess > nbProcesseur && (thumbnailProcess > 1 ||
-		faceProcess > 1 || exifProcess > 1))
+	else if ((thumbnailProcess + exifProcess) > nbProcesseur && (thumbnailProcess > 1 ||
+		exifProcess > 1))
 	{
 		wxString errorProcessNumberMax = CLibResource::LoadStringFromResource(L"ErrorProcessNumberMax", 1);
 		wxString errorInfo = CLibResource::LoadStringFromResource(L"informationserror", 1);
@@ -425,7 +404,7 @@ void ConfigRegards::OnbtnOkClick(wxCommandEvent& event)
 	}
 	else
 	{
-		regardsParam->SetFaceProcess(faceProcess);
+
 		regardsParam->SetExifProcess(exifProcess);
 		regardsParam->SetThumbnailProcess(thumbnailProcess);
 

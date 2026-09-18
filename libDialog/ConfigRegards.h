@@ -31,7 +31,7 @@ public:
 	wxButton* btMusicDiaporamaPath;
 
 	wxSpinCtrl* scTime;
-	wxSpinCtrl* scProcessFace;
+
 	wxSpinCtrl* scProcessExif;
 	wxSpinCtrl* scProcessThumbnail;
 
@@ -44,8 +44,6 @@ public:
 	wxRadioBox* rbContrastCorrection;
 
 
-	wxRadioBox* rbUSESUPERDNN;
-	wxComboBox* cbUSESUPERDNNFILTER;
 
 	wxComboBox* rbTransitionDiaporamaEffect;
 	wxComboBox* rbInterpolation;
@@ -55,9 +53,6 @@ public:
 	wxComboBox* rbVideoEncoderHard;
 	wxComboBox* rbVideoDecoderHard;
 
-	//ID_RBVIDEOFACEDETECTION
-	wxRadioBox* rbVideoFaceDetection;
-	wxRadioBox* rbFaceDetection;
 	//*)
 
 	wxComboBox* rbSkin;
