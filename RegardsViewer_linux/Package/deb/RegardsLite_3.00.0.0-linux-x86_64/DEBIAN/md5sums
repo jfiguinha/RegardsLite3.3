@@ -264,6 +264,6 @@ a241f3b407a1153384ae399af2d4033d  opt/RegardsLite/Resources/shader/convert.sh
 21b213419e2dfb3f996a7af3b8ee7847  opt/RegardsLite/libtbb.so.12
 6a7d13c70270aafa3408c6776bf117e1  opt/RegardsLite/libavformat.so.62
 654c762951affecd9160365a9ffbaa78  opt/RegardsLite/libavdevice.so.62
-5372d4ef8ab94cf4a9d7d1a8001f0a8d  usr/share/applications/RegardsViewer.desktop
-54493f9d3dc8804164bb016aba80892f  usr/share/doc/RegardsViewer/copyright
-46a6d8bac90c6638a768dd2166f918eb  usr/bin/RegardsViewer
+de429c822e60ba533601e1af785b9a06  usr/share/applications/RegardsLite.desktop
+54493f9d3dc8804164bb016aba80892f  usr/share/doc/RegardsLite/copyright
+46a6d8bac90c6638a768dd2166f918eb  usr/bin/RegardsLite

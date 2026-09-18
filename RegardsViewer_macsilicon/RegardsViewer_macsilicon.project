@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<CodeLite_Project Name="RegardsLiteViewer_macsilicon" InternalType="GUI" Version="11000">
+<CodeLite_Project Name="RegardsLite_macsilicon" InternalType="GUI" Version="11000">
   <Plugins>
     <Plugin Name="qmake">
       <![CDATA[00020001N0005Debug0000000000000001N0007Release000000000000]]>
@@ -347,7 +347,7 @@
         <LibraryPath Value="../Otherlib/OpenCV/Debug"/>
       </Linker>
       <ResourceCompiler Options="$(shell wx-config --rcflags)" Required="no"/>
-      <General OutputFile="$(IntermediateDirectory)/RegardsLiteViewer" IntermediateDirectory="./Debug" Command="./$(ProjectName)" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(IntermediateDirectory)" PauseExecWhenProcTerminates="yes" IsGUIProgram="yes" IsEnabled="yes"/>
+      <General OutputFile="$(IntermediateDirectory)/RegardsLite" IntermediateDirectory="./Debug" Command="./$(ProjectName)" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(IntermediateDirectory)" PauseExecWhenProcTerminates="yes" IsGUIProgram="yes" IsEnabled="yes"/>
       <BuildSystem Name="Default"/>
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
         <![CDATA[]]>
@@ -361,19 +361,19 @@
         <Command Enabled="yes">if [ -f Debug/header.h ]; then echo « Exists »; else if [ -d Debug ]; then echo « Exists »; else mkdir Debug;fi;cp ../include/header.h Debug/header.h;fi</Command>
       </PreBuild>
       <PostBuild>
-        <Command Enabled="yes">SetFile -t APPL ./Debug/RegardsLiteViewer</Command>
-        <Command Enabled="yes">mkdir -p ./Debug/RegardsLiteViewer.app/Contents</Command>
-        <Command Enabled="yes">mkdir -p ./Debug/RegardsLiteViewer.app/Contents/Frameworks</Command>
-        <Command Enabled="yes">mkdir -p ./Debug/RegardsLiteViewer.app/Contents/MacOS</Command>
-        <Command Enabled="yes">mkdir -p ./Debug/RegardsLiteViewer.app/Contents/Resources</Command>
+        <Command Enabled="yes">SetFile -t APPL ./Debug/RegardsLite</Command>
+        <Command Enabled="yes">mkdir -p ./Debug/RegardsLite.app/Contents</Command>
+        <Command Enabled="yes">mkdir -p ./Debug/RegardsLite.app/Contents/Frameworks</Command>
+        <Command Enabled="yes">mkdir -p ./Debug/RegardsLite.app/Contents/MacOS</Command>
+        <Command Enabled="yes">mkdir -p ./Debug/RegardsLite.app/Contents/Resources</Command>
         <Command Enabled="yes">sed -e "s/IDENTIFIER/`echo . | sed -e 's,\.\./,,g' | sed -e 's,/,.,g'`/" \
-	-e "s/EXECUTABLE/RegardsLiteViewer/" \
-	-e "s/VERSION/2.0.3.3/" \
-	../Regards/mac/Info.plist.in &gt;./Debug/RegardsLiteViewer.app/Contents/Info.plist</Command>
-        <Command Enabled="yes">/bin/echo "APPL????" &gt;./Debug/RegardsLiteViewer.app/Contents/PkgInfo</Command>
-        <Command Enabled="yes">ln -f ./Debug/RegardsLiteViewer ./Debug/RegardsLiteViewer.app/Contents/MacOS/RegardsLiteViewer</Command>
-        <Command Enabled="yes">cp -f ../Regards/mac/regardsliteicon.icns ./Debug/RegardsLiteViewer.app/Contents/Resources/wxmac.icns</Command>
-        <Command Enabled="yes">cp -R ../Regards/Resources ./Debug/RegardsLiteViewer.app/Contents/</Command>
+	-e "s/EXECUTABLE/RegardsLite/" \
+	-e "s/VERSION/3.00.0.0/" \
+	../Regards/mac/Info.plist.in &gt;./Debug/RegardsLite.app/Contents/Info.plist</Command>
+        <Command Enabled="yes">/bin/echo "APPL????" &gt;./Debug/RegardsLite.app/Contents/PkgInfo</Command>
+        <Command Enabled="yes">ln -f ./Debug/RegardsLite ./Debug/RegardsLite.app/Contents/MacOS/RegardsLite</Command>
+        <Command Enabled="yes">cp -f ../Regards/mac/regardsliteicon.icns ./Debug/RegardsLite.app/Contents/Resources/wxmac.icns</Command>
+        <Command Enabled="yes">cp -R ../Regards/Resources ./Debug/RegardsLite.app/Contents/</Command>
       </PostBuild>
       <CustomBuild Enabled="no">
         <RebuildCommand/>
@@ -428,7 +428,7 @@
         <LibraryPath Value="../Otherlib/OpenCV/Release"/>
       </Linker>
       <ResourceCompiler Options="$(shell wx-config --rcflags)" Required="no"/>
-      <General OutputFile="$(IntermediateDirectory)/RegardsLiteViewer" IntermediateDirectory="./Release" Command="./$(ProjectName)" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(IntermediateDirectory)" PauseExecWhenProcTerminates="yes" IsGUIProgram="yes" IsEnabled="yes"/>
+      <General OutputFile="$(IntermediateDirectory)/RegardsLite" IntermediateDirectory="./Release" Command="./$(ProjectName)" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(IntermediateDirectory)" PauseExecWhenProcTerminates="yes" IsGUIProgram="yes" IsEnabled="yes"/>
       <BuildSystem Name="Default"/>
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
         <![CDATA[]]>
@@ -442,20 +442,20 @@
         <Command Enabled="yes">if [ -f Release/header.h ]; then echo « Exists »; else if [ -d Release ]; then echo « Exists »; else mkdir Release;fi;cp ../include/header.h Release/header.h;fi</Command>
       </PreBuild>
       <PostBuild>
-        <Command Enabled="yes">SetFile -t APPL ./Release/RegardsLiteViewer</Command>
-        <Command Enabled="yes">mkdir -p ./Release/RegardsLiteViewer.app/Contents</Command>
-        <Command Enabled="yes">mkdir -p ./Release/RegardsLiteViewer.app/Contents/Frameworks</Command>
-        <Command Enabled="yes">mkdir -p ./Release/RegardsLiteViewer.app/Contents/MacOS</Command>
-        <Command Enabled="yes">mkdir -p ./Release/RegardsLiteViewer.app/Contents/Resources</Command>
+        <Command Enabled="yes">SetFile -t APPL ./Release/RegardsLite</Command>
+        <Command Enabled="yes">mkdir -p ./Release/RegardsLite.app/Contents</Command>
+        <Command Enabled="yes">mkdir -p ./Release/RegardsLite.app/Contents/Frameworks</Command>
+        <Command Enabled="yes">mkdir -p ./Release/RegardsLite.app/Contents/MacOS</Command>
+        <Command Enabled="yes">mkdir -p ./Release/RegardsLite.app/Contents/Resources</Command>
         <Command Enabled="yes">sed -e "s/IDENTIFIER/`echo . | sed -e 's,\.\./,,g' | sed -e 's,/,.,g'`/" \
-	-e "s/EXECUTABLE/RegardsLiteViewer/" \
-	-e "s/VERSION/2.0.3.3/" \
-	../Regards/mac/Info.plist.in &gt;./Release/RegardsLiteViewer.app/Contents/Info.plist</Command>
-        <Command Enabled="yes">/bin/echo "APPL????" &gt;./Release/RegardsLiteViewer.app/Contents/PkgInfo</Command>
-        <Command Enabled="yes">ln -f ./Release/RegardsLiteViewer ./Release/RegardsLiteViewer.app/Contents/MacOS/RegardsLiteViewer</Command>
-        <Command Enabled="yes">cp -f ../Regards/mac/regardsliteicon.icns ./Release/RegardsLiteViewer.app/Contents/Resources/wxmac.icns</Command>
-        <Command Enabled="yes">cp -R ../Regards/Resources ./Release/RegardsLiteViewer.app/Contents/</Command>
-        <Command Enabled="yes">cp ../libextern/vcpkg/installed/arm64-osx/tools/ffmpeg/ffmpeg ./Release/RegardsLiteViewer.app/Contents/MacOS</Command>
+	-e "s/EXECUTABLE/RegardsLite/" \
+	-e "s/VERSION/3.00.0.0/" \
+	../Regards/mac/Info.plist.in &gt;./Release/RegardsLite.app/Contents/Info.plist</Command>
+        <Command Enabled="yes">/bin/echo "APPL????" &gt;./Release/RegardsLite.app/Contents/PkgInfo</Command>
+        <Command Enabled="yes">ln -f ./Release/RegardsLite ./Release/RegardsLite.app/Contents/MacOS/RegardsLite</Command>
+        <Command Enabled="yes">cp -f ../Regards/mac/regardsliteicon.icns ./Release/RegardsLite.app/Contents/Resources/wxmac.icns</Command>
+        <Command Enabled="yes">cp -R ../Regards/Resources ./Release/RegardsLite.app/Contents/</Command>
+        <Command Enabled="yes">cp ../libextern/vcpkg/installed/arm64-osx/tools/ffmpeg/ffmpeg ./Release/RegardsLite.app/Contents/MacOS</Command>
       </PostBuild>
       <CustomBuild Enabled="no">
         <RebuildCommand/>
