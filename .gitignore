@@ -134,3 +134,6 @@ libAppleFunction/libAppleFunction.txt
 /.ctagsd
 .DS_Store
 /RegardsViewer_macsilicon/Release
+Otherlib/wxPDFDoc/wxPDFDoc.txt
+Otherlib/wxPDFDoc/wxPDFDoc.mk
+RegardsViewer_macsilicon/RegardsLiteViewer_macsilicon.txt
