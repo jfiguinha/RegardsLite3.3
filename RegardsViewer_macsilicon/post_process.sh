@@ -1,4 +1,4 @@
 #/bin/bash
-./MacOsLibExplorer ./Release/RegardsLiteViewer.app/Contents/MacOS ./Release/RegardsLiteViewer.app/Contents/Frameworks change_dylib.sh 1
-./MacOsLibExplorer ./Release/RegardsLiteViewer.app/Contents/Frameworks ./Release/RegardsLiteViewer.app/Contents/Frameworks change_dylib.sh 1
-codesign -fs - ./Release/RegardsLiteViewer.app --deep
+./MacOsLibExplorer ./Release/RegardsLite.app/Contents/MacOS ./Release/RegardsLite.app/Contents/Frameworks change_dylib.sh 1
+./MacOsLibExplorer ./Release/RegardsLite.app/Contents/Frameworks ./Release/RegardsLite.app/Contents/Frameworks change_dylib.sh 1
+codesign -fs - ./Release/RegardsLite.app --deep
