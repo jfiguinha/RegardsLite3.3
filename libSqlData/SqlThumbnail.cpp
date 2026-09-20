@@ -178,7 +178,7 @@ bool CSqlThumbnail::EraseThumbnail()
 	for (int i = 0; i < files.size(); i++)
 	{
         
-        printf("Filename to remove : %s \n", files[i].ToStdString().c_str());
+        //printf("Filename to remove : %s \n", files[i].ToStdString().c_str());
         
 		wxString filename = files[i];
 		if (wxFileExists(filename))
