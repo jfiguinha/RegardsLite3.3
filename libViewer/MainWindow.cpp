@@ -473,13 +473,10 @@ bool CMainWindow::OpenFolder(const wxString& path)
     if (wxDirExists(path))
 	{
         fileToOpen = AddFolder(path, false);
-
+        folderService->SetLocalFilename(fileToOpen);
         folderService->SetFirstFileToShow(fileToOpen);
         folderService->UpdateFolderStatic(false);
         processIdle = true;
-
-        viewerCtrl->LoadPicture(fileToOpen);
-
         return true;
 	}
 
@@ -502,12 +499,14 @@ void CMainWindow::OpenFile(const wxString& fileToOpen)
         if(libPicture.TestImageFormat(fileToOpen) != 0)
             firstFile = fileToOpen;
 
+        folderService->SetLocalFilename(firstFile);
         folderService->SetFirstFileToShow(firstFile);
         folderService->UpdateFolderStatic(false);
         processIdle = true;
 
-        viewerCtrl->LoadPicture(firstFile);
 	}
+
+    
 }
 
 void CMainWindow::OnOpenFileOrFolder(wxCommandEvent& event)
@@ -522,15 +521,6 @@ void CMainWindow::OnOpenFileOrFolder(wxCommandEvent& event)
     if (type == 1) OpenFile(*file);
     else           OpenFolder(*file);
 
-    if (auto* w = FindWindowById(CRITERIAFOLDERWINDOWID); w != nullptr)
-    {
-        auto* fp = new wxString(*file);
-        wxCommandEvent evt(wxEVENT_SELCHANGED);
-        evt.SetExtraLong(1);
-        evt.SetInt(1);
-        evt.SetClientData(fp);
-        w->GetEventHandler()->AddPendingEvent(evt);
-    }
     delete file;
 }
 
