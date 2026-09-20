@@ -181,7 +181,6 @@
         <Library Value="Filtre"/>
         <Library Value="RegardsGL"/>
         <Library Value="VideoEffect"/>
-        <Library Value="DeepLearning"/>
         <Library Value="Dialog"/>
         <Library Value="Window"/>
         <Library Value="SqlData"/>

@@ -219,7 +219,7 @@ CPanelInfosWnd::CPanelInfosWnd(wxWindow* parent, wxWindowID id)
 #if wxUSE_WEBVIEW_EDGE
 		// Check if a fixed version of edge is present in
 		// $executable_path/edge_fixed and use it
-		wxFileName edgeFixedDir(wxStandardPaths::Get().GetExecutablePath());
+		wxFileName edgeFixedDir(wxStandardPaths::Get().GetExecutablePath(), wxEmptyString);
 		edgeFixedDir.SetFullName("");
 		edgeFixedDir.AppendDir("edge_fixed");
 		if (edgeFixedDir.DirExists())

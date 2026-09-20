@@ -169,14 +169,17 @@ void CSqlThumbnail::EraseThumbnail(const int& numPhoto)
 
 bool CSqlThumbnail::EraseThumbnail()
 {
-	wxFileName documentPath = wxFileName(CFileUtility::GetDocumentFolderPath());
-	documentPath.AppendDir("ThumbnailVideo");
+	wxFileName documentPath(CFileUtility::GetDocumentFolderPath(), wxEmptyString);
+	documentPath.AppendDir("Thumbnail");
 
 	wxArrayString files;
 	wxDir::GetAllFiles(documentPath.GetFullPath(), &files, wxEmptyString, wxDIR_FILES);
 
 	for (int i = 0; i < files.size(); i++)
 	{
+        
+        printf("Filename to remove : %s /n", files[i].ToStdString().c_str());
+        
 		wxString filename = files[i];
 		if (wxFileExists(filename))
 		{

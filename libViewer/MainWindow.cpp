@@ -469,40 +469,45 @@ wxString CMainWindow::AddFolder(const wxString& folder, const bool& showDialog)
 
 bool CMainWindow::OpenFolder(const wxString& path)
 {
+    wxString fileToOpen = "";
     if (wxDirExists(path))
 	{
-        wxString fileToOpen = AddFolder(path, false);
+        fileToOpen = AddFolder(path, false);
 
-        
         folderService->SetFirstFileToShow(fileToOpen);
         folderService->UpdateFolderStatic(false);
         processIdle = true;
 
         viewerCtrl->LoadPicture(fileToOpen);
+
+        return true;
 	}
 
-    return true;
+    return false;
 }
 
 void CMainWindow::OpenFile(const wxString& fileToOpen)
 {
+    CLibPicture libPicture;
     FolderCatalogVector folderList;
     CSqlFindFolderCatalog folderCatalog;
     folderCatalog.GetFolderCatalog(&folderList, NUMCATALOGID);
 
     wxFileName fn(fileToOpen);
-    wxString folder = fn.GetPath();
-    bool find = false;
+    wxString path = fn.GetPath();
 
-    if (!find)
-        OpenFolder(folder);
+    if (wxDirExists(path))
+	{
+        wxString firstFile = AddFolder(path, false);
+        if(libPicture.TestImageFormat(fileToOpen) != 0)
+            firstFile = fileToOpen;
 
-    
-    folderService->SetFirstFileToShow(fileToOpen);
-    folderService->UpdateFolderStatic(false);
-    processIdle = true;
+        folderService->SetFirstFileToShow(firstFile);
+        folderService->UpdateFolderStatic(false);
+        processIdle = true;
 
-    viewerCtrl->LoadPicture(fileToOpen);
+        viewerCtrl->LoadPicture(firstFile);
+	}
 }
 
 void CMainWindow::OnOpenFileOrFolder(wxCommandEvent& event)
