@@ -1,7 +1,7 @@
 #!/bin/bash
 
-PACKAGE_DIR="RegardsLite_3.00.0.0-linux-x86_64"
-PACKAGE_NAME="RegardsLite_3.00.0.0_linux_amd64.deb"
+PACKAGE_DIR="RegardsLite_3.00.0.1-linux-x86_64"
+PACKAGE_NAME="RegardsLite_3.00.0.1_linux_amd64.deb"
 
 rm -f "$PACKAGE_NAME"
 
