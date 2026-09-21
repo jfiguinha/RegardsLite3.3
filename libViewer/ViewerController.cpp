@@ -120,6 +120,13 @@ wxString CViewerController::LoadingNextPicture(const bool& loadPicture, LoadingM
     return filename;
 }
 
+void CViewerController::SetActif(const wxString& filename)
+{
+    thumbnailPicture->SetActifItem(filename, false);
+    listPicture->SetActifItem(filename, false);
+}
+
+
 wxString CViewerController::ImageSuivante(const bool& loadPicture)
 {
     return LoadingNextPicture(loadPicture, Next);
