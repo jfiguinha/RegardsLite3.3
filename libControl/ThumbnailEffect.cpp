@@ -231,16 +231,6 @@ void CThumbnailEffect::SetFile(const wxString& filename, CImageLoadingFormat* im
                 break;
             }
 
-			case IDM_REDEYE:
-				{
-					cv::Mat pBitmap = loadingResource.LoadResourceCV("IDB_REDEYE");
-					thumbnailData->SetFilename(CFiltreData::GetFilterLabel(numEffect));
-					infosSeparationSpecialEffect->AddPhotoToList(numElement);
-					thumbnailData->SetBitmap(pBitmap);
-					break;
-				}
-
-
 			case IDM_CROP:
 				{
 					cv::Mat pBitmap = loadingResource.LoadResourceCV("IDB_CROP");
