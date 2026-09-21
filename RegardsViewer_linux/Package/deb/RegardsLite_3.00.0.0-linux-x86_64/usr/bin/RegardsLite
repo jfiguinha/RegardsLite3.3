@@ -1,4 +1,0 @@
-#! /bin/sh
-cd /opt/RegardsLite
-export FONTCONFIG_PATH=/etc/fonts
-./RegardsLite "$@"
