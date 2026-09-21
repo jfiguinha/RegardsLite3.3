@@ -114,6 +114,9 @@ wxString CViewerController::LoadingNextPicture(const bool& loadPicture, LoadingM
     if (!filename.empty() && loadPicture)
         mediaLoader->LoadPicture(filename);
     
+    thumbnailPicture->SetActifItem(filename, false);
+    listPicture->SetActifItem(filename, false);
+
     return filename;
 }
 

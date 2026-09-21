@@ -166,18 +166,30 @@ int CThumbnail::GetNumItemById(const int& idPhoto)
 	return 0;
 }
 
+
+
 int CThumbnail::GetNumPhotoId(const int& numItem)
 {
 	return iconeList->GetPhotoId(numItem);
 }
 
-void CThumbnail::SetActifItem(const int& idPhoto, const bool& move)
+void CThumbnail::SetActifItem(const wxString &filename, const bool &move)
 {
-	if (nbElementInIconeList == 0)
-		return;
+	int numItem = 0;
+	CIcone* icone = iconeList->FindElementByFilename(filename);
+	if (icone != nullptr)
+	{
+		int newPhotoId = icone->GetPtData()->GetNumPhotoId();
 
-	int numItem = GetNumItemById(idPhoto);
+		numItem = icone->GetNumElement();
+		
+		if(numSelectPhotoId != newPhotoId)
+			SetActifByNumItem(numItem,move);
+	}
+}
 
+void CThumbnail::SetActifByNumItem(const int& numItem, const bool &move)
+{
 	isMovingScroll = move;
 
 	bool refresh = false;
@@ -204,7 +216,7 @@ void CThumbnail::SetActifItem(const int& idPhoto, const bool& move)
 		refresh = true;
 	}
 
-	numActifPhotoId = idPhoto;// iconeList->GetPhotoId(numItem);
+	numActifPhotoId = iconeList->GetPhotoId(numItem);
 	isMovingScroll = false;
 
 	if (move)
@@ -257,6 +269,17 @@ void CThumbnail::SetActifItem(const int& idPhoto, const bool& move)
 	{
 		needToRefresh = true;
 	}
+
+}
+
+void CThumbnail::SetActifItem(const int& idPhoto, const bool& move)
+{
+	if (nbElementInIconeList == 0)
+		return;
+
+	int numItem = GetNumItemById(idPhoto);
+	if(idPhoto != numSelectPhotoId)
+		SetActifByNumItem(numItem, move);
 }
 
 int CThumbnail::ImageSuivante()
