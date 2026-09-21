@@ -125,8 +125,12 @@ public:
 
 	wxString GenerateLibelle() override
 	{
-		wxString seg = fname.GetDirs().back();
-		return seg;
+		if(dirName != "")
+		{
+			wxString seg = fname.GetDirs().back();
+			return seg;
+		}
+		return "";
 	}
 
 	wxString GenerateValue() override
