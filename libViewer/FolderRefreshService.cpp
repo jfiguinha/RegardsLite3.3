@@ -205,4 +205,5 @@ void FolderRefreshService::UpdateFolderStatic(bool isDeleteFolder, bool refreshP
     //------------------------------------------
     firstFileToShow.clear();
     init = true;
+    eventSink->processThumbnail = true;
 }

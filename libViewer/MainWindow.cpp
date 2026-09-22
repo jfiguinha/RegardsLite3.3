@@ -235,23 +235,23 @@ void CMainWindow::InitUI(IStatusBarInterface* statusbar)
     statusBar = new wxStatusBar(
         this, wxID_ANY, wxSTB_DEFAULT_STYLE, "wxStatusBar");
 
-    int tabWidth[] = {100, 300, 300, 300};
+    int tabWidth[] = { 100, 400, 400, 300 };
     statusBar->SetFieldsCount(4);
     statusBar->SetStatusWidths(4, tabWidth);
 
     progressBar = new wxGauge(
         statusBar, wxID_ANY, 200,
-        wxPoint(1000, 0),
-        wxSize(200, statusBar->GetSize().y),
+        wxPoint(900, 0),
+        wxSize(300, statusBar->GetSize().y),
         wxGA_HORIZONTAL);
 
     progressBar->SetRange(100);
     progressBar->SetValue(50);
 
     // ── Création des services ────────────────────────────────────────────
-    scheduler    = std::make_unique<ThumbnailScheduler>(this, thumbnailProcess.get());
+    scheduler = std::make_unique<ThumbnailScheduler>(this, thumbnailProcess.get());
     folderService = std::make_unique<FolderRefreshService>(centralWnd, this, faceDetection);
-    viewerCtrl   = std::make_unique<CMainViewerController>(
+    viewerCtrl = std::make_unique<CMainViewerController>(
         centralWnd, toolbarViewerMode,
         statusBar, progressBar,
         statusBarViewer, this);
@@ -295,7 +295,7 @@ void CMainWindow::BindEvents()
     Connect(wxEVENT_UPDATECHECKINSTATUS, wxCommandEventHandler(CMainWindow::OnCheckInUpdateStatus));
     Connect(wxEVENT_UPDATECHECKINFOLDER, wxCommandEventHandler(CMainWindow::OnRemoveFileFromCheckIn));
     Connect(wxEVENT_FOLDERCHECK, wxCommandEventHandler(CMainWindow::OnFolderCheck));
-
+    Connect(wxEVENT_ENDTHUMBNAILPROCESS, wxCommandEventHandler(CMainWindow::OnProcessThumbnailEnd));
 
     auto start_time = std::chrono::steady_clock::now();
     for (int i = 0; i < 6; i++)
@@ -968,7 +968,7 @@ void CMainWindow::SetDataToStatusBar(void* thumbMessage, const wxString& picture
 
     int nbPhoto = msg->nbElement - msg->nbPhoto;
 
-    auto remaining_time = elapsed_time* nbPhoto;
+    auto remaining_time = elapsed_time * msg->nbPhoto;
 
     auto remaining_sec = std::chrono::duration_cast<std::chrono::seconds>(remaining_time).count();
 
@@ -1015,7 +1015,7 @@ void CMainWindow::UpdateMessage(wxCommandEvent& event)
     auto* msg         = new CThumbnailMessage();
     msg->nbPhoto      = nbPhoto;
     msg->thumbnailPos = scheduler->GetThumbnailPos();
-    msg->nbElement    = nbElementInIconeList;
+    msg->nbElement    = CThumbnailBuffer::GetVectorSize();
     msg->typeMessage  = 3;
 
     if (auto* mw = FindWindowById(MAINVIEWERWINDOWID); mw != nullptr)
