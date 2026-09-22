@@ -29,6 +29,7 @@ namespace Regards::Viewer
         ID_FACEDETECTION = 10,
         ID_INTERPOLATIONFILTER = 11,
         ID_EXPORT = 12,
+        ID_ECONOMY = 13,
         ID_CATEGORYDETECTION = 14,
         ID_ASSOCIATE = 15,
         ID_ExternalProgram = 16,
@@ -39,7 +40,7 @@ namespace Regards::Viewer
         ID_DIAPORAMA = 21,
         ID_EDIT = 22,
         ID_OPENFILE = 23,
-	ID_OPENFOLDER = 24,
+	    ID_OPENFOLDER = 24,
         ID_VIDEO = 1018,
         ID_AUDIO = 1019,
         ID_SUBTITLE = 1020,
@@ -114,6 +115,7 @@ namespace Regards::Viewer
         void OnPageSetup(wxCommandEvent& event);
 #ifdef WIN32
         void OnAssociate(wxCommandEvent& event);
+        void OnEconomyMode(wxCommandEvent& event);
 #endif
 #ifdef __WXMAC__
         void OnPageMargins(wxCommandEvent& event);

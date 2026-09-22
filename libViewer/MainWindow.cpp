@@ -64,6 +64,8 @@ CMainWindow::CMainWindow(wxWindow* parent,
     InitConfig(fileToOpen);
     InitBackgroundTasks();
 
+    isProcessThumbnailRunning = true;
+    processThumbnailThread = new std::thread(ProcessThumbnail, this);
 
 	checkFolderThread = std::thread(CheckFolder,this);
 
@@ -113,6 +115,51 @@ void CMainWindow::CheckFolder(CMainWindow * main)
     evt.SetInt(nbNewFiles);
     wxPostEvent(main, evt);
 }
+
+
+
+void CMainWindow::ProcessThumbnail(void* data)
+{
+    int nbProcesseur = 1;
+    CMainWindow* main = static_cast<CMainWindow*>(data);
+
+    if (CRegardsConfigParam* cfg = CParamInit::getInstance(); cfg != nullptr)
+        nbProcesseur = cfg->GetThumbnailProcess();
+
+
+    while (!main->stopProcessThumbnail)
+    {
+        //---------------------------------------
+        // Scheduling des miniatures
+        //---------------------------------------
+        if (main->processThumbnail)
+        {
+            int nbElementInIconeList = CThumbnailBuffer::GetVectorSize();
+            if (!main->scheduler->Tick(nbProcesseur, nbElementInIconeList))
+            {
+                main->processThumbnail = false;
+                continue;
+            }
+            wxMilliSleep(100);
+        }
+        else
+            wxSleep(1);
+    }
+
+    wxCommandEvent evt(wxEVENT_ENDTHUMBNAILPROCESS);
+    main->GetEventHandler()->AddPendingEvent(evt);
+}
+
+
+void CMainWindow::OnProcessThumbnailEnd(wxCommandEvent& event)
+{
+    isProcessThumbnailRunning = false;
+    processThumbnailThread->join();
+    delete processThumbnailThread;
+    processThumbnailThread = nullptr;
+}
+
+
 
 void CMainWindow::OnFolderCheck(wxCommandEvent& event)
 {
@@ -341,9 +388,12 @@ void CMainWindow::ProcessIdle()
     //---------------------------------------
     // Scheduling des miniatures
     //---------------------------------------
-    nbElementInIconeList = CThumbnailBuffer::GetVectorSize();
-    if (scheduler->Tick(nbProcesseur, nbElementInIconeList))
-        hasPendingWork = true;
+    if (stopProcessThumbnail)
+    {
+        stopProcessThumbnail = false;
+        processThumbnailThread = new std::thread(ProcessThumbnail, this);
+    }
+
 
     processIdle = hasPendingWork;
 }
@@ -354,7 +404,9 @@ void CMainWindow::ProcessIdle()
 
 bool CMainWindow::GetProcessEnd()
 {
-    if (scheduler->GetNbProcess() > 0 || isCheckingFile || checkFolderThread.joinable())
+    stopProcessThumbnail = true;
+
+    if (scheduler->GetNbProcess() > 0 || isProcessThumbnailRunning || isCheckingFile || checkFolderThread.joinable())
         return false;
     return true;
 }

@@ -136,8 +136,8 @@ int CMediaLoader::LoadPicture(const wxString& newFilename, const bool& refresh)
         int width = 0, height = 0, rotation = 0;
         libPicture.GetPictureDimensions(newFilename, width, height, rotation);
         auto* pictureInfos = new CPictureInfosMessage();
-        pictureInfos->filename = newFilename;
-        pictureInfos->infos    = std::to_string(width) + "x" + std::to_string(height);
+        pictureInfos->filename = "Filename : " + newFilename;
+        pictureInfos->infos    = "Size : " + std::to_string(width) + "x" + std::to_string(height);
 
         wxWindow* mainWindow = parent->FindWindowById(MAINVIEWERWINDOWID);
         if (mainWindow != nullptr)
@@ -221,11 +221,9 @@ int CMediaLoader::LoadPicture(const wxString& newFilename, const bool& refresh)
 
         if (needToLoadPicture)
         {
-
             isPicture = true;
             isVideo = false;
             isAnimation = false;
-
             // Try thumbnail first (instant display while full image loads)
             if (!isDiaporama)
             {
@@ -265,6 +263,9 @@ int CMediaLoader::LoadPicture(const wxString& newFilename, const bool& refresh)
         }
     }
 
+    // Sync active item in all list views
+    //if (thumbnailPicture != nullptr)
+    //    thumbnailPicture->SetActifItem(GetPhotoId(this->filename), true);
 
     application_context.numElementToLoad++;
 

@@ -7,12 +7,13 @@
 #include "ViewerParamInit.h"
 #include <window_id.h>
 #include <TreeWindow.h>
+#include <MainWindow.h>
 #include <ScrollbarWnd.h>
 using namespace Regards::Viewer;
 using namespace Regards::Sqlite;
 
 FolderRefreshService::FolderRefreshService(CCentralWindow* centralWnd,
-                                           wxWindow*       eventSink,
+                                            CMainWindow*       eventSink, 
                                            int             faceDetection)
     : centralWnd(centralWnd)
     , eventSink(eventSink)
@@ -126,6 +127,20 @@ bool FolderRefreshService::HasPictureListChanged(const PhotosVector* newPictures
         });
 }
 
+// ── Fenêtres dépendantes ─────────────────────────────────────────────────────
+
+void FolderRefreshService::RefreshDependentWindows(CCategoryFolderWindow* categoryFolder)
+{
+    if (faceDetection)
+    {
+        if (auto* faceWindow = eventSink->FindWindowById(LISTFACEID);
+            faceWindow != nullptr)
+        {
+            wxCommandEvent evt(wxEVENT_REFRESHFOLDER);
+            faceWindow->GetEventHandler()->AddPendingEvent(evt);
+        }
+    }
+}
 
 // ── Point d'entrée principal ─────────────────────────────────────────────────
 
@@ -154,8 +169,8 @@ void FolderRefreshService::UpdateFolderStatic(bool isDeleteFolder, bool refreshP
     // Fichier courant
     //------------------------------------------
     localFilename = !firstFileToShow.empty()
-                    ? firstFileToShow
-                    : centralWnd->GetFilename();
+        ? firstFileToShow
+        : centralWnd->GetFilename();
 
     //------------------------------------------
     // Abandon si la liste n'a pas changé
@@ -190,5 +205,4 @@ void FolderRefreshService::UpdateFolderStatic(bool isDeleteFolder, bool refreshP
     //------------------------------------------
     firstFileToShow.clear();
     init = true;
-
 }

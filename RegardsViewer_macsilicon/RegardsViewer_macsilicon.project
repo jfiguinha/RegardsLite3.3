@@ -276,7 +276,7 @@
         <Command Enabled="yes">mkdir -p ./Debug/RegardsLite.app/Contents/Resources</Command>
         <Command Enabled="yes">sed -e "s/IDENTIFIER/`echo . | sed -e 's,\.\./,,g' | sed -e 's,/,.,g'`/" \
 	-e "s/EXECUTABLE/RegardsLite/" \
-	-e "s/VERSION/3.00.0.3/" \
+	-e "s/VERSION/3.00.0.4/" \
 	../Regards/mac/Info.plist.in &gt;./Debug/RegardsLite.app/Contents/Info.plist</Command>
         <Command Enabled="yes">/bin/echo "APPL????" &gt;./Debug/RegardsLite.app/Contents/PkgInfo</Command>
         <Command Enabled="yes">ln -f ./Debug/RegardsLite ./Debug/RegardsLite.app/Contents/MacOS/RegardsLite</Command>
