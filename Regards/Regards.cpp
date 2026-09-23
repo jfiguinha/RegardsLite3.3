@@ -46,6 +46,9 @@ extern int Start(int argc, char **argv);
 
 MyApp::MyApp()
 {
+#ifdef _DEBUG
+	_CrtSetDbgFlag(_CrtSetDbgFlag(_CRTDBG_REPORT_FLAG) & ~_CRTDBG_LEAK_CHECK_DF);
+#endif
 
 	regardsParam = nullptr;
 	frameStart = nullptr;
@@ -152,10 +155,6 @@ int MyApp::Close()
 #ifdef FFMPEG
 	avformat_network_deinit();
 	//av_lockmgr_register(nullptr);
-#endif
-
-#if defined(__WXMSW__) && defined(_DEBUG)
-	//_CrtDumpMemoryLeaks();
 #endif
 
 
