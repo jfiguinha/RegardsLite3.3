@@ -181,7 +181,7 @@ void CThumbnail::SetActifItem(const wxString &filename, const bool &move)
 	{
 		int newPhotoId = icone->GetPtData()->GetNumPhotoId();
 
-		numItem = icone->GetNumElement();
+		numItem = iconeList->GetNumElement(filename);
 		
 		if(numSelectPhotoId != newPhotoId || numOldItem != numItem)
 			SetActifByNumItem(numItem,move);
@@ -327,6 +327,17 @@ wxString CThumbnail::GetFilename(const int& numItem)
 		filename = iconeList->GetFilename(numItem);
 	}
 	return filename;
+}
+
+wxString CThumbnail::GetActifItem()
+{
+	if (numSelectPhotoId != -1)
+	{
+		CIcone* numActif = GetIconeById(numSelectPhotoId);
+		if (numActif != nullptr)
+			return numActif->GetFilename();
+	}
+	return "";
 }
 
 void CThumbnail::SetTheme(CThemeThumbnail* theme)
@@ -740,42 +751,52 @@ void CThumbnail::SetIconeSize(const int& width, const int& height)
 
 	ResizeThumbnail();
 }
-
-void CThumbnail::ExecuteTimer(const int& numId, std::unique_ptr<wxTimer> & refresh)
+void CThumbnail::ExecuteTimer(const int& numId, std::unique_ptr<wxTimer>& refresh)
 {
+	CIcone* icone = GetIconeById(numId);
+	if (icone == nullptr)
+		return;
+
+	CThumbnailData* data = icone->GetPtData();
+	if (data == nullptr)
+		return;
+
 	CLibPicture libPicture;
 	bool actifActif = false;
-	CIcone* icone = GetIconeById(numId);
-	if (icone != nullptr)
-	{
-		CThumbnailData* data = icone->GetPtData();
+	const wxString& filename = data->GetFilename();
 
-		if (libPicture.TestIsVideo(data->GetFilename()) || libPicture.TestIsPDF(data->GetFilename()) ||
-			libPicture.TestIsAnimation(data->GetFilename()) || showLoadingBitmap)
-		{
-			actifActif = true;
-		}
-		if (showLoadingBitmap)
-		{
-			timeActif = 100;
-		}
-		else if (libPicture.TestIsVideo(data->GetFilename()))
-		{
-			timeActif = 1000 / 25;
-		}
-		else if (libPicture.TestIsAnimation(data->GetFilename()))
-		{
-			timeActif = 100;
-		}
-		else
-		{
-			timeActif = 1000;
-		}
+	// OPTIMISATION : Idéalement, remplacez ces appels de méthodes sur chaîne par une énumération 
+	// pré-calculée dans data->GetTypeElement() (ex: s'il s'agit du type TYPEVIDEO, TYPEANIMATION, etc.)
+	bool isVideo = libPicture.TestIsVideo(filename);
+	bool isAnimation = libPicture.TestIsAnimation(filename);
+	bool isPDF = libPicture.TestIsPDF(filename);
+
+	if (isVideo || isPDF || isAnimation || showLoadingBitmap)
+	{
+		actifActif = true;
 	}
 
-	if (actifActif)
-		if (!refresh->IsRunning())
-			refresh->Start(timeActif, showLoadingBitmap ? FALSE : TRUE);
+	if (showLoadingBitmap)
+	{
+		timeActif = 100;
+	}
+	else if (isVideo)
+	{
+		timeActif = 1000 / 25; // 25 FPS pour les vidéos
+	}
+	else if (isAnimation)
+	{
+		timeActif = 100;
+	}
+	else
+	{
+		timeActif = 1000;
+	}
+
+	if (actifActif && !refresh->IsRunning())
+	{
+		refresh->Start(timeActif, showLoadingBitmap ? FALSE : TRUE);
+	}
 }
 
 void CThumbnail::IdleFunction()
@@ -803,17 +824,17 @@ bool CThumbnail::GetProcessEnd()
 {
 	return true;
 }
-
 void CThumbnail::OnMouseMove(wxMouseEvent& event)
 {
 	if (threadDataProcess == false)
 		return;
 
-	refreshMouseMove->Stop();
+	int xPos = event.GetX();
+	int yPos = event.GetY();
 
-	isMoving = true;
-	bool needtoRedraw = false;
-	isMovingScroll = true;
+	// ------------------------------------------------------------------
+	// CAS 1 : L'utilisateur est en train de faire un Drag & Drop
+	// ------------------------------------------------------------------
 	bool isChecked = false;
 	if (numActifPhotoId != -1)
 	{
@@ -824,72 +845,86 @@ void CThumbnail::OnMouseMove(wxMouseEvent& event)
 
 	if (mouseClickBlock && enableDragAndDrop && isChecked)
 	{
-		int xPos = event.GetX();
-		int yPos = event.GetY();
-		if (numActifPhotoId != -1)
-		{
-			if (!mouseClickMove)
-				nbElementChecked = GetNbIconSelected();
-			mouseClickMove = true;
-			xPosDrag = xPos;
-			yPosDrag = yPos;
-		}
+		isDragAndDropUse = true;
 
+		// CORRECTION : Calculer le nombre d'éléments AVANT de passer le flag à true
+		if (!mouseClickMove)
+		{
+			nbElementChecked = GetNbIconSelected();
+		}
+		mouseClickMove = true;
+
+		// Mettre à jour les coordonnées de l'icône virtuelle de drag
+		xPosDrag = xPos;
+		yPosDrag = yPos;
+
+		// Gestion du défilement automatique aux bordures
 		if (yPos < 100)
 			MoveTop();
 		else if (yPos > this->GetWindowHeight() - 100)
 			MoveBottom();
 		else
-			needtoRedraw = true;
-	}
-	else
-	{
-		int xPos = event.GetX();
-		int yPos = event.GetY();
-		int iconePhotoId = -1;
-		wxSetCursor(wxCursor(wxCURSOR_HAND));
-
-		CIcone* pBitmapIcone = FindElement(xPos, yPos);
-
-
-		if (pBitmapIcone != nullptr)
 		{
+			// Demande un rafraîchissement asynchrone pour dessiner l'icône et son compteur à la nouvelle position
+			this->Refresh(false);
+		}
+		return;
+	}
 
-			if (pBitmapIcone->GetPtData() != nullptr)
-				iconePhotoId = pBitmapIcone->GetPtData()->GetNumPhotoId();
 
-			if (numActifPhotoId != -1)
+	// ------------------------------------------------------------------
+	// CAS 2 : Mouvement de souris standard (Survol des vignettes)
+	// ------------------------------------------------------------------
+
+	// Limiter la fréquence d'exécution du survol (Throttling avec votre timer existant)
+	if (isMoving && refreshMouseMove->IsRunning())
+	{
+		return; // On ignore les pixels intermédiaires pour soulager le CPU
+	}
+
+	isMoving = true;
+	isMovingScroll = true;
+	bool needtoRedraw = false;
+	int iconePhotoId = -1;
+
+	wxSetCursor(wxCursor(wxCURSOR_HAND));
+
+	// Recherche de l'élément sous la souris
+	CIcone* pBitmapIcone = FindElement(xPos, yPos);
+
+	if (pBitmapIcone != nullptr)
+	{
+		if (pBitmapIcone->GetPtData() != nullptr)
+			iconePhotoId = pBitmapIcone->GetPtData()->GetNumPhotoId();
+
+		if (numActifPhotoId != -1 && iconePhotoId != numActifPhotoId)
+		{
+			CIcone* numActif = GetIconeById(numActifPhotoId);
+			if (numActif != nullptr)
 			{
-				if (iconePhotoId != numActifPhotoId)
-				{
-					if (numActifPhotoId != -1)
-					{
-						CIcone* numActif = GetIconeById(numActifPhotoId);
-
-						if (numActif != nullptr)
-						{
-							numActif->SetActive(false);
-						}
-					}
-					needtoRedraw = true;
-				}
+				numActif->SetActive(false);
 			}
-
-			if (pBitmapIcone->GetState() != ACTIFICONE)
-			{
-				numActifPhotoId = iconePhotoId;
-				if (pBitmapIcone != nullptr)
-					pBitmapIcone->SetActive(true);
-			}
+			needtoRedraw = true;
 		}
 
-
-		if (needtoRedraw)
-			needToRefresh = true;
-
-		refreshMouseMove->Start(1000, true);
+		if (pBitmapIcone->GetState() != ACTIFICONE)
+		{
+			numActifPhotoId = iconePhotoId;
+			pBitmapIcone->SetActive(true);
+			needtoRedraw = true; // Forcer le redraw de la surbrillance active
+		}
 	}
+
+	if (needtoRedraw)
+	{
+		needToRefresh = true;
+		this->Refresh(false); // Demande un repaint asynchrone propre à l'OS
+	}
+
+	// Relancer le timer pour débloquer le prochain calcul de survol dans 30ms (environ 30 FPS)
+	refreshMouseMove->Start(30, true);
 }
+
 
 void CThumbnail::RefreshThumbnail(wxCommandEvent& event)
 {
@@ -923,16 +958,15 @@ bool CThumbnail::UpdateThumbnail(CIcone* pBitmapIcone)
 	}
 	return isProcess;
 }
+
+
 void CThumbnail::RenderBitmap(wxDC* deviceContext, CIcone* pBitmapIcone, const int& posLargeur, const int& posHauteur)
 {
-	// //printf("CThumbnail::RenderBitmap PreprocessThumbnail localid : %d \n", localid);
-
 	if (pBitmapIcone == nullptr || !pBitmapIcone->GetVisibility())
 		return;
 
-	int nbProcesseur = 1;
-	if (CRegardsConfigParam* config = CParamInit::getInstance(); config != nullptr)
-		nbProcesseur = config->GetThumbnailProcess();
+	// OPTIMISATION : Suppression des appels redondants à CParamInit::getInstance() 
+	// qui n'étaient pas utilisés et saturaient le CPU à chaque itération de vignette.
 
 	const int value = pBitmapIcone->RenderIcone(deviceContext, posLargeur, posHauteur, flipHorizontal, flipVertical);
 
@@ -940,24 +974,16 @@ void CThumbnail::RenderBitmap(wxDC* deviceContext, CIcone* pBitmapIcone, const i
 	{
 		if (value == 1)
 		{
-			if (pBitmapIcone != nullptr)
+			if (CThumbnailData* pThumbnailData = pBitmapIcone->GetPtData(); pThumbnailData != nullptr)
 			{
-				if (CThumbnailData* pThumbnailData = pBitmapIcone->GetPtData(); pThumbnailData != nullptr)
+				if (!pThumbnailData->IsProcess())
 				{
-					const bool isProcess = pThumbnailData->IsProcess();
-					//const bool isLoad = pThumbnailData->IsLoad();
-					if (!isProcess) // && !isLoad)
-					{
-						listIconeToGenerate.push_back(pThumbnailData->GetFilename());
-						pThumbnailData->SetIsProcess(true);
-					}
+					listIconeToGenerate.push_back(pThumbnailData->GetFilename());
+					pThumbnailData->SetIsProcess(true);
 				}
 			}
 		}
 	}
-
-
-
 }
 
 void CThumbnail::UpdateScreenRatio()
@@ -999,23 +1025,50 @@ void CThumbnail::OnLButtonUp(wxMouseEvent& event)
 	int yPos = event.GetY();
 	timeClick->Stop();
 	mouseClickBlock = false;
-	if (mouseClickMove && enableDragAndDrop)
+	if (mouseClickMove && enableDragAndDrop && isDragAndDropUse)
 	{
 		OnMouseRelease(xPos, yPos);
 		mouseClickMove = false;
 		needToRefresh = true;
 	}
+
+	isDragAndDropUse = false;
+}
+
+void CThumbnail::EnableModification(const bool& enable)
+{
+	enableModification = enable;
 }
 
 
 void CThumbnail::OnLButtonDown(wxMouseEvent& event)
 {
+	if (!enableModification)
+	{
+		wxClientDC winDC(this);
+		this->SetFocus();
+		int xPos = event.GetX();
+		int yPos = event.GetY();
+
+
+		CIcone* pBitmapIcone = FindElement(xPos, yPos);
+		if (pBitmapIcone != nullptr)
+			if (pBitmapIcone->GetPtData() != nullptr)
+			{
+				int iconePhotoId = pBitmapIcone->GetPtData()->GetNumPhotoId();
+				OnPictureClick(iconePhotoId);
+			}
+
+		return;
+	}
+
+
 	wxClientDC winDC(this);
 	this->SetFocus();
 	int xPos = event.GetX();
 	int yPos = event.GetY();
 
-	mouseClickBlock = true;
+	wxString filename = "";
 	bool isIconeSelected = false;
 	int iconePhotoId = -1;
 	CIcone* pBitmapIcone = FindElement(xPos, yPos);
@@ -1023,6 +1076,7 @@ void CThumbnail::OnLButtonDown(wxMouseEvent& event)
 		if (pBitmapIcone->GetPtData() != nullptr)
 		{
 			iconePhotoId = pBitmapIcone->GetPtData()->GetNumPhotoId();
+			filename = pBitmapIcone->GetPtData()->GetFilename();
 			isIconeSelected = pBitmapIcone->IsChecked();
 		}
 
@@ -1037,6 +1091,7 @@ void CThumbnail::OnLButtonDown(wxMouseEvent& event)
 
 	if (pBitmapIcone != nullptr)
 	{
+
 		numSelectPhotoId = iconePhotoId;
 		int value = pBitmapIcone->OnClick(xPos, yPos, posLargeur, posHauteur);
 		//
@@ -1053,14 +1108,18 @@ void CThumbnail::OnLButtonDown(wxMouseEvent& event)
 			OnPictureClick(numSelectPhotoId);
 			pBitmapIcone->SetSelected(true);
 		}
+		SetActifItem(numSelectPhotoId, false);
 	}
 	else
 	{
 		FindOtherElement(&winDC, xPos, yPos);
 	}
 
-	if (numActifPhotoId != -1 && enableDragAndDrop && isIconeSelected)
+	if (numActifPhotoId != -1 && enableDragAndDrop && isIconeSelected && enableModification)
 	{
+
+		mouseClickBlock = true;
+
 		if (timeClick->IsRunning())
 			timeClick->Stop();
 
@@ -1077,6 +1136,10 @@ void CThumbnail::OnLButtonDown(wxMouseEvent& event)
 		memset(alphaData, 128, image.GetWidth() * image.GetHeight());
 		image.SetAlpha(alphaData);
 		bitmapIconDrag = image;
+
+		// AJOUT : Force la réinitialisation du texte et du buffer
+		bitmapIconDragChange = true;
+		oldLibelle = "";
 	}
 	needToRefresh = true;
 }
@@ -1153,7 +1216,6 @@ void CThumbnail::on_paint(wxPaintEvent& event)
 
 void CThumbnail::Render(wxDC& dc)
 {
-
 	int width = GetWindowWidth();
 	int height = GetWindowHeight();
 
@@ -1162,9 +1224,7 @@ void CThumbnail::Render(wxDC& dc)
 
 	if (threadDataProcess == false)
 	{
-
 		wxRect rc = GetWindowRect();
-		//UpdateScroll();
 		FillRect(&dc, rc, themeThumbnail.colorBack);
 		if (!animationStart)
 		{
@@ -1173,11 +1233,11 @@ void CThumbnail::Render(wxDC& dc)
 			animationStart = true;
 			timerAnimation->Start(100, TIMER_TIME_REFRESH);
 		}
-
 		m_waitingAnimation->SetSize(wxSize(width, height));
 		m_waitingAnimation->SetBackgroundColour(themeThumbnail.colorBack);
 		return;
 	}
+
 	if (animationStart)
 	{
 		timerAnimation->Stop();
@@ -1186,7 +1246,10 @@ void CThumbnail::Render(wxDC& dc)
 		animationStart = false;
 	}
 
-	if (numSelectPhotoId != -1 && !isMovingScroll && moveOnPaint)
+	// Mode Drag & Drop actif
+	bool isDragging = (mouseClickBlock && mouseClickMove && enableDragAndDrop);
+
+	if (numSelectPhotoId != -1 && !isMovingScroll && moveOnPaint && !isDragging)
 	{
 		CIcone* numSelect = GetIconeById(numSelectPhotoId);
 		if (numSelect != nullptr)
@@ -1203,14 +1266,17 @@ void CThumbnail::Render(wxDC& dc)
 	TestMaxY();
 
 	render = true;
-
 	listIconeToGenerate.clear();
 
+	// 1. Dessiner le fond (Géré par le double-buffer de wxBufferedPaintDC)
 	wxRect rc = GetWindowRect();
 	FillRect(&dc, rc, themeThumbnail.colorBack);
 
+	// 2. Dessiner la grille de vignettes existantes
 	RenderIcone(&dc);
-	if (listIconeToGenerate.size() > 0)
+
+	// Ne PAS demander de génération de vignettes si on est en train de faire un Drag & Drop
+	if (listIconeToGenerate.size() > 0 && !isDragging)
 	{
 		wxWindow* window = this->FindWindowById(MAINVIEWERWINDOWID);
 		if (window != nullptr)
@@ -1225,53 +1291,77 @@ void CThumbnail::Render(wxDC& dc)
 	}
 
 	render = false;
-
 	oldPosLargeur = posLargeur;
 	oldPosHauteur = posHauteur;
 
-
-	if (this->GetParent() != nullptr && moveOnPaint)
+	// OPTIMISATION & SÉCURISATION MÉMOIRE :
+	// Si votre classe parente accepte SetInt/SetExtraLong, privilégiez cette méthode (sans pointeur).
+	// Si elle exige un wxSize* via GetClientData(), assurez-vous que le parent fait un "delete" du pointeur récupéré.
+	if (this->GetParent() != nullptr && moveOnPaint && !isDragging)
 	{
-		auto size = new wxSize();
+		auto* size = new wxSize(posLargeur, posHauteur); // Allocation propre
 		wxCommandEvent evt(wxEVENT_SETPOSITION);
-		size->x = posLargeur;
-		size->y = posHauteur;
 		evt.SetClientData(size);
 		this->GetParent()->GetEventHandler()->AddPendingEvent(evt);
 	}
 
-
-	if (mouseClickBlock && mouseClickMove && enableDragAndDrop)
+	// 3. Dessiner l'image de Drag & Drop (Code optimisé mis en cache)
+	if (isDragging)
 	{
 		dc.DrawBitmap(bitmapIconDrag, xPosDrag - (bitmapIconDrag.GetWidth() / 2),
 			yPosDrag - (bitmapIconDrag.GetHeight() / 2));
 
 		if (nbElementChecked > 1)
 		{
-			wxString libelle = L"";
+			wxString libelle = to_string(nbElementChecked);
 
-			libelle = to_string(nbElementChecked);
-
-			if (libelle != L"")
+			if (!libelle.IsEmpty())
 			{
 				CThemeIcone themeIcone;
 				CThemeFont themeFont = themeIcone.font;
 				themeFont.SetFontSize(18);
-				wxSize size = GetSizeTexte(&dc, libelle, themeFont);
-				int localx = xPosDrag - (bitmapIconDrag.GetWidth() / 2);
-				int localy = yPosDrag - (bitmapIconDrag.GetHeight() / 2);
 
-				int xPos = xPosDrag - size.x / 2;
-				int yPos = yPosDrag - size.y / 2;
+				if (oldLibelle != libelle || bitmapIconDragChange || !bufferBitmap.IsOk())
+				{
+					wxSize textSize = GetSizeTexte(&dc, libelle, themeFont);
 
-				dc.SetBrush(wxBrush(themeIcone.colorSelectTop));
-				dc.DrawRoundedRectangle(localx + bitmapIconDrag.GetWidth() / 4, localy + bitmapIconDrag.GetHeight() / 4,
-					bitmapIconDrag.GetWidth() / 2, bitmapIconDrag.GetHeight() / 2, -0.25);
-				dc.SetBrush(wxNullBrush);
+					int paddingX = 16;
+					int paddingY = 8;
+					int badgeWidth = textSize.x + paddingX;
+					int badgeHeight = textSize.y + paddingY;
 
-				dc.SetBrush(wxBrush(*wxWHITE));
-				DrawTexte(&dc, libelle, xPos, yPos, themeFont);
-				dc.SetBrush(wxNullBrush);
+					if (!bufferBitmap.IsOk() || bufferBitmap.GetWidth() != badgeWidth || bufferBitmap.GetHeight() != badgeHeight)
+					{
+						bufferBitmap = wxBitmap(badgeWidth, badgeHeight);
+					}
+
+					wxMemoryDC memDC;
+					memDC.SelectObject(bufferBitmap);
+
+					memDC.SetBackground(wxBrush(themeThumbnail.colorBack));
+					memDC.Clear();
+
+					memDC.SetBrush(wxBrush(themeIcone.colorSelectTop));
+					memDC.SetPen(*wxTRANSPARENT_PEN);
+					memDC.DrawRoundedRectangle(0, 0, badgeWidth, badgeHeight, 4.0);
+					memDC.SetBrush(wxNullBrush);
+
+					memDC.SetTextForeground(*wxWHITE);
+					DrawTexte(&memDC, libelle, paddingX / 2, paddingY / 2, themeFont);
+
+					memDC.SelectObject(wxNullBitmap);
+
+					oldLibelle = libelle;
+					bitmapIconDragChange = false;
+				}
+
+				int badgeX = xPosDrag - (bufferBitmap.GetWidth() / 2);
+				int badgeY = yPosDrag + (bitmapIconDrag.GetHeight() / 4);
+
+				wxMemoryDC renderDC;
+				renderDC.SelectObject(bufferBitmap);
+				dc.Blit(badgeX, badgeY, bufferBitmap.GetWidth(), bufferBitmap.GetHeight(), &renderDC, 0, 0);
+				renderDC.SelectObject(wxNullBitmap);
 			}
 		}
 	}
@@ -1281,6 +1371,8 @@ void CThumbnail::Render(wxDC& dc)
 			timerAnimation->Start(500, true);
 	firstRefresh = false;
 }
+
+
 
 void CThumbnail::Resize()
 {

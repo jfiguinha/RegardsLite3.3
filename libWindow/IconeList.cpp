@@ -74,25 +74,31 @@ int CIconeList::GetPhotoId(const int& numElement)
 
 void CIconeList::RemoveElement(int numElement)
 {
-    if (numElement >= pIconeList.size())
-        return;
+	std::unique_lock lock(mutexList);
 
-    CIcone* icone = pIconeList[numElement];
+	if (numElement >= pIconeList.size())
+		return;
 
-    if (icone != nullptr)
-    {
-		if (CThumbnailData* data = icone->GetPtData();
-			data != nullptr)
+	CIcone* icone = pIconeList[numElement];
+
+	if (icone != nullptr)
+	{
+		if (CThumbnailData* data = icone->GetPtData(); data != nullptr)
 		{
-			pIconeByPhotoId[data->GetNumPhotoId()] = nullptr;
-			pIconeByFilename[data->GetFilename()] = nullptr;
+			// Utilisation de unsafe_erase(), sécurisé ici grâce au mutexList
+			pIconeByPhotoId.unsafe_erase(data->GetNumPhotoId());
+			pIconeByFilename.unsafe_erase(data->GetFilename());
 		}
+		delete icone;
+	}
 
-        delete icone;
-    }
+	// Déplacement des éléments restants vers la gauche pour combler le vide
+	std::move(pIconeList.begin() + numElement + 1, pIconeList.end(), pIconeList.begin() + numElement);
 
-    pIconeList[numElement] = nullptr;
+	// Réduction de la taille du concurrent_vector de 1
+	pIconeList.resize(pIconeList.size() - 1);
 }
+
 
 CIcone* CIconeList::GetElement(const int& numElement)
 {
@@ -153,10 +159,28 @@ CIcone* CIconeList::FindElementByFilename(const wxString& filename)
 {
     auto it = pIconeByFilename.find(filename);
 
-    if (it != pIconeByFilename.end() && it->second != nullptr)
-        return it->second;
-
+	if (it != pIconeByFilename.end() && it->second != nullptr)
+	{
+		int numElement = GetNumElement(filename);
+		it->second->SetNumElement(numElement);
+		return it->second;
+	}
     return nullptr;
+}
+
+int CIconeList::GetNumElement(const wxString& filename)
+{
+	for (int i = 0; i < pIconeList.size(); i++)
+	{
+		if (CIcone* icone = pIconeList[i])
+		{
+			if (CThumbnailData* data = icone->GetPtData())
+			{
+				if (data->GetFilename() == filename)
+					return i;
+			}
+		}
+	}
 }
 
 

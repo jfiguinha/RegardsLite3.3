@@ -33,7 +33,7 @@ namespace Regards::Window
 		int GetNbElement();
 		int GetNumPhotoId(const int& numItem);
 		int GetNumItem();
-
+		wxString GetActifItem();
 		int GetHauteur()
 		{
 			return posHauteur;
@@ -66,6 +66,8 @@ namespace Regards::Window
 		void SetTheme(CThemeThumbnail* theme);
 
 		void UpdateScreenRatio() override;
+
+		virtual void EnableModification(const bool &enable);
 
 		void Resize() override;
 		static bool ItemCompFonct(int xPos, int yPos, CIcone* icone, CWindowMain* parent);
@@ -165,8 +167,9 @@ namespace Regards::Window
 		bool enableTimer = true;
 		int nbElement = 0;
 		int nbPhotoElement = 0;
-
-		
+		wxBitmap bufferBitmap;
+		wxString oldLibelle = "";
+		bool bitmapIconDragChange = true;
 
 		bool processThumbnailVideo = false;
 		wxString videoFilename = "";
@@ -250,6 +253,7 @@ namespace Regards::Window
 		std::vector<wxString> listIconeToGenerate;
 		wxWindowID localid;
 
+		bool isDragAndDropUse = false;
         
 		std::unique_ptr<CIconeList> iconeList = nullptr;
 		static std::unique_ptr<wxAnimation> m_animation;
@@ -262,5 +266,9 @@ namespace Regards::Window
 		std::unique_ptr<wxTimer> timeClick;
         std::unique_ptr<wxActivityIndicator> m_waitingAnimation;
 		int pictureAnimationPos = 0;
+
+		bool enableModification = true;
+
+		int numClickIcone = 0;
 	};
 }
