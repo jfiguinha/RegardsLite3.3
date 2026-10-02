@@ -30,6 +30,33 @@ void CThumbnailHorizontal::InitPosition()
 	posHauteur = 0;
 	posLargeur = 0;
 }
+/*
+void CThumbnailHorizontal::RenderIcone(wxDC* deviceContext)
+{
+	int x = -posLargeur;
+	int y = 0;
+
+	for (int i = 0; i < nbElementInIconeList; i++)
+	{
+		CIcone* pBitmapIcone = iconeList->GetElement(i);
+		if (pBitmapIcone != nullptr)
+		{
+			int left = x;
+			int right = x + themeThumbnail.themeIcone.GetWidth();
+			int top = y;
+			int bottom = y + themeThumbnail.themeIcone.GetHeight();
+			pBitmapIcone->SetWindowPos(x, y);
+			if ((right > 0 && left < GetWindowWidth()) && (top < GetWindowHeight() && bottom > 0))
+			{
+				pBitmapIcone->SetTheme(themeThumbnail.themeIcone);
+				RenderBitmap(deviceContext, pBitmapIcone, 0, 0);
+			}
+
+			x += themeThumbnail.themeIcone.GetWidth();
+		}
+	}
+}
+*/
 
 void CThumbnailHorizontal::RenderIcone(wxDC* deviceContext)
 {
@@ -54,7 +81,7 @@ void CThumbnailHorizontal::RenderIcone(wxDC* deviceContext)
 		if (pBitmapIcone != nullptr)
 		{
 			// Position absolue sur la toile virtuelle
-			int absX = i * iconeWidth;
+			int absX = (i - firstVisibleIdx) * iconeWidth;
 			int absY = 0;
 
 			// Coordonnées relatives à l'écran (pour RenderIcone interne)
