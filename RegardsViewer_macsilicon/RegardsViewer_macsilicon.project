@@ -354,7 +354,7 @@
         <Command Enabled="yes">mkdir -p ./Release/RegardsLite.app/Contents/Resources</Command>
         <Command Enabled="yes">sed -e "s/IDENTIFIER/`echo . | sed -e 's,\.\./,,g' | sed -e 's,/,.,g'`/" \
 	-e "s/EXECUTABLE/RegardsLite/" \
-	-e "s/VERSION/3.00.0.0/" \
+	-e "s/VERSION/3.00.0.5/" \
 	../Regards/mac/Info.plist.in &gt;./Release/RegardsLite.app/Contents/Info.plist</Command>
         <Command Enabled="yes">/bin/echo "APPL????" &gt;./Release/RegardsLite.app/Contents/PkgInfo</Command>
         <Command Enabled="yes">ln -f ./Release/RegardsLite ./Release/RegardsLite.app/Contents/MacOS/RegardsLite</Command>
