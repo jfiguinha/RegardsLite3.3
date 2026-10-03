@@ -453,7 +453,7 @@ CThumbnail::CThumbnail(wxWindow* parent, wxWindowID id, const CThemeThumbnail& t
 	Connect(TIMER_MOVE, wxEVT_TIMER, wxTimerEventHandler(CThumbnail::OnTimerMove), nullptr, this);
 
 	if(!m_animation)
-		m_animation = std::make_unique<wxAnimation>(CFileUtility::GetResourcesFolderPathWithExt("loading.gif"));
+		m_animation = std::make_unique<wxAnimation>(CFileUtility::GetResourcesFolderPathWithExt("loading_circle_gradient.webp"));
 
 	Connect(wxEVENT_ONSTARTLOADINGPICTURE, wxCommandEventHandler(CThumbnail::StartLoadingPicture));
 	Connect(wxEVENT_ONSTOPLOADINGPICTURE, wxCommandEventHandler(CThumbnail::StopLoadingPicture));
@@ -1214,6 +1214,18 @@ void CThumbnail::on_paint(wxPaintEvent& event)
 	Render(dc);
 }
 
+void CThumbnail::CalculateScrollPosition(CIcone* numSelect)
+{
+	if (numSelect != nullptr)
+	{
+		wxRect rect = numSelect->GetPos();
+		int yPos = max((rect.y - this->GetWindowHeight() / 2), 0);
+		int xPos = max((rect.x - this->GetWindowWidth() / 2), 0);
+		posLargeur = xPos;
+		posHauteur = yPos;
+	}
+}
+
 void CThumbnail::Render(wxDC& dc)
 {
 	int width = GetWindowWidth();
@@ -1253,13 +1265,7 @@ void CThumbnail::Render(wxDC& dc)
 	{
 		CIcone* numSelect = GetIconeById(numSelectPhotoId);
 		if (numSelect != nullptr)
-		{
-			wxRect rect = numSelect->GetPos();
-			int yPos = max((rect.y - this->GetWindowHeight() / 2), 0);
-			int xPos = max((rect.x - this->GetWindowWidth() / 2), 0);
-			posLargeur = xPos;
-			posHauteur = yPos;
-		}
+			CalculateScrollPosition(numSelect);
 	}
 
 	TestMaxX();
