@@ -20,10 +20,10 @@ ReserveFile `${NSISDIR}\Plugins\EmbeddedLists.dll`
 !define MUI_FILE "RegardsLite"
 !define MUI_ICON "regardsliteicon.ico"
 !define UninstId "RegardsLite3" ; You might want to use a GUID here
-!define MUI_VERSION "3.0.0.6"
+!define MUI_VERSION "3.0.0.7"
 
   ;Name and file
-  Name "RegardsLite 3.0.0.6"
+  Name "RegardsLite 3.0.0.7"
   OutFile "RegardsLite3_arm64_win.exe"
 
   ;Default installation folder
@@ -141,7 +141,7 @@ Section "RegardsLite" SecRegardsViewer
 
 
   ;ADD YOUR OWN FILES HERE...
-  DetailPrint "*** Installing RegardsLite 3.0.0.6 ..."
+  DetailPrint "*** Installing RegardsLite 3.0.0.7 ..."
   File "Prerequisites\RegardsLite3.zip"
   ZipDLL::extractall "$INSTDIR\RegardsLite3.zip" $INSTDIR
   ;Store installation folder
