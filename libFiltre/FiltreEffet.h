@@ -64,7 +64,7 @@ public:
     int Inpaint(const cv::Mat &mask, int algorithm);
 	int HQDn3D(const double& LumSpac = 4, const double& temporalLumaDefault = 6.0, const double& temporalSpatialLumaDefault = 4.0);
 	int MotionBlur(const double& radius, const double& sigma, const double& angle);
-	int RotateFree(const double& angle);
+	int RotateFree(const double& angle, const cv::Scalar& bgColor, const bool& preview = true);
 	int PhotoFiltre(const CRgbaquad& clValue, const int& intensity);
 	int BrightnessAndContrast(const double& brightness, const double& contrast);
 	int RGBFilter(const int& red, const int& green, const int& blue);
@@ -105,7 +105,7 @@ public:
 	bool StabilizeVideo(Regards::OpenCV::COpenCVStabilization* stabilization);
 
 private:
-	void CalculNewSize(const int32_t& x, const int32_t& y, const double& angle, int& width, int& height);
+	void CalculNewSize(const int32_t& x, const int32_t& y, const double& angle, int& width, int& height, const bool& preview);
 	//CRegardsBitmap * pBitmap;
 	std::unique_ptr<IFiltreEffet> filtreEffet;
 	CRgbaquad backColor;

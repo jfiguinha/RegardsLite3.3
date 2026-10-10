@@ -7,6 +7,8 @@
 #include <ParamInit.h>
 #include <RegardsConfigParam.h>
 #include <opencv2/core/ocl.hpp>
+#include <opencv2/dnn_superres.hpp>
+
 #include <wx/filename.h>
 #include "OpenCLKernelBuilder.h"
 #include <appcontext.h>
@@ -15,11 +17,19 @@ extern AppContext application_context;
 using namespace Regards::OpenCL;
 using namespace cv;
 
+using namespace dnn;
+using namespace dnn_superres;
 
 #define OPENCV_METHOD
 
 
+#define EDSR 0
+#define ESPCN 1
+#define FSRCNN 2
+#define LapSRN 3
 
+std::atomic<bool> isDnnUsed{ false };
+std::mutex muDnnSuperResImpl;
 int numTexture = -1;
 
 
@@ -210,7 +220,131 @@ cv::UMat ExecuteSafeOpenCLWithUMatOutput(cv::UMat& inputData, bool bgraOutput, F
 	return dest;
 }
 
+class CSuperSampling
+{
+public:
+	CSuperSampling()
+	{
+	};
 
+	~CSuperSampling()
+	{
+	};
+	string GenerateModelPath(string modelName, int scale);
+	bool TestIfMethodIsValid(int method, int scale);
+	UMat upscaleImage(UMat img, int method, int scale);
+
+private:
+	DnnSuperResImpl sr;
+	int oldscale = -1;
+	int oldmethod = -1;
+};
+
+string CSuperSampling::GenerateModelPath(string modelName, int scale)
+{
+
+	wxFileName path = wxFileName(CFileUtility::GetResourcesFolderPath(), wxEmptyString);
+	path.AppendDir("model");
+	path.SetFullName(modelName + "_x" + to_string(scale) + ".pb");
+
+	return path.GetFullPath().utf8_string();
+}
+
+bool CSuperSampling::TestIfMethodIsValid(int method, int scale)
+{
+	if (method == EDSR && (scale == 2 || scale == 3 || scale == 4))
+	{
+		return true;
+	}
+	if (method == ESPCN && (scale == 2 || scale == 3 || scale == 4))
+	{
+		return true;
+	}
+	if (method == FSRCNN && (scale == 2 || scale == 3 || scale == 4))
+	{
+		return true;
+	}
+	if (method == LapSRN && (scale == 2 || scale == 4 || scale == 8))
+	{
+		return true;
+	}
+	return false;
+}
+
+UMat CSuperSampling::upscaleImage(UMat img, int method, int scale)
+{
+	
+	isDnnUsed = true;
+	UMat outputImage;
+
+	if (oldscale != scale || oldmethod != method)
+	{
+		try
+		{
+			switch (method)
+			{
+			case EDSR:
+				{
+					string algorithm = "edsr";
+					sr.readModel(GenerateModelPath("EDSR", scale));
+					sr.setModel(algorithm, scale);
+				}
+				break;
+
+			case ESPCN:
+				{
+					string algorithm = "espcn";
+					sr.readModel(GenerateModelPath("ESPCN", scale));
+					sr.setModel(algorithm, scale);
+				}
+				break;
+			case FSRCNN:
+				{
+					string algorithm = "fsrcnn";
+					sr.readModel(GenerateModelPath("FSRCNN", scale));
+					sr.setModel(algorithm, scale);
+				}
+				break;
+			case LapSRN:
+				{
+					string algorithm = "lapsrn";
+					sr.readModel(GenerateModelPath("LapSRN", scale));
+					sr.setModel(algorithm, scale);
+				}
+				break;
+			}
+
+			sr.setPreferableTarget(DNN_TARGET_OPENCL);
+			sr.upsample(img, outputImage);
+
+			//muDnnSuperResImpl.unlock();
+		}
+		catch (Exception& e)
+		{
+			const char* err_msg = e.what();
+			std::cout << "CSuperSampling::exception caught: " << err_msg << std::endl;
+			std::cout << "wrong file format, please input the name of an IMAGE file" << std::endl;
+		}
+	}
+	else
+	{
+		try
+		{
+			sr.upsample(img, outputImage);
+		}
+		catch (Exception& e)
+		{
+			const char* err_msg = e.what();
+			std::cout << "CSuperSampling::exception caught: " << err_msg << std::endl;
+			std::cout << "wrong file format, please input the name of an IMAGE file" << std::endl;
+		}
+	}
+
+	oldscale = scale;
+	oldmethod = method;
+	isDnnUsed = false;
+	return outputImage;
+}
 
 
 COpenCLFilter::COpenCLFilter(COpenCLContext* openCLContext)
@@ -219,7 +353,7 @@ COpenCLFilter::COpenCLFilter(COpenCLContext* openCLContext)
 	bool useMemory = (ocl::Device::getDefault().type() == CL_DEVICE_TYPE_GPU) ? false : true;
 	flag = useMemory ? CL_MEM_USE_HOST_PTR : CL_MEM_COPY_HOST_PTR;
 	hq3d = nullptr;
-
+    superSampling = std::make_unique<CSuperSampling>();
 	resizer = std::make_unique<COpenCLAvirResizer>(openCLContext);
 	
 }
@@ -1056,24 +1190,46 @@ void COpenCLFilter::HQDn3D(const double& LumSpac, const double& temporalLumaDefa
 }
 
 void COpenCLFilter::Rotate(const wxString& functionName, const int& widthOut, const int& heightOut, const double& angle,
-                           UMat& inputData)
+	UMat& inputData, const cv::Scalar& bgColor, const bool& preview)
 {
 	ExecuteSafe([&]
 		{
-			UMat cvDest;
-			// get rotation matrix for rotating the image around its center in pixel coordinates
+			// 1. Calculs communs (Centre, Boîte englobante et Matrice initiale)
 			const Point2f center((inputData.cols - 1) / 2.0, (inputData.rows - 1) / 2.0);
-			Mat rot = getRotationMatrix2D(center, angle, 1.0);
-			// determine bounding rectangle, center not relevant
-			Rect2f bbox = RotatedRect(Point2f(), inputData.size(), angle).boundingRect2f();
-			// adjust transformation matrix
-			rot.at<double>(0, 2) += bbox.width / 2.0 - inputData.cols / 2.0;
-			rot.at<double>(1, 2) += bbox.height / 2.0 - inputData.rows / 2.0;
+			const Rect2f bbox = RotatedRect(Point2f(), inputData.size(), angle).boundingRect2f();
 
-			warpAffine(inputData, cvDest, rot, bbox.size());
+			Mat rot;
+			Size targetSize;
+
+			if (preview)
+			{
+				// Mode Preview : Réduction de l'image pour qu'elle rentre dans le cadre d'origine
+				double scaleX = (bbox.width > 0) ? inputData.cols / static_cast<double>(bbox.width) : 1.0;
+				double scaleY = (bbox.height > 0) ? inputData.rows / static_cast<double>(bbox.height) : 1.0;
+				double scale = std::min({ 1.0, scaleX, scaleY });
+
+				rot = getRotationMatrix2D(center, angle, scale);
+				targetSize = inputData.size();
+			}
+			else
+			{
+				// Mode Normal : Agrandissement du cadre (boîte englobante complète)
+				rot = getRotationMatrix2D(center, angle, 1.0);
+				targetSize = bbox.size();
+
+				// Ajustement de la matrice de transformation pour le nouveau cadre
+				rot.at<double>(0, 2) += bbox.width / 2.0 - inputData.cols / 2.0;
+				rot.at<double>(1, 2) += bbox.height / 2.0 - inputData.rows / 2.0;
+			}
+
+			// 2. Application de la transformation affine commune
+			UMat cvDest;
+			warpAffine(inputData, cvDest, rot, targetSize, cv::INTER_LINEAR, cv::BORDER_CONSTANT, bgColor);
 			cvDest.copyTo(inputData);
 		});
 }
+
+
 
 Rect COpenCLFilter::CalculRect(int widthIn, int heightIn, int widthOut, int heightOut, int flipH, int flipV, int angle,
 	float ratioX, float ratioY, int x, int y, float left, float top)
@@ -1210,7 +1366,10 @@ UMat COpenCLFilter::Interpolation(const int& widthOut, const int& heightOut, con
     bool _useSuperResolution = false;
     //cout << "COpenCLFilter::Interpolation : " << method << endl;
     CRegardsConfigParam* regardsParam = CParamInit::getInstance();
-
+    int superDnn = regardsParam->GetSuperResolutionType();
+    int useSuperResolution = regardsParam->GetUseSuperResolution();
+    if (useSuperResolution && superSampling->TestIfMethodIsValid(superDnn, (ratio / 100)) && !isDnnUsed)
+        _useSuperResolution = true;
 
 	
 	//UMat cvImage;
@@ -1318,7 +1477,19 @@ UMat COpenCLFilter::Interpolation(const int& widthOut, const int& heightOut, con
 		the nearest neighbor method in PIL, scikit-image or Matlab.
 		INTER_NEAREST_EXACT = 6,
 		*/
-		if (method == 7) //AVIR INTERPOLATION NOT SUPPORTED BY OPENCL
+		if (_useSuperResolution)
+		{
+			cv::UMat picture;
+			if (cvDestBgra.channels() == 4)
+			{
+				cvtColor(cvDestBgra, picture, cv::COLOR_BGRA2BGR);
+				picture = superSampling->upscaleImage(picture, superDnn, (ratio / 100));
+				cvtColor(picture, cvDestBgra, cv::COLOR_BGR2BGRA);
+			}
+			else
+				cvDestBgra = superSampling->upscaleImage(cvDestBgra, superDnn, (ratio / 100));
+		}
+		else if (method == 7) //AVIR INTERPOLATION NOT SUPPORTED BY OPENCL
 		{
 #ifdef _DEBUG
 			using std::chrono::high_resolution_clock;

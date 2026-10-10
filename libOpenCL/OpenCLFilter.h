@@ -11,7 +11,7 @@
 #include "OpenCLContext.h"
 #include "COpenCLAvirResizer.h"
 
-
+class CSuperSampling;
 
 namespace Regards
 {
@@ -68,7 +68,7 @@ namespace Regards
 			void BrightnessAndContrast(const double& brightness, const double& contrast, cv::UMat& inputData);
 			void ColorEffect(const wxString& functionName, cv::UMat& inputData);
 			void Rotate(const wxString& functionName, const int& widthOut, const int& heightOut, const double& angle,
-			            cv::UMat& inputData);
+			            cv::UMat& inputData, const cv::Scalar& bgColor, const bool& preview);
 			cv::UMat Interpolation(const int& widthOut, const int& heightOut, const wxRect& rc, const int& method,
 			                       cv::UMat& inputData, int flipH, int flipV, int angle, int ratio, bool bgraOutput = false);
 			void Fusion(cv::UMat& inputData, const cv::UMat& secondPictureData, const float& pourcentage);
@@ -116,7 +116,7 @@ namespace Regards
 			std::unique_ptr<COpenCLAvirResizer> resizer = nullptr;
 			bool isVideo = false;
 			std::map<wxString,std::unique_ptr<OpenCLMemoryTemp>> openclMemTempMap;
-
+			std::unique_ptr<CSuperSampling> superSampling;
 
 		};
 	}

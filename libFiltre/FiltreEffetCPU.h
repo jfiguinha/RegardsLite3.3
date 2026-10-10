@@ -56,14 +56,14 @@ public:
 	int FlipHorizontal() override;
 	int CartoonifyImage(const int& mode) override;
 	int MotionBlur(const double& radius, const double& sigma, const double& angle) override;
-	int RotateFree(const double& angle, const int& widthOut, const int& heightOut) override;
+	int RotateFree(const double& angle, const int& widthOut, const int& heightOut, const cv::Scalar& bgColor, const bool& preview) override;
 	int PhotoFiltre(const CRgbaquad& clValue, const int& intensity) override;
 	int Rotate90() override;
 	int Rotate270() override;
 	int Rotate180() override;
 	int BrightnessAndContrast(const double& brightness, const double& contrast) override;
 	int RGBFilter(const int& red, const int& green, const int& blue) override;
-	int Resize(const int& imageWidth, const int& imageHeight, const int& interpolation);
+
 	int CloudsFilter(const CRgbaquad& color1, const CRgbaquad& color2, const float& amplitude, const float& frequence,
 	                 const int& octave, const int& intensity) override;
 	int Swirl(const float& radius, const float& angle) override;

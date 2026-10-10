@@ -21,6 +21,11 @@ namespace Regards::Filter
 		int TypeApplyFilter() override;
 		int GetNameFilter() override;
 
+		bool IsOpenCLCompatible() override
+		{
+			return false;
+		}
+
 		void Filter(CEffectParameter* effectParameter, const wxString& filename,
 		            IFiltreEffectInterface* filtreInterface) override
 		{
@@ -46,5 +51,6 @@ namespace Regards::Filter
 
 	private:
 		wxString libelleRotationAngle;
+		wxString libelleBgColor;
 	};
 }

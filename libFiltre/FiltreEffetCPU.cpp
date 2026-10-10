@@ -21,7 +21,6 @@
 #include <RegardsConfigParam.h>
 #include <ConvertUtility.h>
 #include <opencv2/xphoto/inpainting.hpp>
-
 #include "InterpolationFilters.h"
 #include <wx/filename.h>
 #include <effect_id.h>
@@ -62,8 +61,9 @@ public:
 	static void generateGradient(Mat& mask, const double& radius, const double& power);
 	static double getMaxDisFromCorners(const Size& imgSize, const Point& center);
 	static double dist(Point a, Point b);
-
-
+	static Mat upscaleImage(Mat img, int method, int scale);
+	static string GenerateModelPath(string modelName, int scale);
+	static bool TestIfMethodIsValid(int method, int scale);
 	static Rect CalculRect(int widthIn, int heightIn, int widthOut, int heightOut, int flipH, int flipV, int angle,
 	                       float ratioX, float ratioY, int x, int y, float left, float top);
 	static cv::Mat BuildContrastLUT(double alpha, double beta);
@@ -168,6 +168,93 @@ Rect CFiltreEffetCPUImpl::CalculRect(int widthIn, int heightIn, int widthOut, in
 
 
 
+string CFiltreEffetCPUImpl::GenerateModelPath(string modelName, int scale)
+{
+	wxString documentPath = CFileUtility::GetDocumentFolderPathWithFilename("model");
+	wxFileName file(documentPath, wxString::Format("%s_x%d.pb", modelName, scale));
+	return CConvertUtility::ConvertToStdString(file.GetFullPath());
+}
+
+bool CFiltreEffetCPUImpl::TestIfMethodIsValid(int method, int scale)
+{
+	if (method == EDSR && (scale == 2 || scale == 3 || scale == 4))
+	{
+		return true;
+	}
+	if (method == ESPCN && (scale == 2 || scale == 3 || scale == 4))
+	{
+		return true;
+	}
+	if (method == FSRCNN && (scale == 2 || scale == 3 || scale == 4))
+	{
+		return true;
+	}
+	if (method == LapSRN && (scale == 2 || scale == 4 || scale == 8))
+	{
+		return true;
+	}
+	return false;
+}
+
+Mat CFiltreEffetCPUImpl::upscaleImage(Mat img, int method, int scale)
+{
+	Mat outputImage;
+	try
+	{
+		//muDnnSuperResImpl.lock();
+
+		DnnSuperResImpl sr;
+
+
+		switch (method)
+		{
+		case EDSR:
+			{
+				string algorithm = "edsr";
+				sr.readModel(GenerateModelPath("EDSR", scale));
+				sr.setModel(algorithm, scale);
+			}
+			break;
+
+		case ESPCN:
+			{
+				string algorithm = "espcn";
+				sr.readModel(GenerateModelPath("ESPCN", scale));
+				sr.setModel(algorithm, scale);
+			}
+			break;
+		case FSRCNN:
+			{
+				string algorithm = "fsrcnn";
+				sr.readModel(GenerateModelPath("FSRCNN", scale));
+				sr.setModel(algorithm, scale);
+			}
+			break;
+		case LapSRN:
+			{
+				string algorithm = "lapsrn";
+				sr.readModel(GenerateModelPath("LapSRN", scale));
+				sr.setModel(algorithm, scale);
+			}
+			break;
+		}
+
+		sr.setPreferableTarget(DNN_TARGET_CPU);
+		sr.upsample(img, outputImage);
+
+		//muDnnSuperResImpl.unlock();
+	}
+	catch (Exception& e)
+	{
+		const char* err_msg = e.what();
+		std::cout << "exception caught: " << err_msg << std::endl;
+		std::cout << "wrong file format, please input the name of an IMAGE file" << std::endl;
+	}
+
+	return outputImage;
+}
+
+
 CFiltreEffetCPU::CFiltreEffetCPU(CRgbaquad back_color, CImageLoadingFormat* bitmap)
 	: IFiltreEffet(back_color)
 {
@@ -211,6 +298,7 @@ int CFiltreEffetCPU::Inpaint(const cv::Mat &mask, int algorithm)
 
     return 0;
 }
+
 
 bool CFiltreEffetCPU::StabilizeVideo(Regards::OpenCV::COpenCVStabilization* openCVStabilization)
 {
@@ -718,7 +806,6 @@ void CFiltreEffetCPU::SetBitmap(CImageLoadingFormat* bitmap)
 	}
 }
 
-
 int CFiltreEffetCPU::WaveFilter(int x, int y, short height, int scale, int radius)
 {
 	ExecuteSafe([&](cv::Mat& image)
@@ -1058,6 +1145,8 @@ wxImage CFiltreEffetCPU::GetwxImage()
 
 	return wx;
 }
+
+
 
 
 Mat CFiltreEffetCPU::Interpolation(const Mat& inputData, const int& widthOut, const int& heightOut, const wxRect& rc,
@@ -1716,24 +1805,43 @@ int CFiltreEffetCPU::GroundGlassEffect(const double& radius)
 //----------------------------------------------------------------------------
 //
 //----------------------------------------------------------------------------
-int CFiltreEffetCPU::RotateFree(const double& angle, const int& widthOut, const int& heightOut)
+int CFiltreEffetCPU::RotateFree(const double& angle, const int& widthOut, const int& heightOut, const cv::Scalar& bgColor, const bool& preview)
 {
 	ExecuteSafe([&](cv::Mat& image)
 		{
 
-			Mat out;
-			// get rotation matrix for rotating the image around its center in pixel coordinates
+			// 1. Calculs communs (Centre, Boîte englobante et Matrice initiale)
 			const Point2f center((image.cols - 1) / 2.0, (image.rows - 1) / 2.0);
-			Mat rot = getRotationMatrix2D(center, angle, 1.0);
-			// determine bounding rectangle, center not relevant
-			Rect2f bbox = RotatedRect(Point2f(), image.size(), angle).boundingRect2f();
-			// adjust transformation matrix
-			rot.at<double>(0, 2) += bbox.width / 2.0 - image.cols / 2.0;
-			rot.at<double>(1, 2) += bbox.height / 2.0 - image.rows / 2.0;
+			const Rect2f bbox = RotatedRect(Point2f(), image.size(), angle).boundingRect2f();
 
-			warpAffine(image, out, rot, bbox.size());
+			Mat rot;
+			Size targetSize;
 
-			out.copyTo(image);
+			if (preview)
+			{
+				// Mode Preview : Réduction de l'image pour qu'elle rentre dans le cadre d'origine
+				double scaleX = (bbox.width > 0) ? image.cols / static_cast<double>(bbox.width) : 1.0;
+				double scaleY = (bbox.height > 0) ? image.rows / static_cast<double>(bbox.height) : 1.0;
+				double scale = std::min({ 1.0, scaleX, scaleY });
+
+				rot = getRotationMatrix2D(center, angle, scale);
+				targetSize = image.size();
+			}
+			else
+			{
+				// Mode Normal : Agrandissement du cadre (boîte englobante complète)
+				rot = getRotationMatrix2D(center, angle, 1.0);
+				targetSize = bbox.size();
+
+				// Ajustement de la matrice de transformation pour le nouveau cadre
+				rot.at<double>(0, 2) += bbox.width / 2.0 - image.cols / 2.0;
+				rot.at<double>(1, 2) += bbox.height / 2.0 - image.rows / 2.0;
+			}
+
+			// 2. Application de la transformation affine commune
+			Mat cvDest;
+			warpAffine(image, cvDest, rot, targetSize, cv::INTER_LINEAR, cv::BORDER_CONSTANT, bgColor);
+			cvDest.copyTo(image);
 		});
 
 	return 0;
@@ -1801,6 +1909,7 @@ int CFiltreEffetCPU::Rotate270()
 //----------------------------------------------------------------------------
 //
 //----------------------------------------------------------------------------
+/*
 int CFiltreEffetCPU::Resize(const int& imageWidth, const int& imageHeight, const int& interpolation)
 {
 	if (imageWidth <= 0 || imageHeight <= 0)
@@ -1821,6 +1930,7 @@ int CFiltreEffetCPU::Resize(const int& imageWidth, const int& imageHeight, const
 
 	return 0;
 }
+*/
 
 int CFiltreEffetCPU::Fusion(Mat& bitmapSecond, const float& pourcentage)
 {
