@@ -291,6 +291,12 @@
     <ClInclude Include="ModificationManager.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
+    <ClInclude Include="TreeElementColor.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="TreeElementComboBox.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BitmapInfos.cpp">
@@ -477,6 +483,12 @@
       <Filter>Fichiers sources</Filter>
     </ClCompile>
     <ClCompile Include="ModificationManager.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="TreeElementColor.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="TreeElementComboBox.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
   </ItemGroup>

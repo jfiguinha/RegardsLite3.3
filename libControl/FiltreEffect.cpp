@@ -12,6 +12,8 @@
 #include <TreeElementTriangle.h>
 #include <TreeElementCheckBox.h>
 #include <TreeElementListBox.h>
+#include <TreeElementColor.h>
+#include <TreeElementComboBox.h>
 #include <PositionElement.h>
 #include <TreeElementControlInterface.h>
 #include <ImageLoadingFormat.h>
@@ -54,6 +56,54 @@ void CFiltreEffect::AddTreeInfos(const wxString& exifKey, CTreeElementValue* pos
 	AddTreeInfos(exifKey, position, value, typeValue, index++, top, child, type);
 }
 
+CPositionElement* CFiltreEffect::RenderColor(
+	CTreeData* dataEffect,
+	int& xPos,
+	int& yPos,
+	bool visible,
+	RenderMode mode)
+{
+	CPositionElement* posElement = nullptr;
+	auto data = static_cast<CTreeDataEffect*>(dataEffect);
+
+	// On vérifie si l'élément de positionnement existe déjà dans le vecteur dynamique
+	if (mode == RenderMode::Update)
+		posElement = GetElement(data, ELEMENT_COLOR);
+
+	if (posElement == nullptr)
+	{
+		// Premier affichage : extraction de la wxColour via l'objet initial Value
+		wxColour initialColor(255, 0, 0); // Couleur de repli
+		if (data->GetInitValue() != nullptr && data->GetInitValue()->GetType() == TYPE_ELEMENT_COLOR)
+		{
+			auto colorValue = static_cast<CTreeElementValueColor*>(data->GetInitValue());
+			initialColor = colorValue->GetValue();
+		}
+
+		// Appel de la méthode de création héritée de CTreeControl
+		CTreeElementColor* treeElementColor = CreateColorElement(
+			themeTree.GetRowWidth(), themeTree.GetRowHeight(), initialColor);
+		treeElementColor->SetVisible(visible);
+
+		// Enregistrement de la position sur la colonne de droite (colonne 1)
+		posElement = CreatePositionElement(xPos, yPos, nbRow, 1, themeTree.GetRowWidth(),
+			themeTree.GetRowHeight(), ELEMENT_COLOR, treeElementColor, data);
+	}
+	else
+	{
+		// Mise à jour de l'interface : repositionnement XY standard
+		auto* colorElement = static_cast<CTreeElementColor*>(posElement->GetTreeElement());
+		colorElement->SetVisible(visible);
+		colorElement->SetElementPos(xPos, yPos);
+
+		posElement->SetX(xPos);
+		posElement->SetY(yPos);
+	}
+
+	return posElement;
+}
+
+
 void CFiltreEffect::Init(CEffectParameter* effectParameter, cv::Mat source, const wxString& filename,
                          const int& filtre)
 {
@@ -93,6 +143,10 @@ void CFiltreEffect::Init(CEffectParameter* effectParameter, cv::Mat source, cons
 	RenderElement(RenderMode::Create);
 }
 
+CEffectParameter* CFiltreEffect::GetEffectParameter()
+{
+	return effectParameter;
+}
 
 void CFiltreEffect::UpdateScreenRatio()
 {
@@ -152,7 +206,7 @@ CImageLoadingFormat* CFiltreEffect::ApplyEffect()
 }
 
 void CFiltreEffect::SlidePosChange(CTreeElement* treeElement, const int& position, CTreeElementValue* value,
-                                   const wxString& key)
+	const wxString& key)
 {
 	if (filterEffect != nullptr)
 		filterEffect->FilterChangeParam(effectParameter, value, key);
@@ -161,8 +215,19 @@ void CFiltreEffect::SlidePosChange(CTreeElement* treeElement, const int& positio
 	{
 		bitmapViewer->UpdateFiltre(effectParameter);
 	}
-	//eventControl->UpdateElement(treeElement);
+
+	// --- AJOUT REQUIS POUR LA COMBOBOX ET LE SLIDER ---
+	// Force l'arbre entier à recalculer l'agencement et la visibilité des lignes au repos
+	this->RenderElement(RenderMode::Update);
+
+	// Demande au conteneur de fenêtre global de rafraîchir le contrôle de l'arbre
+	if (eventControl != nullptr)
+	{
+		eventControl->UpdateTreeControl();
+	}
 }
+
+
 void CFiltreEffect::AddTreeInfos(const wxString& exifKey,
 	CTreeElementValue* position,
 	void* value,
@@ -300,6 +365,64 @@ CPositionElement* CFiltreEffect::RenderList(
 	return posElement;
 }
 
+/**
+ * Gère la création, la mise à jour et le positionnement d'une ComboBox dans l'arbre.
+ */
+CPositionElement* CFiltreEffect::RenderComboBox(
+	CTreeData* data,
+	int& xPos,
+	int& yPos,
+	bool visible,
+	RenderMode mode)
+{
+	CPositionElement* posElement = nullptr;
+	auto dataEffect = static_cast<CTreeDataEffect*>(data);
+
+	// 1. Recherche d'un élément existant si nous rafraîchissons l'interface
+	if (mode == RenderMode::Update)
+		posElement = GetElement(data, ELEMENT_COMBOBOX);
+
+	if (posElement == nullptr)
+	{
+		// 2. Extraction des données textuelles depuis CTreeData
+		std::vector<wxString> items;
+		int defaultSelection = 0;
+
+		if (dataEffect != nullptr)
+		{
+			// Récupération du vecteur de CMetadata (comme pour la ListBox)
+			const auto& metadataVector = dataEffect->GetMetadataValue();
+			for (const auto& meta : metadataVector)
+			{
+				items.push_back(meta.value); // Extraction de la chaîne localisée
+			}
+			defaultSelection = dataEffect->GetIndex();
+		}
+
+		// 3. Création de l'élément graphique via la méthode héritée
+		CTreeElementComboBox* treeElementComboBox = CreateComboBoxElement(
+			themeTree.GetRowWidth(), themeTree.GetRowHeight(), items, dataEffect->GetExifKey(), defaultSelection);
+
+		treeElementComboBox->SetVisible(visible);
+
+		// 4. Enregistrement dans le gestionnaire de positions (Colonne de droite = 1)
+		posElement = CreatePositionElement(xPos, yPos, nbRow, 1, themeTree.GetRowWidth(),
+			themeTree.GetRowHeight(), ELEMENT_COMBOBOX, treeElementComboBox, data);
+	}
+	else
+	{
+		// 5. Mode Mise à jour : Simple réalignement des coordonnées graphiques XY
+		auto* comboElement = static_cast<CTreeElementComboBox*>(posElement->GetTreeElement());
+		comboElement->SetVisible(visible);
+		comboElement->SetElementPos(xPos, yPos);
+
+		posElement->SetX(xPos);
+		posElement->SetY(yPos);
+	}
+
+	return posElement;
+}
+
 void CFiltreEffect::CreateElementChild(tree<CTreeData*>::sibling_iterator& it, CTreeDataEffect* data, int widthPosition, int profondeur, bool isVisible, RenderMode mode)
 {
 	int xPos = widthPosition * profondeur;
@@ -336,6 +459,14 @@ void CFiltreEffect::CreateElementChild(tree<CTreeData*>::sibling_iterator& it, C
 				isVisible,
 				mode);
 
+		}
+		else if (data->GetType() == TYPE_COLOR)
+		{
+			pos_element = RenderColor(data, xPos, yPos, isVisible, mode);
+		}
+		else if (data->GetType() == TYPE_COMBOBOX)
+		{
+			pos_element = RenderComboBox(data, xPos, yPos, isVisible, mode);
 		}
 
 		if (pos_element != nullptr)
@@ -445,6 +576,23 @@ void CFiltreEffect::RenderElement(RenderMode mode)
 		}
 	}
 
+	// --- À insérer au tout début de votre méthode CFiltreEffect::RenderElement ---
+	for (CPositionElement* value : vectorPosElement)
+	{
+		if (value != nullptr && value->GetType() == ELEMENT_COMBOBOX)
+		{
+			CTreeElement* treeElement = value->GetTreeElement();
+			if (treeElement != nullptr)
+			{
+				// On va forcer l'effacement visuel du widget natif associé
+				// Pour cela, nous pouvons ajouter une petite méthode de commodité dans TreeElementComboBox
+				// ou appeler une surcharge. Le plus simple est de mettre à jour le flag à false :
+				treeElement->SetVisible(false);
+			}
+		}
+	}
+
+
 	while (it != itend)
 	{
 		CTreeData* data = *it;
@@ -509,7 +657,7 @@ void CFiltreEffect::UnclickOnElement(CPositionElement* element, wxWindow* window
 }
 
 void CFiltreEffect::ClickOnElement(CPositionElement* element, wxWindow* window, const int& x, const int& y,
-                                   const int& posLargeur, const int& posHauteur)
+	const int& posLargeur, const int& posHauteur)
 {
 	bool update = false;
 	CTreeElement* treeElement = element->GetTreeElement();
@@ -521,9 +669,8 @@ void CFiltreEffect::ClickOnElement(CPositionElement* element, wxWindow* window, 
 		if (treeElementSlide->GetRow() > 0)
 			xPos = GetWidthRow(treeElementSlide->GetRow() - 1);
 
-		//treeElementSlide->SetElementPos((x - xPos) - posLargeur, y - posHauteur);
 		treeElementSlide->ClickElement(window, (x + posLargeur) - (element->GetX() + xPos),
-		                               (y + posHauteur) - element->GetY());
+			(y + posHauteur) - element->GetY());
 
 		update = true;
 	}
@@ -531,14 +678,14 @@ void CFiltreEffect::ClickOnElement(CPositionElement* element, wxWindow* window, 
 	{
 		auto treeElementTriangle = static_cast<CTreeElementTriangle*>(treeElement);
 		treeElementTriangle->ClickElement(window, (x + posLargeur) - element->GetX(),
-		                                  (y + posHauteur) - element->GetY());
+			(y + posHauteur) - element->GetY());
 		update = true;
 	}
 	else if (element->GetType() == ELEMENT_CHECKBOX)
 	{
 		auto treeElementCheckBox = static_cast<CTreeElementCheckBox*>(treeElement);
 		treeElementCheckBox->ClickElement(window, (x + posLargeur) - element->GetX(),
-		                                  (y + posHauteur) - element->GetY());
+			(y + posHauteur) - element->GetY());
 
 		if (filterEffect != nullptr)
 		{
@@ -560,13 +707,49 @@ void CFiltreEffect::ClickOnElement(CPositionElement* element, wxWindow* window, 
 		if (treeElementListbox->GetRow() > 0)
 			xPos = GetWidthRow(treeElementListbox->GetRow() - 1);
 
-		//treeElementSlide->SetElementPos((x - xPos) - posLargeur, y - posHauteur);
 		treeElementListbox->ClickElement(window, (x + posLargeur) - (element->GetX() + xPos),
-		                                 (y + posHauteur) - element->GetY());
-
+			(y + posHauteur) - element->GetY());
 
 		update = true;
 	}
+	// --- BRANCHEMENT DU COMPOSANT COULEUR ---
+	else if (element->GetType() == ELEMENT_COLOR)
+	{
+		auto treeElementColor = static_cast<CTreeElementColor*>(treeElement);
+		treeElementColor->ClickElement(window, (x + posLargeur) - element->GetX(),
+			(y + posHauteur) - element->GetY());
+
+		if (filterEffect != nullptr)
+		{
+			auto data = static_cast<CTreeDataEffect*>(element->GetTreeData());
+			wxColour selectedColor = treeElementColor->GetColor();
+			CTreeElementValueColor tree_element_value_color(selectedColor);
+			filterEffect->FilterChangeParam(effectParameter, &tree_element_value_color, data->GetExifKey());
+		}
+
+		update = true;
+
+		if (bitmapViewer != nullptr)
+			bitmapViewer->UpdateFiltre(effectParameter);
+	}
+	// --- ENTRÉE AJOUTÉE POUR LA COMBOBOX ---
+	else if (element->GetType() == ELEMENT_COMBOBOX)
+	{
+		auto treeElementComboBox = static_cast<CTreeElementComboBox*>(treeElement);
+
+		int xPos = 0;
+		if (treeElementComboBox->GetRow() > 0)
+			xPos = GetWidthRow(treeElementComboBox->GetRow() - 1);
+
+		// CORRECTION : On passe l'emplacement absolu exact calculé sur le canvas pour le composant wxWidgets
+		int comboAbsoluteX = (element->GetX() + xPos) - posLargeur;
+		int comboAbsoluteY = element->GetY() - posHauteur;
+
+		// Déclenche l'ouverture au pixel près avec la bonne largeur m_width préservée
+		treeElementComboBox->ClickElement(window, comboAbsoluteX, comboAbsoluteY);
+
+	}
+
 
 	if (update)
 	{
@@ -574,6 +757,7 @@ void CFiltreEffect::ClickOnElement(CPositionElement* element, wxWindow* window, 
 		eventControl->UpdateTreeControl();
 	}
 }
+
 
 void CFiltreEffect::MouseOver(wxDC* deviceContext, CPositionElement* element, const int& x, const int& y,
                               const int& posLargeur, const int& posHauteur, bool& update)
