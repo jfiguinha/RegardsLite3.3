@@ -794,6 +794,10 @@ void CBitmapWndRender::SetBitmap(CImageLoadingFormat* bitmapIn)
 			bitmapheight = bitmapIn->GetHeight();
 			orientation = bitmapIn->GetOrientation();
 
+			CSqlPhotos sqlPhotos;
+			int exifCode = sqlPhotos.GetPhotoExif(filename);
+			if (exifCode != -1)
+				application_context.GetAngleAndFlip(exifCode, angle, flipHorizontal, flipVertical);
 
 			ShrinkImage(false);
 			AfterSetBitmap();
@@ -901,8 +905,8 @@ void CBitmapWndRender::FlipVertical()
 
 
 	UpdateExifInfos();
-
-	//updateFilter = true;
+	updateFilter = true;
+	forceUpdateFilter = true;
 	RefreshWindow();
 }
 
@@ -912,6 +916,8 @@ void CBitmapWndRender::Rotate90()
 	angle += 90;
 	angle = angle % 360;
 
+	updateFilter = true;
+	forceUpdateFilter = true;
 	UpdateExifInfos();
 	UpdateResized();
 	RefreshWindow();
@@ -944,7 +950,11 @@ void CBitmapWndRender::Rotate270()
 
 	angle += 270;
 	angle = angle % 360;
-	//updateFilter = true;
+
+
+	updateFilter = true;
+	forceUpdateFilter = true;
+
 	UpdateExifInfos();
 
 	UpdateResized();
@@ -958,12 +968,14 @@ void CBitmapWndRender::FlipHorizontal()
 		flipHorizontal = 0;
 	else
 		flipHorizontal = 1;
-	//updateFilter = true;
 
+	updateFilter = true;
+	forceUpdateFilter = true;
 	UpdateExifInfos();
 
 	RefreshWindow();
 }
+
 
 //-----------------------------------------------------------------
 //Obtention des dimensions du bitmap
@@ -1659,69 +1671,82 @@ void CBitmapWndRender::OnPaint3D(wxGLCanvas* canvas, CRenderOpenGL* renderOpenGL
 
 	if (renderBitmapOpenGL != nullptr)
 	{
-        CRgbaquad color;
+		CRgbaquad color;
 		CRegardsConfigParam* regardsParam = CParamInit::getInstance();
 		bool useCuda = regardsParam->GetIsUseCuda();
 		bool useOpenCL = regardsParam->GetIsOpenCLSupport();
-        
-        int widthOutput = static_cast<int>(GetBitmapWidthWithRatio()) * scale_factor;
-        int heightOutput = static_cast<int>(GetBitmapHeightWithRatio()) * scale_factor;
+
+		int widthOutput = static_cast<int>(GetBitmapWidthWithRatio()) * scale_factor;
+		int heightOutput = static_cast<int>(GetBitmapHeightWithRatio()) * scale_factor;
 
 
-        bool invert = true;
-        bool bitmapIsLoad = false;
+		bool invert = true;
+		bool bitmapIsLoad = false;
 
-        if (loadBitmap)
-        {
-            if (filtreEffet == nullptr)
-                filtreEffet = std::make_unique<CFiltreEffet>(color, renderOpenGL->GetOpenCLContext(), source.get());
-            else
-            {
-                filtreEffet->SetBitmap(source.get());
-            }
+		if (loadBitmap)
+		{
+			if (filtreEffet == nullptr)
+				filtreEffet = std::make_unique<CFiltreEffet>(color, renderOpenGL->GetOpenCLContext(), source.get());
+			else
+			{
+				filtreEffet->SetBitmap(source.get());
+			}
 
-            loadBitmap = false;
-            bitmapIsLoad = true;
-        }
+			loadBitmap = false;
+			bitmapIsLoad = true;
+		}
 
-        if (bitmapLoad && GetWidth() > 0 && GetHeight() > 0)
-        {
-            if (widthOutput < 0 || heightOutput < 0)
-                return;
+		if (bitmapLoad && GetWidth() > 0 && GetHeight() > 0)
+		{
+			if (widthOutput < 0 || heightOutput < 0)
+				return;
 
-            if (updateFilter)// || mouseUpdate != nullptr)
-            {
-                if (!bitmapIsLoad)
-                    filtreEffet->SetBitmap(source.get());
-                BeforeInterpolationBitmap();
-                updateFilter = true;
-            }
+			// Application de votre logique d'optimisation
+// Si la mise à jour est forcée OU qu'un effet de prévisualisation est actif (preview > 0),
+// on doit obligatoirement lever le flag pour rafraîchir la source brute.
+			if (forceUpdateFilter || preview > 0 || bitmapIsLoad)
+			{
+				updateFilter = true;
+			}
+			else
+			{
+				updateFilter = false;
+			}
 
 
-            //printf("widthOutput : %d heightOutput %d \n", widthOutput, heightOutput);
-            if (updateFilter || widthOutputOld != widthOutput || heightOutputOld != heightOutput)
-            {
-                GenerateScreenBitmap(filtreEffet.get(), widthOutput, heightOutput);
+			if (updateFilter)// || mouseUpdate != nullptr)
+			{
+				if (!bitmapIsLoad)
+					filtreEffet->SetBitmap(source.get());
+				BeforeInterpolationBitmap();
+				updateFilter = true;
+			}
 
-                ApplyPreviewEffect(widthOutput, heightOutput);
 
-                glTexture = renderOpenGL->GetDisplayTexture(widthOutput, heightOutput);
+			//printf("widthOutput : %d heightOutput %d \n", widthOutput, heightOutput);
+			if (updateFilter || widthOutputOld != widthOutput || heightOutputOld != heightOutput)
+			{
+				GenerateScreenBitmap(filtreEffet.get(), widthOutput, heightOutput);
 
-                Regards::Picture::CPictureArray mat = filtreEffet->GetMatrix();
-                glTexture->SetData(mat, renderOpenGL->GetOpenCLContext());
-            }
+				ApplyPreviewEffect(widthOutput, heightOutput);
 
-            updateFilter = false;
+				glTexture = renderOpenGL->GetDisplayTexture(widthOutput, heightOutput);
 
-            widthOutputOld = widthOutput;
-            heightOutputOld = heightOutput;
+				Regards::Picture::CPictureArray mat = filtreEffet->GetMatrix();
+				glTexture->SetData(mat, renderOpenGL->GetOpenCLContext());
+			}
 
-            renderOpenGL->CreateScreenRender(GetWidth() * scale_factor, GetHeight() * scale_factor,
-                CRgbaquad(themeBitmap.colorBack.Red(), themeBitmap.colorBack.Green(),
-                    themeBitmap.colorBack.Blue()));
+			updateFilter = false;
 
-            RenderTexture(invert);
-        }
+			widthOutputOld = widthOutput;
+			heightOutputOld = heightOutput;
+
+			renderOpenGL->CreateScreenRender(GetWidth() * scale_factor, GetHeight() * scale_factor,
+				CRgbaquad(themeBitmap.colorBack.Red(), themeBitmap.colorBack.Green(),
+					themeBitmap.colorBack.Blue()));
+
+			RenderTexture(invert);
+		}
 
 		AfterRender();
 	}
