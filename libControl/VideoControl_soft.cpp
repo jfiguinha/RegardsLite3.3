@@ -1617,9 +1617,7 @@ void CVideoControlSoft::OnPaint3D(wxGLCanvas* canvas, CRenderOpenGL* renderOpenG
 						renderOpenGL->GetWidth() / 2,
 						renderOpenGL->GetHeight() / 4,
 						subtitleScale,
-						videoEffectParameter.subtitleRedColor,
-						videoEffectParameter.subtitleGreenColor,
-						videoEffectParameter.subtitleBlueColor,
+						videoEffectParameter.subtitleColor,
 						subtitleText);
 				}
 			}

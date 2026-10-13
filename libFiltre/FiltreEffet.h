@@ -68,8 +68,8 @@ public:
 	int PhotoFiltre(const CRgbaquad& clValue, const int& intensity);
 	int BrightnessAndContrast(const double& brightness, const double& contrast);
 	int RGBFilter(const int& red, const int& green, const int& blue);
-	int CloudsFilter(const CRgbaquad& color1, const CRgbaquad& color2, const float& amplitude, const float& frequence,
-	                 const int& octave, const int& intensity);
+	int CloudsFilter(const cv::Scalar& color1, const cv::Scalar& color2, const float& amplitude,
+		const float& frequence, const int& octave, const int& intensity);
 	int Swirl(const float& radius, const float& angle);
 	int Fusion(cv::Mat& bitmapSecond, const float& pourcentage);
 	int Posterize(const float& level, const float& gamma);
