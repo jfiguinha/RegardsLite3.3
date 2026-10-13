@@ -116,8 +116,6 @@ namespace Regards
 			std::unique_ptr<COpenCLAvirResizer> resizer = nullptr;
 			bool isVideo = false;
 			std::map<wxString,std::unique_ptr<OpenCLMemoryTemp>> openclMemTempMap;
-			std::unique_ptr<CSuperSampling> superSampling;
-
 		};
 	}
 }

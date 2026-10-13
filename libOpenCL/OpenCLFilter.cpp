@@ -7,7 +7,6 @@
 #include <ParamInit.h>
 #include <RegardsConfigParam.h>
 #include <opencv2/core/ocl.hpp>
-#include <opencv2/dnn_superres.hpp>
 
 #include <wx/filename.h>
 #include "OpenCLKernelBuilder.h"
@@ -17,19 +16,9 @@ extern AppContext application_context;
 using namespace Regards::OpenCL;
 using namespace cv;
 
-using namespace dnn;
-using namespace dnn_superres;
 
 #define OPENCV_METHOD
 
-
-#define EDSR 0
-#define ESPCN 1
-#define FSRCNN 2
-#define LapSRN 3
-
-std::atomic<bool> isDnnUsed{ false };
-std::mutex muDnnSuperResImpl;
 int numTexture = -1;
 
 
@@ -220,140 +209,13 @@ cv::UMat ExecuteSafeOpenCLWithUMatOutput(cv::UMat& inputData, bool bgraOutput, F
 	return dest;
 }
 
-class CSuperSampling
-{
-public:
-	CSuperSampling()
-	{
-	};
-
-	~CSuperSampling()
-	{
-	};
-	string GenerateModelPath(string modelName, int scale);
-	bool TestIfMethodIsValid(int method, int scale);
-	UMat upscaleImage(UMat img, int method, int scale);
-
-private:
-	DnnSuperResImpl sr;
-	int oldscale = -1;
-	int oldmethod = -1;
-};
-
-string CSuperSampling::GenerateModelPath(string modelName, int scale)
-{
-
-	wxFileName path = wxFileName(CFileUtility::GetResourcesFolderPath(), wxEmptyString);
-	path.AppendDir("model");
-	path.SetFullName(modelName + "_x" + to_string(scale) + ".pb");
-
-	return path.GetFullPath().utf8_string();
-}
-
-bool CSuperSampling::TestIfMethodIsValid(int method, int scale)
-{
-	if (method == EDSR && (scale == 2 || scale == 3 || scale == 4))
-	{
-		return true;
-	}
-	if (method == ESPCN && (scale == 2 || scale == 3 || scale == 4))
-	{
-		return true;
-	}
-	if (method == FSRCNN && (scale == 2 || scale == 3 || scale == 4))
-	{
-		return true;
-	}
-	if (method == LapSRN && (scale == 2 || scale == 4 || scale == 8))
-	{
-		return true;
-	}
-	return false;
-}
-
-UMat CSuperSampling::upscaleImage(UMat img, int method, int scale)
-{
-	
-	isDnnUsed = true;
-	UMat outputImage;
-
-	if (oldscale != scale || oldmethod != method)
-	{
-		try
-		{
-			switch (method)
-			{
-			case EDSR:
-				{
-					string algorithm = "edsr";
-					sr.readModel(GenerateModelPath("EDSR", scale));
-					sr.setModel(algorithm, scale);
-				}
-				break;
-
-			case ESPCN:
-				{
-					string algorithm = "espcn";
-					sr.readModel(GenerateModelPath("ESPCN", scale));
-					sr.setModel(algorithm, scale);
-				}
-				break;
-			case FSRCNN:
-				{
-					string algorithm = "fsrcnn";
-					sr.readModel(GenerateModelPath("FSRCNN", scale));
-					sr.setModel(algorithm, scale);
-				}
-				break;
-			case LapSRN:
-				{
-					string algorithm = "lapsrn";
-					sr.readModel(GenerateModelPath("LapSRN", scale));
-					sr.setModel(algorithm, scale);
-				}
-				break;
-			}
-
-			sr.setPreferableTarget(DNN_TARGET_OPENCL);
-			sr.upsample(img, outputImage);
-
-			//muDnnSuperResImpl.unlock();
-		}
-		catch (Exception& e)
-		{
-			const char* err_msg = e.what();
-			std::cout << "CSuperSampling::exception caught: " << err_msg << std::endl;
-			std::cout << "wrong file format, please input the name of an IMAGE file" << std::endl;
-		}
-	}
-	else
-	{
-		try
-		{
-			sr.upsample(img, outputImage);
-		}
-		catch (Exception& e)
-		{
-			const char* err_msg = e.what();
-			std::cout << "CSuperSampling::exception caught: " << err_msg << std::endl;
-			std::cout << "wrong file format, please input the name of an IMAGE file" << std::endl;
-		}
-	}
-
-	oldscale = scale;
-	oldmethod = method;
-	isDnnUsed = false;
-	return outputImage;
-}
-
-
 COpenCLFilter::COpenCLFilter(COpenCLContext* openCLContext)
 	: openCLContext(openCLContext)
 {
 	bool useMemory = (ocl::Device::getDefault().type() == CL_DEVICE_TYPE_GPU) ? false : true;
 	flag = useMemory ? CL_MEM_USE_HOST_PTR : CL_MEM_COPY_HOST_PTR;
 	hq3d = nullptr;
-    superSampling = std::make_unique<CSuperSampling>();
+
 	resizer = std::make_unique<COpenCLAvirResizer>(openCLContext);
 	
 }
@@ -1366,10 +1228,6 @@ UMat COpenCLFilter::Interpolation(const int& widthOut, const int& heightOut, con
     bool _useSuperResolution = false;
     //cout << "COpenCLFilter::Interpolation : " << method << endl;
     CRegardsConfigParam* regardsParam = CParamInit::getInstance();
-    int superDnn = regardsParam->GetSuperResolutionType();
-    int useSuperResolution = regardsParam->GetUseSuperResolution();
-    if (useSuperResolution && superSampling->TestIfMethodIsValid(superDnn, (ratio / 100)) && !isDnnUsed)
-        _useSuperResolution = true;
 
 	
 	//UMat cvImage;
@@ -1457,49 +1315,8 @@ UMat COpenCLFilter::Interpolation(const int& widthOut, const int& heightOut, con
 			cv::rotate(cvDestBgra, cvDestBgra, ROTATE_180);
 		}
 
-
-		/*
-		nearest neighbor interpolation
-		INTER_NEAREST = 0,
-		bilinear interpolation
-		INTER_LINEAR = 1,
-		bicubic interpolation
-		INTER_CUBIC = 2,
-		resampling using pixel area relation. It may be a preferred method for image decimation, as
-		it gives moire'-free results. But when the image is zoomed, it is similar to the INTER_NEAREST
-		method.
-		INTER_AREA = 3,
-		Lanczos interpolation over 8x8 neighborhood
-		INTER_LANCZOS4 = 4,
-		Bit exact bilinear interpolation
-		INTER_LINEAR_EXACT = 5,
-		Bit exact nearest neighbor interpolation. This will produce same results as
-		the nearest neighbor method in PIL, scikit-image or Matlab.
-		INTER_NEAREST_EXACT = 6,
-		*/
-		if (_useSuperResolution)
+		if (method == 7) //AVIR INTERPOLATION NOT SUPPORTED BY OPENCL
 		{
-			cv::UMat picture;
-			if (cvDestBgra.channels() == 4)
-			{
-				cvtColor(cvDestBgra, picture, cv::COLOR_BGRA2BGR);
-				picture = superSampling->upscaleImage(picture, superDnn, (ratio / 100));
-				cvtColor(picture, cvDestBgra, cv::COLOR_BGR2BGRA);
-			}
-			else
-				cvDestBgra = superSampling->upscaleImage(cvDestBgra, superDnn, (ratio / 100));
-		}
-		else if (method == 7) //AVIR INTERPOLATION NOT SUPPORTED BY OPENCL
-		{
-#ifdef _DEBUG
-			using std::chrono::high_resolution_clock;
-			using std::chrono::duration_cast;
-			using std::chrono::duration;
-			using std::chrono::milliseconds;
-
-			auto t1 = high_resolution_clock::now();
-#endif	
-
 			if(!resizer->IsInit())
 				resizer->Init();
 
@@ -1545,58 +1362,12 @@ UMat COpenCLFilter::Interpolation(const int& widthOut, const int& heightOut, con
 			if (!result)
 				resize(cvDestBgra, cvDestBgra, Size(widthOut, heightOut), method - 1);
 
-#ifdef _DEBUG
-			auto t2 = high_resolution_clock::now();
-
-			/* Getting number of milliseconds as an integer. */
-			auto ms_int = duration_cast<milliseconds>(t2 - t1);
-
-			/* Getting number of milliseconds as a double. */
-			duration<double, std::milli> ms_double = t2 - t1;
-
-
-#ifdef WIN32
-			OutputDebugString(L"Time taken by COpenCLFilter::Interpolation is : ");
-			OutputDebugString(to_wstring(ms_int.count()).c_str());
-			OutputDebugString(L" ms \n");
-#else
-			std::cout << "Time taken by COpenCLFilter::Interpolation is : " << ms_int.count() << "ms\n";
-#endif
-#endif
-
 		}
 		else if (method > 7)
 		{
-#ifdef _DEBUG
-			using std::chrono::high_resolution_clock;
-			using std::chrono::duration_cast;
-			using std::chrono::duration;
-			using std::chrono::milliseconds;
-
-			auto t1 = high_resolution_clock::now();
-#endif	
 			// Appelle une autre version d'Interpolation pour les méthodes avancées
 			int localMethod = method - 7;
 			cvDestBgra = Interpolation(widthOut, heightOut, cvDestBgra, cvDestBgra.cols, cvDestBgra.rows, localMethod, bgraOutput);
-
-#ifdef _DEBUG
-			auto t2 = high_resolution_clock::now();
-
-			/* Getting number of milliseconds as an integer. */
-			auto ms_int = duration_cast<milliseconds>(t2 - t1);
-
-			/* Getting number of milliseconds as a double. */
-			duration<double, std::milli> ms_double = t2 - t1;
-
-
-#ifdef WIN32
-			OutputDebugString(L"Time taken by COpenCLFilter::Interpolation is : ");
-			OutputDebugString(to_wstring(ms_int.count()).c_str());
-			OutputDebugString(L" ms \n");
-#else
-			std::cout << "Time taken by COpenCLFilter::Interpolation is : " << ms_int.count() << "ms\n";
-#endif
-#endif
 		}
 		else if (cvDestBgra.cols != widthOut || cvDestBgra.rows != heightOut)
 		{
